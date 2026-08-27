@@ -6,6 +6,10 @@ Digite os valores de CIM e o sistema devolve a interpretação colorida — *Sen
 
 **É um único arquivo HTML.** Sem servidor, sem instalação, sem banco de dados. Abre com duplo clique e funciona.
 
+> Feito para a **Dra. Andressa Sulamita Siqueira Menezes de Brito**, biomédica —
+> que faz esse trabalho todo dia no LEPAC, e cuja rotina ensinou o que este
+> sistema precisava ser.
+
 ---
 
 ## Para quem vai usar no dia a dia
@@ -115,6 +119,10 @@ Sem dependências, sem build, sem back-end. A única requisição de rede é a l
 ---
 
 ## Autoria
+
+Feito para a **Dra. Andressa Sulamita Siqueira Menezes de Brito**, biomédica no
+LEPAC. O sistema existe por causa do trabalho dela, e foi a rotina dela que
+definiu o que ele precisava fazer.
 
 **Elisson Andrade de Carvalho** — concepção e direção do projeto: definiu o que o
 sistema deveria fazer, reuniu os dados de referência, conduziu as decisões de
