@@ -111,3 +111,20 @@ Cada PC precisa do arquivo e do link colado uma vez.
 ## Nota técnica
 
 Sem dependências, sem build, sem back-end. A única requisição de rede é a leitura da planilha, feita por `<script>` no endpoint `gviz` do Google — não por `fetch`, porque um arquivo aberto do disco tem origem `null` e o Google só devolve cabeçalho CORS quando existe uma origem para espelhar. Medido: `fetch` do disco é bloqueado, `<script>` passa. É o que permite o arquivo funcionar com duplo clique, sem servidor.
+
+---
+
+## Autoria
+
+**Elisson Andrade** — LEPAC. Concepção, direção do projeto e validação clínica:
+definiu o que o sistema deveria fazer, forneceu os dados de referência, conduziu
+as decisões de arquitetura e testou cada versão contra a rotina real do laboratório.
+
+Implementação em par com Claude (Anthropic).
+
+Licença MIT — veja [LICENSE](LICENSE).
+
+### Aviso
+
+Ferramenta de apoio à interpretação. A conferência e a responsabilidade pelo
+resultado liberado são do profissional responsável.
