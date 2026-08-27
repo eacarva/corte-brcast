@@ -1,0 +1,2103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Corte BrCAST</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@1,400;1,500&display=swap">
+
+<style>
+:root{
+  --ground:#f4f6f8; --surface:#ffffff; --surface-2:#eaeef1;
+  --ink:#101820; --ink-2:#48555f; --ink-3:#78858f;
+  --rule:#d3dae0; --rule-strong:#aab4bd;
+  --accent:#0d6c72; --accent-ink:#0b5c61; --accent-soft:#dfeeee;
+  --sdp:#B7E1CD; --sae:#CFE2F3; --res:#F4CCCC; --warn:#FBE3B4;
+  --sdp-ink:#1a5637; --sae-ink:#1b466c; --res-ink:#8a2320; --warn-ink:#75500e;
+  --btn-primary-ink:#ffffff;
+  --shadow:0 1px 2px rgba(16,24,32,.05),0 10px 26px -18px rgba(16,24,32,.3);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0c1116; --surface:#141c22; --surface-2:#1c252c;
+    --ink:#e4ebf0; --ink-2:#9aa8b3; --ink-3:#6d7b86;
+    --rule:#26323b; --rule-strong:#3c4c58;
+    --accent:#4fb9bd; --accent-ink:#7fd6d9; --accent-soft:#123238;
+    --sdp:#1d4b36; --sae:#1a3b59; --res:#57231f; --warn:#4a3810;
+    --sdp-ink:#a3ddbe; --sae-ink:#a9cdec; --res-ink:#f0b4b1; --warn-ink:#efce8c;
+    --btn-primary-ink:#07171a;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 26px -18px rgba(0,0,0,.85);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0c1116; --surface:#141c22; --surface-2:#1c252c;
+  --ink:#e4ebf0; --ink-2:#9aa8b3; --ink-3:#6d7b86;
+  --rule:#26323b; --rule-strong:#3c4c58;
+  --accent:#4fb9bd; --accent-ink:#7fd6d9; --accent-soft:#123238;
+  --sdp:#1d4b36; --sae:#1a3b59; --res:#57231f; --warn:#4a3810;
+  --sdp-ink:#a3ddbe; --sae-ink:#a9cdec; --res-ink:#f0b4b1; --warn-ink:#efce8c;
+  --btn-primary-ink:#07171a;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 26px -18px rgba(0,0,0,.85);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  font-size:15px; line-height:1.45; -webkit-font-smoothing:antialiased;
+}
+i{font-family:"IBM Plex Serif",Georgia,"Times New Roman",serif; font-style:italic}
+.mono{font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace; font-variant-numeric:tabular-nums}
+button,input,select{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:3px}
+
+.shell{display:grid; grid-template-columns:250px minmax(0,1fr); min-height:100vh}
+
+/* ---------- trilha lateral ---------- */
+.rail{border-right:1px solid var(--rule); background:var(--surface); display:flex; flex-direction:column;
+      position:sticky; top:0; height:100vh; overflow:hidden}
+.brand{padding:17px 18px 13px; border-bottom:1px solid var(--rule)}
+.brand h1{margin:0; font-size:15px; font-weight:600; letter-spacing:-.01em}
+.brand .sub{margin-top:2px; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
+.railsearch{padding:9px 10px; border-bottom:1px solid var(--rule)}
+.railsearch input{width:100%; border:1px solid var(--rule-strong); background:var(--ground);
+  border-radius:6px; padding:6px 10px; font-size:13px}
+.railsearch input::placeholder{color:var(--ink-3)}
+.railsearch input:focus{outline:2px solid var(--accent); outline-offset:-1px}
+.orglist{overflow-y:auto; flex:1; padding:6px 8px 14px}
+.semnada{padding:16px 10px; font-size:12.5px; color:var(--ink-3); line-height:1.5}
+.grouphead{
+  padding:13px 10px 5px; font-size:9.5px; letter-spacing:.11em; text-transform:uppercase;
+  color:var(--ink-3); font-weight:700; position:sticky; top:0; background:var(--surface);
+}
+.grouphead .mat{color:var(--accent-ink); font-weight:600}
+.orgbtn{display:block; width:100%; text-align:left; background:none; border:0; cursor:pointer;
+        padding:6px 10px; border-radius:5px; font-size:13.5px; color:var(--ink-2); line-height:1.3}
+.orgbtn:hover{background:var(--surface-2); color:var(--ink)}
+.orgbtn[aria-current="true"]{background:var(--accent-soft); color:var(--accent-ink); font-weight:600}
+.orgbtn .dois{float:right; font-size:9px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink-3); font-weight:600; margin-top:2px}
+.orgbtn[aria-current="true"] .dois{color:var(--accent-ink); opacity:.75}
+.rail-foot{border-top:1px solid var(--rule); padding:9px 8px; display:flex; flex-direction:column; gap:1px}
+
+.main{min-width:0; display:flex; flex-direction:column}
+.topbar{position:sticky; top:0; z-index:20; background:var(--ground); border-bottom:1px solid var(--rule);
+        padding:15px 28px 13px; display:flex; align-items:flex-end; gap:20px; flex-wrap:wrap}
+.topbar .who{flex:1; min-width:230px}
+.eyebrow{font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
+.eyebrow .dot{color:var(--rule-strong); margin:0 6px}
+.topbar h2{margin:2px 0 0; font-size:24px; font-weight:500; letter-spacing:-.015em; text-wrap:balance}
+.titlerow{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.matseg{display:inline-flex; border:1px solid var(--rule-strong); border-radius:7px; overflow:hidden;
+  background:var(--surface)}
+.matseg button{border:0; background:none; cursor:pointer; padding:5px 12px; font-size:12.5px;
+  font-weight:500; color:var(--ink-2); white-space:nowrap}
+.matseg button + button{border-left:1px solid var(--rule)}
+.matseg button:hover{background:var(--surface-2); color:var(--ink)}
+.matseg button[aria-pressed="true"]{background:var(--accent); color:var(--btn-primary-ink); font-weight:600}
+.actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.btn{border:1px solid var(--rule-strong); background:var(--surface); border-radius:6px;
+     padding:7px 13px; font-size:13.5px; font-weight:500; cursor:pointer; white-space:nowrap}
+.btn:hover{border-color:var(--accent); color:var(--accent-ink)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--btn-primary-ink)}
+.btn.primary:hover{filter:brightness(1.07); color:var(--btn-primary-ink)}
+.btn.ghost{border-color:transparent; background:none; color:var(--ink-2); text-align:left}
+.btn.ghost:hover{background:var(--surface-2); color:var(--ink)}
+.btn.ghost[aria-current="true"]{background:var(--accent-soft); color:var(--accent-ink); font-weight:600}
+
+.content{padding:20px 28px 90px; max-width:1220px}
+.panel{background:var(--surface); border:1px solid var(--rule); border-radius:9px; box-shadow:var(--shadow); overflow:hidden}
+.tablewrap{overflow-x:auto}
+
+table.grid{border-collapse:collapse; width:100%; font-size:13.5px}
+table.grid th{text-align:left; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3);
+              font-weight:700; padding:9px 14px; border-bottom:1px solid var(--rule); background:var(--surface-2); white-space:nowrap}
+table.grid td{padding:0; border-bottom:1px solid var(--rule); vertical-align:middle}
+table.grid tr:last-child td{border-bottom:0}
+.c-abx{padding:8px 14px; min-width:280px; line-height:1.3}
+.c-cim{width:120px; border-left:1px solid var(--rule); border-right:1px solid var(--rule)}
+.c-int{width:245px}
+.c-corte{width:180px; padding:8px 14px; border-left:1px solid var(--rule)}
+tr.sec td{background:var(--surface-2); padding:9px 14px; font-size:10.5px; letter-spacing:.07em;
+          text-transform:uppercase; font-weight:700; color:var(--ink-2)}
+
+input.cim, select.tri{
+  width:100%; border:0; background:transparent; padding:9px 10px; text-align:center;
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace; font-variant-numeric:tabular-nums;
+  font-size:13.5px; font-weight:500; border-radius:0; -webkit-appearance:none; appearance:none;
+}
+select.tri{cursor:pointer; text-align-last:center}
+input.cim::placeholder{color:var(--ink-3); font-weight:400}
+input.cim:focus, select.tri:focus{outline:2px solid var(--accent); outline-offset:-2px; background:var(--surface-2)}
+
+.tag{display:block; padding:8px 14px; font-size:12.5px; font-weight:600; line-height:1.25; border-left:3px solid transparent}
+.tag.sdp{background:var(--sdp); color:var(--sdp-ink); border-left-color:var(--sdp-ink)}
+.tag.sae{background:var(--sae); color:var(--sae-ink); border-left-color:var(--sae-ink)}
+.tag.res{background:var(--res); color:var(--res-ink); border-left-color:var(--res-ink)}
+.tag.warn{background:var(--warn); color:var(--warn-ink); border-left-color:var(--warn-ink)}
+.tag.empty{color:var(--ink-3); font-weight:400; font-style:italic}
+
+/* linha herdada da amostra anterior, ainda não conferida */
+.abxrow{display:flex; align-items:flex-start; gap:7px}
+.pendslot{width:11px; flex:none; padding-top:2px}
+button.pend{width:11px; height:11px; padding:0; border:0; border-radius:50%; cursor:pointer;
+  background:var(--warn-ink); display:block}
+button.pend:hover{filter:brightness(1.25)}
+input.cim.pendente{color:var(--warn-ink); font-style:italic}
+.sumcell.pendente .v{color:var(--warn-ink)}
+.avisopend{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;
+  background:var(--warn); color:var(--warn-ink); border:1px solid var(--warn-ink);
+  border-radius:8px; padding:9px 14px; font-size:13px; font-weight:500}
+.avisopend .btn{background:transparent; border-color:var(--warn-ink); color:var(--warn-ink); padding:4px 10px; font-size:12.5px}
+.avisopend .btn:hover{background:var(--warn-ink); color:var(--warn)}
+
+/* painel: colar / importar resultado de outro sistema */
+.imp{background:var(--surface); border:1px solid var(--accent); border-radius:9px;
+  box-shadow:var(--shadow); margin-bottom:16px; overflow:hidden}
+.imp header{padding:12px 16px; border-bottom:1px solid var(--rule); background:var(--surface-2);
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.imp header h3{margin:0; font-size:14px; font-weight:600; flex:1}
+.imp .corpo{padding:14px 16px; display:flex; flex-direction:column; gap:11px}
+.imp textarea{width:100%; min-height:130px; resize:vertical; border:1px solid var(--rule-strong);
+  border-radius:7px; padding:10px 12px; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace; font-size:12.5px; line-height:1.5}
+.imp textarea:focus{outline:2px solid var(--accent); outline-offset:-1px}
+.imp .linhabtn{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.imp .nota{font-size:12.5px; color:var(--ink-3); line-height:1.5; max-width:78ch}
+.imp .nota strong{color:var(--ink-2); font-weight:600}
+.imp .placar{font-size:13px; font-weight:600}
+.imp .placar .bom{color:var(--sdp-ink)} .imp .placar .ruim{color:var(--warn-ink)}
+.imp table{border-collapse:collapse; width:100%; font-size:12.5px}
+.imp table td{padding:5px 8px; border-bottom:1px solid var(--rule); vertical-align:middle}
+.imp table tr:last-child td{border-bottom:0}
+.imp .vsrc{font-family:"IBM Plex Mono",monospace; color:var(--ink-2); white-space:nowrap}
+.imp .vnovo{font-family:"IBM Plex Mono",monospace; font-weight:600; text-align:center; white-space:nowrap}
+.imp .antes{font-family:"IBM Plex Mono",monospace; color:var(--ink-3); text-decoration:line-through; white-space:nowrap}
+.imp .cx{max-height:290px; overflow:auto; border:1px solid var(--rule); border-radius:7px}
+.imp select{border:1px solid var(--rule-strong); background:var(--surface); border-radius:5px;
+  padding:4px 7px; font-size:12.5px; max-width:100%}
+.imp .sobra td{background:var(--warn); color:var(--warn-ink)}
+
+.corte{font-size:11.5px; color:var(--ink-3); display:flex; gap:9px; flex-wrap:wrap}
+.corte b{font-weight:600; color:var(--ink-2)}
+.corte .none{color:var(--warn-ink)}
+
+.summary{display:flex; border:1px solid var(--rule); border-radius:9px; overflow:hidden;
+         margin-bottom:16px; background:var(--surface); box-shadow:var(--shadow)}
+.sumcell{flex:1; padding:10px 16px; border-right:1px solid var(--rule); min-width:0}
+.sumcell:last-child{border-right:0}
+.sumcell .k{font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:700}
+.sumcell .v{font-size:21px; font-weight:600; font-family:"IBM Plex Mono",monospace; line-height:1.2; margin-top:1px}
+.sumcell.sdp .v{color:var(--sdp-ink)} .sumcell.sae .v{color:var(--sae-ink)}
+.sumcell.res .v{color:var(--res-ink)} .sumcell.warn .v{color:var(--warn-ink)}
+
+.hint{font-size:12.5px; color:var(--ink-3); margin:13px 2px 0; max-width:76ch}
+.hint code{font-family:"IBM Plex Mono",monospace; background:var(--surface-2); padding:1px 4px; border-radius:3px; font-size:11.5px}
+.hint strong{color:var(--ink-2); font-weight:600}
+
+.refhead{padding:13px 18px; border-bottom:1px solid var(--rule); background:var(--surface-2)}
+.refhead p{margin:4px 0 0; font-size:12.5px; color:var(--ink-2); max-width:76ch}
+input.ref{width:100%; border:1px solid transparent; background:transparent; padding:7px 10px;
+          font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace; font-size:13px; text-align:center; border-radius:4px}
+input.ref:hover{border-color:var(--rule)}
+input.ref:focus{outline:2px solid var(--accent); outline-offset:-2px; background:var(--surface-2)}
+/* campo de corte vazio fica vazio mesmo: exemplo em cinza se parece com valor
+   cadastrado. O formato só aparece quando o cursor está na célula. */
+input.ref:not(:focus)::placeholder{color:transparent}
+input.ref::placeholder{color:var(--ink-3); font-style:italic}
+.c-ref{width:135px; border-left:1px solid var(--rule)}
+.c-acoes{width:86px; border-left:1px solid var(--rule)}
+.acoes{display:flex; align-items:center; gap:4px; padding:6px 10px; justify-content:flex-end}
+.mover{display:flex; flex-direction:column; gap:1px}
+.mover button{border:0; background:none; cursor:pointer; color:var(--ink-3); font-size:9px;
+  line-height:1; padding:3px 5px; border-radius:3px}
+.mover button:hover:not(:disabled){background:var(--surface-2); color:var(--ink)}
+.mover button:disabled{opacity:.25; cursor:default}
+button.excluir{border:0; background:none; cursor:pointer; color:var(--ink-3); font-size:14px;
+  line-height:1; padding:5px 8px; border-radius:4px}
+button.excluir:hover{background:var(--res); color:var(--res-ink)}
+input.nome{width:100%; border:1px solid transparent; background:transparent; padding:6px 8px;
+  font-size:13.5px; border-radius:4px; line-height:1.3}
+input.nome:hover{border-color:var(--rule)}
+input.nome:focus{outline:2px solid var(--accent); outline-offset:-2px; background:var(--surface-2)}
+.c-abx .src{font-size:11px; color:var(--ink-3); margin:1px 0 0 9px}
+/* a tabela de referências tem 5 colunas: aperta pra que as ações caibam sem rolar */
+table.reftab .c-abx{min-width:168px}
+table.reftab .c-ref{width:104px}
+table.reftab .c-acoes{width:78px}
+table.reftab th{padding:9px 10px}
+.addrow{display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--rule); background:var(--surface-2)}
+.addrow input{flex:1; min-width:0; border:1px solid var(--rule-strong); background:var(--surface);
+  border-radius:6px; padding:7px 11px; font-size:13.5px}
+.addrow input:focus{outline:2px solid var(--accent); outline-offset:-1px}
+
+/* observacoes */
+.searchbar{display:flex; gap:10px; align-items:center; margin-bottom:14px}
+input.search{flex:1; border:1px solid var(--rule-strong); background:var(--surface); border-radius:7px;
+             padding:9px 13px; font-size:14px}
+input.search:focus{outline:2px solid var(--accent); outline-offset:-1px}
+.obslist{display:flex; flex-direction:column; gap:9px}
+.obs{background:var(--surface); border:1px solid var(--rule); border-radius:8px; padding:12px 14px;
+     display:grid; grid-template-columns:74px minmax(0,1fr) auto; gap:14px; align-items:start}
+.obs .cod{font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:600; color:var(--accent-ink);
+          background:var(--accent-soft); padding:3px 7px; border-radius:4px; text-align:center; white-space:nowrap}
+.obs .txt{font-size:13.5px; line-height:1.5; white-space:pre-wrap; color:var(--ink-2); min-width:0; overflow-wrap:anywhere}
+.obs .txt mark{background:var(--warn); color:var(--warn-ink); border-radius:2px; padding:0 1px}
+.empty-state{color:var(--ink-3); font-size:14px; padding:26px 2px}
+
+.toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(8px);
+       background:var(--ink); color:var(--ground); padding:10px 18px; border-radius:7px;
+       font-size:13.5px; font-weight:500; box-shadow:0 12px 34px -12px rgba(0,0,0,.5);
+       opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s ease; z-index:60}
+.toast.on{opacity:1; transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion: reduce){.toast{transition:none}}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static; height:auto; border-right:0; border-bottom:1px solid var(--rule)}
+  .orglist{max-height:190px}
+  .rail-foot{flex-direction:row}
+  .topbar,.content{padding-left:15px; padding-right:15px}
+  .summary{flex-wrap:wrap}
+  .sumcell{flex:1 1 33%}
+  .obs{grid-template-columns:1fr; gap:8px}
+  .obs .cod{justify-self:start}
+}
+  .selo{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;
+        font-size:12.5px;line-height:1.35;margin-bottom:12px;border:1px solid}
+  .selo b{font-weight:600}
+  /* usa os tokens do tema: claro e escuro viram junto com o resto */
+  .selo.ok   {background:var(--sdp); border-color:var(--sdp); color:var(--sdp-ink)}
+  .selo.aviso{background:var(--warn);border-color:var(--warn);color:var(--warn-ink)}
+  .selo.ruim {background:var(--res); border-color:var(--res); color:var(--res-ink)}
+  .selo.neu  {background:var(--surface-2);border-color:var(--rule);color:var(--ink-2)}
+  .selo .dot2{margin-left:auto;display:flex;gap:8px;flex-shrink:0}
+  .selo a{color:inherit;text-decoration:underline;white-space:nowrap}
+  .fonte-campo{display:flex;gap:8px;margin:10px 0 6px}
+  .fonte-campo input{flex:1;min-width:0}
+  .erros{margin:8px 0 0;padding-left:18px;font-size:12.5px;color:var(--res-ink)}
+  .erros li{margin:2px 0}
+  .passos{margin:0;padding:0 0 0 20px;font-size:13px;line-height:1.55;color:var(--ink-2)}
+  .passos li{margin:0 0 9px}
+  .passos strong{color:var(--ink)}
+  .passos code{background:var(--surface-2);border:1px solid var(--rule);border-radius:4px;
+               padding:1px 5px;font-size:12px;white-space:nowrap}
+  .cuidado{border-left:3px solid var(--warn);background:var(--surface-2);
+           padding:9px 12px;margin:10px 0 0;font-size:12.5px;line-height:1.5;color:var(--ink-2)}
+  .cuidado b{color:var(--ink)}
+  /* Marca: duas fendas escuras separando as três faixas — os dois pontos de
+     corte, S/I e I/R, que é o que o programa decide. */
+  .brand{display:flex;align-items:center;gap:11px}
+  .marca{width:34px;height:34px;flex-shrink:0;border-radius:9px;display:block}
+  .brand h1{margin:0}
+</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%20%3Cdefs%3E%3CclipPath%20id%3D%22m%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%22112%22%2F%3E%3C%2FclipPath%3E%3C%2Fdefs%3E%20%3Cg%20clip-path%3D%22url(%23m)%22%3E%20%20%3Crect%20width%3D%22512%22%20height%3D%22512%22%20fill%3D%22%230F171D%22%2F%3E%20%20%3Cpath%20d%3D%22M0%200%20H244%20L206%20512%20H0%20Z%22%20%20%20fill%3D%22%236FC49B%22%2F%3E%20%20%3Cpath%20d%3D%22M268%200%20H320%20L282%20512%20H230%20Z%22%20fill%3D%22%238FBEE6%22%2F%3E%20%20%3Cpath%20d%3D%22M344%200%20H512%20V512%20H306%20Z%22%20%20%20fill%3D%22%23E58880%22%2F%3E%20%3C%2Fg%3E%3C%2Fsvg%3E">
+
+</head>
+<body>
+<div class="shell">
+  <nav class="rail">
+    <div class="brand">
+      <svg class="marca" viewBox="0 0 512 512" aria-hidden="true">
+        <defs><clipPath id="marcaClip"><rect width="512" height="512" rx="112"/></clipPath></defs>
+        <g clip-path="url(#marcaClip)">
+          <rect width="512" height="512" fill="#0F171D"/>
+          <path d="M0 0 H244 L206 512 H0 Z"     fill="#6FC49B"/>
+          <path d="M268 0 H320 L282 512 H230 Z" fill="#8FBEE6"/>
+          <path d="M344 0 H512 V512 H306 Z"     fill="#E58880"/>
+        </g>
+      </svg>
+      <div>
+        <h1>Corte BrCAST</h1>
+        <div class="sub" id="marcaSub">LEPAC</div>
+      </div>
+    </div>
+    <div class="railsearch">
+      <input id="buscaOrg" placeholder="Buscar microrganismo…" spellcheck="false" autocomplete="off" aria-label="Buscar microrganismo">
+    </div>
+    <div class="orglist" id="orglist"></div>
+    <div class="rail-foot">
+      <button class="btn ghost" id="navLaudo" aria-current="true">Laudo</button>
+      <button class="btn ghost" id="navRef">Valores de referência</button>
+      <button class="btn ghost" id="navObs">Observações padrão</button>
+      <button class="btn ghost" id="navFonte">Fonte dos cortes</button>
+    </div>
+  </nav>
+  <main class="main">
+    <header class="topbar">
+      <div class="who">
+        <div class="eyebrow" id="eyebrow"></div>
+        <div class="titlerow"><h2 id="titulo"></h2><div id="matseg"></div></div>
+      </div>
+      <div class="actions" id="actions"></div>
+    </header>
+    <div class="content" id="content"></div>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* ==========================================================================
+   DADOS — extraídos das 10 planilhas BrCAST 2024 e do documento
+   "OBSERVAÇÕES PADRÃO PARA LAUDOS". Nada foi inventado.
+   ========================================================================== */
+const PANELS = [{"id":"entero_urina","fam":"Enterobactérias","mat":"Urina","cartao":"NMIC ID 471","orgs":[{"nome":"Escherichia coli","aba":"E. coli","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico- Oral (Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Oral (Infecção do trato urinário não complicado)","ref":{"sdp":"≤32","sae":"","res":">32"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefalexina","ref":{"sdp":"≤16","sae":"","res":">16"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Cefuroxima- Oral","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefuroxima - Intravenoso","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Imipenem","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"4 a 8","res":">8"}},{"t":"cim","n":"Nitrofurantoína","ref":{"sdp":"≤64","sae":"","res":">64"}},{"t":"cim","n":"Norfloxacino","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_urina__escherichia_coli","abbr":"E. coli"},{"nome":"Klebsiella pneumoniae ssp. pneumoniae","aba":"K. pneumo","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico- Oral (Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Oral (Infecção do trato urinário não complicado)","ref":{"sdp":"≤32","sae":"","res":">32"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefalexina","ref":{"sdp":"≤16","sae":"","res":">16"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Cefuroxima- Oral","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefuroxima - Intravenoso","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Imipenem","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"4 a 8","res":">8"}},{"t":"cim","n":"Norfloxacino","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_urina__klebsiella_pneumoniae_ssp_pneumoniae","abbr":"K. pneumoniae"},{"nome":"Citrobacter koseri","aba":"Citrobacter koseri","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico- Oral (Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Oral (Infecção do trato urinário não complicado)","ref":{"sdp":"≤32","sae":"","res":">32"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefalexina","ref":{"sdp":"≤16","sae":"","res":">16"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Imipenem","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"4 a 8","res":">8"}},{"t":"cim","n":"Norfloxacino","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_urina__citrobacter_koseri","abbr":"C. koseri"},{"nome":"Citrobacter freundii","aba":"Citrobacter freundii","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico- Oral (Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Oral (Infecção do trato urinário não complicado)","ref":{"sdp":"≤32","sae":"","res":">32"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefalexina","ref":{"sdp":"≤16","sae":"","res":">16"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Imipenem","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"4 a 8","res":">8"}},{"t":"cim","n":"Norfloxacino","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_urina__citrobacter_freundii","abbr":"C. freundii"},{"nome":"Klebsiella aerogenes","aba":"K. aerogenes","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico- Oral (Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Oral (Infecção do trato urinário não complicado)","ref":{"sdp":"≤32","sae":"","res":">32"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefalexina","ref":{"sdp":"≤16","sae":"","res":">16"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Imipenem","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"4 a 8","res":">8"}},{"t":"cim","n":"Norfloxacino","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_urina__klebsiella_aerogenes","abbr":"K. aerogenes"},{"nome":"Complexo Enterobacter cloacae","aba":"E. cloacae","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico- Oral (Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Oral (Infecção do trato urinário não complicado)","ref":{"sdp":"≤32","sae":"","res":">32"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefalexina","ref":{"sdp":"≤16","sae":"","res":">16"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Imipenem","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"4 a 8","res":">8"}},{"t":"cim","n":"Norfloxacino","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_urina__complexo_enterobacter_cloacae","abbr":"E. cloacae"},{"nome":"Pluralibacter gergoviae","aba":"Pluralibacter gergoviae","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico- Oral (Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Oral (Infecção do trato urinário não complicado)","ref":{"sdp":"≤32","sae":"","res":">32"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefalexina","ref":{"sdp":"≤16","sae":"","res":">16"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Imipenem","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"4 a 8","res":">8"}},{"t":"cim","n":"Norfloxacino","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_urina__pluralibacter_gergoviae","abbr":"P. gergoviae"},{"nome":"Proteus mirabilis","aba":"P. mirabilis","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico- Oral (Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Oral (Infecção do trato urinário não complicado)","ref":{"sdp":"≤32","sae":"","res":">32"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefalexina","ref":{"sdp":"≤16","sae":"","res":">16"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Cefuroxima- oral","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefuroxima - Intravenoso","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"4 a 8","res":">8"}},{"t":"cim","n":"Norfloxacino","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_urina__proteus_mirabilis","abbr":"P. mirabilis"},{"nome":"Proteus vulgaris","aba":"P. vulgaris","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico- Oral (Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Oral (Infecção do trato urinário não complicado)","ref":{"sdp":"≤32","sae":"","res":">32"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefalexina","ref":{"sdp":"≤16","sae":"","res":">16"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"4 a 8","res":">8"}},{"t":"cim","n":"Norfloxacino","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_urina__proteus_vulgaris","abbr":"P. vulgaris"},{"nome":"Morganella morganii","aba":"Morganella spp.","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico- Oral (Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Oral (Infecção do trato urinário não complicado)","ref":{"sdp":"≤32","sae":"","res":">32"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefalexina","ref":{"sdp":"≤16","sae":"","res":">16"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"4 a 8","res":">8"}},{"t":"cim","n":"Norfloxacino","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_urina__morganella_morganii","abbr":"M. morganii"},{"nome":"Serratia marcescens","aba":"Serratia sp","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico- Oral (Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Oral (Infecção do trato urinário não complicado)","ref":{"sdp":"≤32","sae":"","res":">32"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefalexina","ref":{"sdp":"≤16","sae":"","res":">16"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Imipenem","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"4 a 8","res":">8"}},{"t":"cim","n":"Norfloxacino","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_urina__serratia_marcescens","abbr":"S. marcescens"},{"nome":"Providencia rettgeri","aba":"Providencia spp.","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico- Oral (Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Oral (Infecção do trato urinário não complicado)","ref":{"sdp":"≤32","sae":"","res":">32"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefalexina","ref":{"sdp":"≤16","sae":"","res":">16"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"4 a 8","res":">8"}},{"t":"cim","n":"Norfloxacino","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_urina__providencia_rettgeri","abbr":"P. rettgeri"},{"nome":"Salmonella spp","aba":"Salmonella spp.","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico- Oral (Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/Ácido Clavulânico - Oral (Infecção do trato urinário não complicado)","ref":{"sdp":"≤32","sae":"","res":">32"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefalexina","ref":{"sdp":"≤16","sae":"","res":">16"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Imipenem","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"4 a 8","res":">8"}},{"t":"cim","n":"Norfloxacino","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_urina__salmonella_spp","abbr":"Salmonella spp."}]},{"id":"entero_outros","fam":"Enterobactérias","mat":"Outros materiais","cartao":"NMIC ID 471","orgs":[{"nome":"Escherichia coli","aba":"E coli","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/ácido clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/ácido clavulânico - Oral ( Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/ácido clavulânico - Oral ( Outras indicações)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Cefuroxima - Intravenoso","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Imipenem","ref":{"sdp":"","sae":"≤4","res":">4"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_outros__escherichia_coli","abbr":"E. coli"},{"nome":"Klebsiella pneumoniae ssp. pneumoniae","aba":"K. pneumoniae ssp. pneumoniae","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/ácido clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/ácido clavulânico - Oral ( Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/ácido clavulânico - Oral ( Outras indicações)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Cefuroxima - Intravenoso","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Imipenem","ref":{"sdp":"","sae":"≤4","res":">4"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_outros__klebsiella_pneumoniae_ssp_pneumoniae","abbr":"K. pneumoniae"},{"nome":"Proteus mirabilis","aba":"P. mirabilis","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/ácido clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/ácido clavulânico - Oral ( Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/ácido clavulânico - Oral ( Outras indicações)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Cefuroxima - Intravenoso","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤0,25","sae":"0,5","res":">0,5"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_outros__proteus_mirabilis","abbr":"P. mirabilis"},{"nome":"Salmonella sp.","aba":"Salmonella","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/ácido clavulânico - Intravenoso","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Amoxicilina/ácido clavulânico - Oral ( Infecção com origem no trato urinário)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Amoxicilina/ácido clavulânico - Oral ( Outras indicações)","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Cefalexina","ref":{"sdp":"≤16","sae":"","res":">16"}},{"t":"cim","n":"Cefepima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"≤1","sae":"2 a 4","res":">4"}},{"t":"cim","n":"Ceftriaxona","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Ertapenem","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Imipenem","ref":{"sdp":"","sae":"≤4","res":">4"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Piperacilina/Tazobactam","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"entero_outros__salmonella_sp","abbr":"Salmonella sp."}]},{"id":"entcoc_urina","fam":"Enterococos","mat":"Urina","cartao":"PMIC ID 601","orgs":[{"nome":"Enterococcus faecalis","aba":"Enterococcus faecalis","rows":[{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Linezolida","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Nitrofurantoína","ref":{"sdp":"≤64","sae":"","res":">64"}},{"t":"cim","n":"Teicoplanina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Tigeciclina","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Vancomicina","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"tit","n":"TRIAGEM DE ALTO NÍVEL DE RESISTÊNCIA AOS AMINOGLICOSÍDEOS"},{"t":"triagem","n":"Gentamicina","op":["Positiva","Negativa"]},{"t":"triagem","n":"Estreptomicina","op":["Positiva","Negativa"]}],"id":"entcoc_urina__enterococcus_faecalis","abbr":"E. faecalis"}]},{"id":"entcoc_outros","fam":"Enterococos","mat":"Outros materiais","cartao":"PMIC ID 601","orgs":[{"nome":"Enterococos faecalis","aba":"Enterococos faecalis","rows":[{"t":"cim","n":"Ampicilina","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Linezolida","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Teicoplanina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Tigeciclina","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Vancomicina","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"tit","n":"TRIAGEM DE ALTO NÍVEL DE RESISTÊNCIA AOS AMINOGLICOSÍDEOS"},{"t":"triagem","n":"Gentamicina","op":["Positiva","Negativa"]},{"t":"triagem","n":"Estreptomicina","op":["Positiva","Negativa"]}],"id":"entcoc_outros__enterococos_faecalis","abbr":"E. faecalis"}]},{"id":"staph_urina","fam":"Staphylococcus","mat":"Urina","cartao":"PMIC ID 601","orgs":[{"nome":"Staphylococcus aureus","aba":"Staphylococcus aureus","rows":[{"t":"cim","n":"Benzilpenicilina","ref":{"sdp":"≤0,125","sae":"","res":">0,125"}},{"t":"cim","n":"Ceftarolina","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"","sae":"≤2","res":">2"}},{"t":"cim","n":"Clindamicina","ref":{"sdp":"≤0,25","sae":"","res":">0,25"}},{"t":"cim","n":"Daptomicina","ref":{"sdp":"≤1","sae":"","res":">1"}},{"t":"cim","n":"Eritromicina","ref":{"sdp":"≤1","sae":"","res":">1"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"","sae":"≤1","res":">1"}},{"t":"cim","n":"Nitrofurantoína","ref":{"sdp":"≤64","sae":"","res":">64"}},{"t":"cim","n":"Teicoplamina (S. aureus)","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Teicoplamina (ECN)","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Tigeciclina","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Trimetoprim/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Vancomicina (S. aureus)","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Vancomicina (ECN)","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"triagem","n":"TRIAGEM PARA RESISTÊNCIA A METICILINA (OXACILINA)","op":["Positivo","Negativo"]}],"id":"staph_urina__staphylococcus_aureus","abbr":"S. aureus"}]},{"id":"staph_outros","fam":"Staphylococcus","mat":"Outros materiais","cartao":"PMIC ID 601","orgs":[{"nome":"Staphylococcus aureus","aba":"S aureus","rows":[{"t":"cim","n":"Ceftarolina","src":"CEFTAROLINA S. aureus (outras indicações excetuando pneumonia)","ref":{"sdp":"≤1","sae":"2","res":">2"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"","sae":"≤2","res":">2"}},{"t":"cim","n":"Clindamicina","src":"CLINDAMICINA (não urina)","ref":{"sdp":"≤0,25","sae":"","res":">0,25"}},{"t":"cim","n":"Daptomicina","ref":{"sdp":"≤1","sae":"","res":">1"}},{"t":"cim","n":"Eritromicina","src":"ERITROMICINA (não urina)","ref":{"sdp":"≤1","sae":"","res":">1"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Levofloxacino","src":"LEVOFLOXACINO S. aureus e ECN","ref":{"sdp":"","sae":"≤1","res":">1"}},{"t":"cim","n":"Linezolida","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Penicilina","src":"BENZILPENICILINA","ref":{"sdp":"≤0,125","sae":"","res":">0,125"}},{"t":"cim","n":"Teicoplanina","src":"TEICOPLAMINA S. aureus","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Vancomicina","src":"VANCOMICINA, S. aureus","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"triagem","n":"TRIAGEM PARA RESISTÊNCIA A METICILINA (OXACILINA)","op":["Positivo","Negativo"]}],"id":"staph_outros__staphylococcus_aureus","abbr":"S. aureus"},{"nome":"Staphylococcus capitis","aba":"S capitis","rows":[{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"","sae":"≤2","res":">2"}},{"t":"cim","n":"Daptomicina","ref":{"sdp":"≤1","sae":"","res":">1"}},{"t":"cim","n":"Eritromicina","src":"ERITROMICINA (não urina)","ref":{"sdp":"≤1","sae":"","res":">1"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Levofloxacino","src":"LEVOFLOXACINO S. aureus e ECN","ref":{"sdp":"","sae":"≤1","res":">1"}},{"t":"cim","n":"Linezolida","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Penicilina","src":"BENZILPENICILINA","ref":{"sdp":"≤0,125","sae":"","res":">0,125"}},{"t":"cim","n":"Teicoplanina","src":"TEICOPLAMINA ECN","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Tigeciclina","ref":{"sdp":"≤0,5","sae":"","res":">0,5"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Vancomicina","src":"VANCOMICINA, ECN","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"triagem","n":"TRIAGEM PARA RESISTÊNCIA A METICILINA (OXACILINA)","op":["Positivo","Negativo"]}],"id":"staph_outros__staphylococcus_capitis","abbr":"S. capitis"},{"nome":"Staphylococcus hominis","aba":"S hominis","rows":[{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"","sae":"≤2","res":">2"}},{"t":"cim","n":"Daptomicina","ref":{"sdp":"≤1","sae":"","res":">1"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Levofloxacino","src":"LEVOFLOXACINO S. aureus e ECN","ref":{"sdp":"","sae":"≤1","res":">1"}},{"t":"cim","n":"Linezolida","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Penicilina","src":"BENZILPENICILINA","ref":{"sdp":"≤0,125","sae":"","res":">0,125"}},{"t":"cim","n":"Teicoplanina","src":"TEICOPLAMINA ECN","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Vancomicina","src":"VANCOMICINA, ECN","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"triagem","n":"TRIAGEM PARA RESISTÊNCIA A METICILINA (OXACILINA)","op":["Positivo","Negativo"]}],"id":"staph_outros__staphylococcus_hominis","abbr":"S. hominis"},{"nome":"Staphylococcus saprophyticus","aba":"S saprophylicus","rows":[{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"","sae":"≤2","res":">2"}},{"t":"cim","n":"Clindamicina","src":"CLINDAMICINA (não urina)","ref":{"sdp":"≤0,25","sae":"","res":">0,25"}},{"t":"cim","n":"Daptomicina","ref":{"sdp":"≤1","sae":"","res":">1"}},{"t":"cim","n":"Eritromicina","src":"ERITROMICINA (não urina)","ref":{"sdp":"≤1","sae":"","res":">1"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Levofloxacino","src":"LEVOFLOXACINO S. aureus e ECN","ref":{"sdp":"","sae":"≤1","res":">1"}},{"t":"cim","n":"Linezolida","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Teicoplanina","src":"TEICOPLAMINA ECN","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Vancomicina","src":"VANCOMICINA, ECN","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"triagem","n":"TRIAGEM PARA RESISTÊNCIA A METICILINA (OXACILINA)","op":["Positivo","Negativo"]}],"id":"staph_outros__staphylococcus_saprophyticus","abbr":"S. saprophyticus"},{"nome":"Staphylococcus epidermidis","aba":"S epidermidis","rows":[{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"","sae":"≤2","res":">2"}},{"t":"cim","n":"Clindamicina","src":"CLINDAMICINA (não urina)","ref":{"sdp":"≤0,25","sae":"","res":">0,25"}},{"t":"cim","n":"Daptomicina","ref":{"sdp":"≤1","sae":"","res":">1"}},{"t":"cim","n":"Eritromicina","src":"ERITROMICINA (não urina)","ref":{"sdp":"≤1","sae":"","res":">1"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Levofloxacino","src":"LEVOFLOXACINO S. aureus e ECN","ref":{"sdp":"","sae":"≤1","res":">1"}},{"t":"cim","n":"Linezolida","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Teicoplanina","src":"TEICOPLAMINA ECN","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Vancomicina","src":"VANCOMICINA, ECN","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"triagem","n":"TRIAGEM PARA RESISTÊNCIA A METICILINA (OXACILINA)","op":["Positivo","Negativo"]}],"id":"staph_outros__staphylococcus_epidermidis","abbr":"S. epidermidis"}]},{"id":"acineto","fam":"Acinetobacter","mat":"Todos os materiais","cartao":"NMIC ID 471","orgs":[{"nome":"Complexo Acinetobacter baumanni","aba":"Acinet bau","rows":[{"t":"cim","n":"Amicacina","ref":{"sdp":"≤8","sae":"","res":">8"}},{"t":"cim","n":"Ciprofloxacino","ref":{"sdp":"","sae":"≤1","res":">1"}},{"t":"cim","n":"Gentamicina","ref":{"sdp":"≤4","sae":"","res":">4"}},{"t":"cim","n":"Imipenem","ref":{"sdp":"≤2","sae":"4","res":">4"}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"≤0,5","sae":"1","res":">1"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"4 a 8","res":">8"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"≤2","sae":"4","res":">4"}}],"id":"acineto__complexo_acinetobacter_baumanni","abbr":"A. baumannii"}]},{"id":"burkholderia","fam":"Burkholderia pseudomallei","mat":"Todos os materiais","cartao":"NMIC ID 471","orgs":[{"nome":"Burkholderia pseudomallei","aba":"Burkholderia pseudomallei","rows":[{"t":"cim","n":"Amoxicilina/ácido clavulânico","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Ceftazidima","ref":{"sdp":"","sae":"≤8","res":">8"}},{"t":"cim","n":"Imipenem","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Meropenem","ref":{"sdp":"≤2","sae":"","res":">2"}},{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"","sae":"≤4","res":">4"}}],"id":"burkholderia__burkholderia_pseudomallei","abbr":"B. pseudomallei"}]},{"id":"malto","fam":"Stenotrophomonas maltophilia","mat":"Todos os materiais","cartao":"NMIC ID 471","orgs":[{"nome":"Stenotrophomonas maltophilia","aba":"Plan1","rows":[{"t":"cim","n":"Trimetoprima/Sulfametoxazol","ref":{"sdp":"","sae":"","res":""}}],"id":"malto__stenotrophomonas_maltophilia","abbr":"S. maltophilia"}]},{"id":"strepto","fam":"Streptococcus","mat":"Gradiente de concentração","cartao":"Etest","orgs":[{"nome":"Streptococcus pneumoniae","aba":"S. pneumoniae","rows":[{"t":"cim","n":"Benzilpenicilina (não-meningite)","ref":{"sdp":"","sae":"","res":""}},{"t":"cim","n":"Benzilpenicilina (meningite)","ref":{"sdp":"","sae":"","res":""}},{"t":"cim","n":"Benzilpenicilina (infecções pulmonares)","ref":{"sdp":"","sae":"","res":""}},{"t":"cim","n":"Ceftriaxona (não-meningite)","ref":{"sdp":"","sae":"","res":""}},{"t":"cim","n":"Ceftriaxona (meningite)","ref":{"sdp":"","sae":"","res":""}},{"t":"cim","n":"Meropenem (não-meningite)","ref":{"sdp":"","sae":"","res":""}},{"t":"cim","n":"Meropenem (meningite)","ref":{"sdp":"","sae":"","res":""}},{"t":"cim","n":"Levofloxacino","ref":{"sdp":"","sae":"","res":""}},{"t":"cim","n":"Vancomicina","ref":{"sdp":"","sae":"","res":""}},{"t":"cim","n":"Tetraciclina","ref":{"sdp":"","sae":"","res":""}},{"t":"cim","n":"Sulfametoxazol/Trimetoprima","ref":{"sdp":"","sae":"","res":""}},{"t":"cim","n":"Clindamicina","ref":{"sdp":"","sae":"","res":""}},{"t":"cim","n":"Eritromicina","ref":{"sdp":"","sae":"","res":""}}],"id":"strepto__streptococcus_pneumoniae","abbr":"S. pneumoniae"},{"nome":"Streptococcus pyogenes","aba":"S. pyogenes","rows":[{"t":"cim","n":"Benzilpenicilina (não-meningite)","ref":{"sdp":"","sae":"","res":""}}],"id":"strepto__streptococcus_pyogenes","abbr":"S. pyogenes"},{"nome":"Streptococcus acidominimus","aba":"S. acidominimus","rows":[{"t":"cim","n":"Benzilpenicilina (não-meningite)","ref":{"sdp":"","sae":"","res":""}}],"id":"strepto__streptococcus_acidominimus","abbr":"S. acidominimus"}]}];
+const OBS    = [{"c":"Bac 1","t":"Bactéria produtora de \"E.S.B.L.\" (beta-lactamase de espectro estendido)."},{"c":"Bac 2","t":"CARBAPENEMASE DETECTADA\n(Método: mCIM - Método Modificado de Inibição de Carbapenens para Enterobactérias e Pseudomonas aeruginosa suspeitos de produção de carbapenemases (CLSI, 2019/BrCAST 2018."},{"c":"Bac 3","t":"Em LCR - S. pneumoniae com resultado resistente (R), na triagem com oxacilina (halo \u003c9mm) é resistente à  benzilpenicilina e à fenoximetilpenicilina"},{"c":"Bac 4","t":"Amostra coletada através de sonda vesical de demora, 2 dias após sua troca."},{"c":"Bac 5","t":"A amostra estava inadequada para cultura por apresentar grande quantidade de células epiteliais escamosas. Se o clínico considerar necessário, favor realizar nova coleta."},{"c":"Bac 6","t":"Para a interpretação deste antibiograma foram utilizados os critérios preconizados pelo CLSI 2019."},{"c":"Bac 10","t":"Bactéria produtora de \"K.P.C.\" (Klebsiella pneumoniae carbapenemase)."},{"c":"Bac 11","t":"Bactéria produtora de NDM (New Delhi Metallobetalactamase)."},{"c":"Bac 12","t":"Em função da positividade do teste fenotípico para (MBL) metalo-betalactamase (bloqueio enzimático com EDTA) este isolado será encaminhado ao LACEN-PR para realização de PCR para blaNDM."},{"c":"Bac 13","t":"A detecção de KPC foi realizada por bloqueio enzimático com ácido fenilborônico, método com especificidade superior a 99%."},{"c":"Bac 14","t":"Provável mecanismo de resistência aos carbapenêmicos: AmpC mais perda de porina."},{"c":"Bac 15","t":"Os testes fenotípicos para KPC, metalo-betalactamases e AmpC apresentaram resultados negativos. A resistência aos carbapenêmicos pode indicar a presença de carbapenemase OXA-48 like ou ESBL mais perda de porinas."},{"c":"Bac 16","t":"PESQUISA DE GENES DE RESISTÊNCIA:\n(Exame realizado no LACEN - PR)\n\nMétodo: PCR em Tempo Real (Taqman)\nMicrorganismo:\nGene pesquisado: bla KPC           Resultado: Detectável.\nGene pesquisado: bla NDM         Resutado: Detectável.\nGene pesquisado: mcr-1              Resultado: Não detectável."},{"c":"Bac 17","t":"PESQUISA DE GENES DE RESISTÊNCIA:\n(Exame realizado no LACEN - PR)\n\nMétodo: PCR em Tempo Real (Taqman)\nMicrorganismo:\nGene pesquisado: bla KPC           Resultado: Detectável.\nGene pesquisado: bla NDM         Resutado: Não detectável.\nGene pesquisado: mcr-1              Resultado: Não detectável."},{"c":"Bac 18","t":"PESQUISA DE GENES DE RESISTÊNCIA:\n(Exame realizado no LACEN - PR)\n\nMétodo: PCR em Tempo Real (Taqman)\nMicrorganismo:\nGene pesquisado: bla KPC           Resultado: Não detectável.\nGene pesquisado: bla NDM         Resutado: Detectável.\nGene pesquisado: mcr-1               Resultado: Não detectável."},{"c":"Bac 19","t":"PESQUISA DE GENES DE RESISTÊNCIA:\n(Exame realizado no LACEN - PR)\n\nMétodo: PCR em Tempo Real (Taqman)\nMicrorganismo:\nGene pesquisado: bla KPC           Resultado: Não detectável.\nGene pesquisado: bla NDM         Resutado: Não detectável.\nGene pesquisado: mcr-1              Resultado: Não detectável."},{"c":"Bac 20","t":"CARBAPENEMASE NÃO DETECTADA.\n(Método: mCIM - Método Modificado de Inibição de Carbapenens para Enterobactérias e Pseudomonas aeruginosa suspeitos de produção de carbapenemases (CLSI, 2019/BrCAST 2018)."},{"c":"Bac 21","t":"Em isolados de E. coli, Klebsiella spp. (exceto K. aerogenes), Raoultella spp SENSÍVEIS À CEFALOSPORINA DE 3ª GERAÇÃO (cefotaxima, ceftriaxona, ceftazidima) ou 4ª GERAÇÃO (cefepima), mas com produção de ESBL, o resultado terapêutico é incerto para outras infecções além de infecções do trato urinário. As evidências disponíveis indicam que o fenótipo (sensível ou resistente) para essas cefalosporinas prevê o resultado do tratamento em isolados capazes de produzir ESBL, embora ainda haja uma escassez de dados clínicos fora do trato urinário.\nObservação do laudo, versão compacta para o médico.\n\nEm isolados de E. coli, Klebsiella spp. (exceto K. aerogenes), Raoultella spp SENSÍVEIS À CEFALOSPORINA DE 3ª GERAÇÃO (cefotaxima, ceftriaxona, ceftazidima) ou 4ª GERAÇÃO (cefepima), mas com produção de ESBL, o resultado terapêutico é incerto para outras infecções além de infecções do trato urinário."},{"c":"Bac 22","t":"E. coli, Klebsiella spp. (exceto K. aerogenes), Raoultella spp: se RESISTENTES para qualquer CEFALOSPORINA DE 3ª GERAÇÃO (cefotaxima, ceftriaxona, ceftazidima) ou 4ª GERAÇÃO (cefepima) e SENSÍVEIS a PIPERACILINA-TAZOBACTAM ou AMOXICILINA ÁCIDO CLAVULÂNICO - informar conforme resultado do teste. Este fenótipo é mais frequentemente causado pela produção de ESBL. Os produtores de ESBL às vezes testam como sensíveis a combinações beta-lactâmicos/inibidor de beta-lactamase. O uso dessas combinações em infecções causadas por produtores de ESBL tem sido historicamente controverso, mas uma série de estudos têm mostrado que o uso é seguro, desde que dosagem apropriada seja usada. Uma publicação indica que a terapia com carbapenêmico pode ser superior a piperacilina/tazobactam, principalmente em pacientes com câncer terminal\n\nObservação do laudo, versão compacta para o médico.\n\nEscherichia coli, Klebsiella spp. (exceto K. aerogenes), Raoultella spp., produtores de ß Lactamase de espectro estendido (ESBL), podem testar como sensíveis à PIPERACILINA-TAZOBACTAM ou AMOXICILINA/ÁCIDO CLAVULÂNICO. Entretanto, o uso dessas combinações em infecções causadas por produtores de ESBL tem sido historicamente controverso."},{"c":"Bac 23","t":"A monoterapia com CEFOTAXIMA, CEFTRIAXONA OU CEFTAZIDIMA em Enterobacter spp., Klebsiella aerogenes, Citrobacter freundii (incluindo: C. braakii, C. murliniae, C. werkmanii, C. youngae) e Hafnia alvei, mesmo que sensíveis a essas cefalosporinas, deve ser desencorajada, bem como o uso em combinação com um aminoglicosídeo, devido ao risco relativamente alto de selecionar mutantes (com produção de AmpC) resistentes à essas cefalosporinas, inclusive durante o tratamento. O risco de seleção de mutantes é ausente ou muito diminuído para cefepima.\nObservação do laudo, versão compacta para o médico.\n\nA monoterapia com CEFOTAXIMA, CEFTRIAXONA OU CEFTAZIDIMA em Enterobacter spp., Klebsiella aerogenes, Citrobacter freundii (incluindo: C. braakii, C. murliniae, C. werkmanii, C. youngae) e Hafnia alvei, mesmo que sensíveis a essas cefalosporinas, deve ser desencorajada, bem como o uso em combinação com um aminoglicosídeo, devido ao risco relativamente alto de selecionar mutantes (com produção de AmpC) resistentes à essas cefalosporinas, inclusive durante o tratamento. O risco de seleção de mutantes é ausente ou muito diminuído para cefepima."},{"c":"Bac 24","t":"Em Serratia spp., Morganella morganii e Providencia spp., sensíveis à CEFOTAXIMA, CEFTRIAXONA ou CEFTAZIDIMA, a monoterapia com esses antimicrobianos pode raramente selecionar mutantes resistentes."},{"c":"Bac 25","t":"Enterobacter spp., Klebsiella aerogenes, Citrobacter freundii (incluindo: C. braakii, C. murliniae, C. werkmanii, C. youngae), Hafnia alvei, Serratia spp., Morganella morganii e Providencia spp. devem ser considerados resistentes à qualquer cefalosporina de segunda geração , incluindo a CEFUROXIMA, independentemente dos resultados obtidos in vitro."},{"c":"Bac 26","t":"Em urina e outros materiais -  S. pneumoniae com resultado resistente (R), na triagem com oxacilina (halo 9-19mm),   é resistente   à fenoximetilpenicilina,  mas sensível, dose padrão (S-DP) à ampicilina, amoxicilina, piperacilina, amoxicilina/ácido clavulânico, piperacilina/ácido clavulânico, cefepima, cefotaxima, ceftarolina, ceftobiprole, ceftriaxona, imipenem e meropenem."},{"c":"Bac 27","t":"Em LCR, urina e outros materiais - S. pneumoniae com resultado sensível, dose padrão (S-DP), na triagem com oxacilina, é S-DP à: benzilpenicilina, ampicilina, amoxicilina, amoxicilina/ácido clavulânico, piperacilina, piperacilina/tazobactam, fenoximetilpenicilina, cefepima, cefotaxima, ceftarolina, ceftriaxona, cefuroxima, doripenem, ertapenem, imipenem, imipenem/relebactam, meropenem, meropenem/vaborbactam e sensível, aumentando a exposição (S-AE) ao cefaclor."},{"c":"Bac 28","t":"Em LCR - S. pneumoniae com resultado resistente (R), na triagem com oxacilina (halo 9-19mm), é resistente (R) à  benzilpenicilina e à fenoximetilpenicilina, mas sensível, dose padrão (S-DP) à ampicilina, amoxicilina, piperacilina, amoxicilina/ácido clavulânico, piperacilina/ácido clavulânico, cefepima, cefotaxima, ceftarolina, ceftobiprole, ceftriaxona, imipenem e meropenem."},{"c":"Bac 29","t":"Em urina e outros materiais -  S. pneumoniae pneumoniae com resultado resistente (R), na triagem com oxacilina (halo \u003c9mm) é resistente à  fenoximetilpenicilina"},{"c":"Bac 30","t":"Paciente sob terapia antimicrobiana."},{"c":"Bac 31","t":"Amostra coletada por micção espontânea."},{"c":"Bac 32","t":"Amostra coletada através de coletor pediátrico."},{"c":"Bac 33","t":"Modo de coleta não informado."},{"c":"Bac 34","t":"Amostra coletada através de sonda de cistostomia."},{"c":"Bac 35","t":"Amostra coletada na primeira passagem da sonda vesical de demora."},{"c":"Bac 36","t":"Amostra coletada através de sonda vesical de demora. A data da troca da sonda não foi informada."},{"c":"Bac 37","t":"Amostra coletada através de sonda vesical de demora, no dia da sua passagem."},{"c":"Bac 38","t":"Amostra coletada através de sonda vesical de demora, no dia seguinte à sua troca."},{"c":"Bac 39","t":"Amostra coletada através de sonda vesical de demora, 1 dia após sua troca."},{"c":"Bac 40","t":"Amostra coletada através de sonda vesical de demora, 3 dias após sua troca."},{"c":"Bac 41","t":"Amostra coletada através de sonda vesical de demora, 4 dias após sua troca."},{"c":"Bac 42","t":"Amostra coletada através de sonda vesical de demora, 5 dias após sua troca."},{"c":"Bac 43","t":"Amostra coletada através de sonda vesical de demora, 6 dias após sua troca."},{"c":"Bac 44","t":"Amostra coletada através de sonda vesical de demora, 7 dias após sua troca."},{"c":"Bac 45","t":"Amostra coletada através de sonda vesical de demora, 8 dias após sua troca."},{"c":"Bac 46","t":"Amostra coletada através de sonda vesical de demora, 9 dias após sua troca."},{"c":"Bac 47","t":"Amostra coletada através de sonda vesical de demora, 10 dias após sua troca."},{"c":"Bac 48","t":"Amostra coletada através de sonda vesical de demora, no dia da sua troca."},{"c":"Bac 49","t":"Amostra coletada através de sonda de alívio."},{"c":"Bac 50","t":"Coleta, semeadura da amostra em meio de cultura e incubação inicial realizadas no laboratório de origem."},{"c":"Bac 51","t":"Semeadura da amostra em meio de cultura e incubação inicial realizadas no laboratório de origem (                     ), em             . A amostra, já semeada em meio de cultura, foi encaminhada ao LEPAC apenas em             ."},{"c":"Bac 52","t":"Identificação bacteriana realizada por provas bioquímicas automatizadas (PHOENIX 100 - BD) e sorológicas (testes de aglutinação  )."},{"c":"Bac 53","t":"Triagem para MLSb: Positiva.\nA clindamicina ainda pode ser utilizada para tratamento de curta duração ou tratamento de infecções menos graves de pele e tecidos moles, pois é improvável haver desenvolvimento de resistência plena durante tais tratamentos."},{"c":"Bac 54","t":"Triagem para MLSb: Negativa.\n\nNão foi detectada resistência induzível à clindamicina."},{"c":"Bac 55","t":"Enterococo resistente à vancomicina (V.R.E.)"},{"c":"Bac 56","t":"\"A resistência à VANCOMICINA é intrínseca da espécie (gallinarum). Portanto, não são necessárias medidas de controle de infecção e epidemiológicas.\""},{"c":"Bac 57","t":"\"A resistência à VANCOMICINA é intrínseca da espécie (casseliflavus). Portanto, não são necessárias medidas de controle de infecção e epidemiológicas .\""},{"c":"Bac 58","t":"A amostra, já semeada em meio de cultura, estava em condições inadequadas de transporte/conservação: refrigerada."},{"c":"Bac 59","t":"De acordo com as regras preconizadas pelo BrCAST 2022, as categorias de interpretação acima descritas devem ser agora nomeadas da seguinte forma:\n\nSensível - \"Sensível, dose padrão\"\nIntermediário - \"Sensível, aumentando exposição\"\nResistente - \"Resistente\""},{"c":"Bac 60","t":"IIsolados NEGATIVOS na triagem com Benzilpenicilina podem ser reportados como SENSÍVEIS aos agentes beta-lactâmicos: ampicilina, ampicilina/sulbactam, amoxicilina, amoxicilina/ácido clavulânico, piperacilina/tazobactam, cefepima, cefotaxima, ceftriaxona, cefuroxima iv, doripenem, ertapenem, imipenem, imipenem/relebactam, meropenem, meropenem/vaborbactam."},{"c":"Bac 61","t":"IIsolados POSITIVOS na triagem com Benzilpenicilina podem ser reportados como RESISTENTES aos agentes beta-lactâmicos: ampicilina, ampicilina/sulbactam, amoxicilina, amoxicilina/ácido clavulânico, piperacilina/tazobactam, cefepima, cefotaxima, ceftriaxona, cefuroxima iv, doripenem, ertapenem, imipenem, imipenem/relebactam, meropenem, meropenem/vaborbactam."},{"c":"Bac 62","t":"Moraxella catarrhalis produtora de beta-lactamase deve ser considerada resistente à penicilinas e às aminopenicilinas sem inibidores. Mas, as ß-lactamases produzidas por Moraxella catarrhalis não têm ação sobre os carbapenêmicos e carbapenêmicos associados a inibidores de ß-lactamase."},{"c":"Bac 63","t":"Isolados de Neisseria gonorrhoeae com resultado positivo para a Prova da Beta-Lactamase, são resistentes à ampicilina e amoxicilina."},{"c":"Bac 64","t":"Os critérios de disco-difusão para o teste de sensibilidade de Neisseria gonorrhoeae ainda não foram definidos. O isolado será encaminhado ao LACEN-PR."},{"c":"Bac 65","t":"Os critérios de disco-difusão para o teste de sensibilidade de Neisseria meningitidis ainda não foram definidos. O isolado será encaminhado ao LACEN-PR."},{"c":"Bac 66","t":"Haemophilus influenzae com resultado negativo na triagem com Benzilpenicilina, exclui todos os mecanismos de resistência aos Beta-lactâmicos. Sendo assim, é sensível, dose padrão à: benzilpenicilina, ampicilina, ampicilina/sulbactam, amoxicilina IV, amoxicilina/ácido clavulânico IV, piperacilina/tazobactam, cefepima, cefixima, cefotaxima IV, cefpodoxima, ceftarolina, ceftolozana/tazobactam, ceftriaxona, cefuroxima, doripenem, ertapenem, imipenem, imipenem/relebactam, meropenem, meropenem/vaborbactam , mas, sensível, aumentando a exposição (S-AE) à amoxicilina oral,  amoxicilina/ácido clavulânico oral e cefuroxima oral."},{"c":"Bac 67","t":"Haemophilus influenzae com resultado positivo na triagem com Benzilpenicilina, teste para beta-lactamase positivo e resultado negativo na triagem com  amoxicilina/ácido clavulânico  possui como mecanismo de resistência aos beta-lactâmicos apenas beta-lactamase. É resistente à: ampicilina,  amoxicilina e piperacilina. E sensível, dose-padrão à:  benzilpenicilina, , ampicilina/sulbactam,  amoxicilina/ácido clavulânico IV, piperacilina/tazobactam, cefepima, cefixima, cefotaxima IV, cefpodoxima, ceftarolina, ceftolozana/tazobactam, ceftriaxona, cefuroxima, doripenem, ertapenem, imipenem, imipenem/relebactam, meropenem, meropenem/vaborbactam, e sensível, aumentando a exposição (S-AE) à amoxicilina/ácido clavulânico oral e cefuroxima oral."},{"c":"Bac 68","t":"Haemophilus influenzae com resultado positivo na triagem com Benzilpenicilina, teste para beta-lactamase positivo e resultado positivo na triagem com amoxicilina/ácido clavulânico possui como mecanismo de resistência aos beta-lactâmicos produção de beta-lactamase e mutações em PBP3. É resistente à  ampicilina,  amoxicilina e piperacilina."},{"c":"Bac 69","t":"Haemophilus influenzae, isolado de LCR, com resultado positivo na triagem com Benzilpenicilina e teste para beta-lactamase positivo é resistente à: ampicilina, amoxicilina e piperacilina."},{"c":"Bac 70","t":"Haemophilus influenzae com resultado positivo na triagem com Benzilpenicilina e teste para beta-lactamase negativo possui como mecanismo de resistência aos beta-lactâmicos mutações em PBP3."},{"c":"Bac 71","t":"MRSA\n\nV.R.E.\n\nA diferenciação fenotípica entre Enterobacter bugandensis e Enterobacter cloacae apresenta limitações quando realizada por métodos tradicionais. Contudo, com a implementação da Espectrometria de Massas tornou-se possível estabelecer a distinção."}];
+// Índice de navegação: um microrganismo por entrada, apontando para 1 ou 2
+// registros (urina / outros materiais). Derivado de PANELS, não é dado novo.
+const NAV    = [{"k":"escherichia coli","nome":"Escherichia coli","abbr":"E. coli","g":"Enterobactérias","m":[{"mat":"Urina","id":"entero_urina__escherichia_coli"},{"mat":"Outros materiais","id":"entero_outros__escherichia_coli"}],"q":"escherichia coli e. coli enterobacterias urina outros materiais"},{"k":"klebsiella pneumoniae pneumoniae","nome":"Klebsiella pneumoniae ssp. pneumoniae","abbr":"K. pneumoniae","g":"Enterobactérias","m":[{"mat":"Urina","id":"entero_urina__klebsiella_pneumoniae_ssp_pneumoniae"},{"mat":"Outros materiais","id":"entero_outros__klebsiella_pneumoniae_ssp_pneumoniae"}],"q":"klebsiella pneumoniae ssp. pneumoniae k. pneumoniae enterobacterias urina outros materiais"},{"k":"citrobacter koseri","nome":"Citrobacter koseri","abbr":"C. koseri","g":"Enterobactérias","m":[{"mat":"Urina","id":"entero_urina__citrobacter_koseri"}],"q":"citrobacter koseri c. koseri enterobacterias urina"},{"k":"citrobacter freundii","nome":"Citrobacter freundii","abbr":"C. freundii","g":"Enterobactérias","m":[{"mat":"Urina","id":"entero_urina__citrobacter_freundii"}],"q":"citrobacter freundii c. freundii enterobacterias urina"},{"k":"klebsiella aerogenes","nome":"Klebsiella aerogenes","abbr":"K. aerogenes","g":"Enterobactérias","m":[{"mat":"Urina","id":"entero_urina__klebsiella_aerogenes"}],"q":"klebsiella aerogenes k. aerogenes enterobacterias urina"},{"k":"complexo enterobacter cloacae","nome":"Complexo Enterobacter cloacae","abbr":"E. cloacae","g":"Enterobactérias","m":[{"mat":"Urina","id":"entero_urina__complexo_enterobacter_cloacae"}],"q":"complexo enterobacter cloacae e. cloacae enterobacterias urina"},{"k":"pluralibacter gergoviae","nome":"Pluralibacter gergoviae","abbr":"P. gergoviae","g":"Enterobactérias","m":[{"mat":"Urina","id":"entero_urina__pluralibacter_gergoviae"}],"q":"pluralibacter gergoviae p. gergoviae enterobacterias urina"},{"k":"proteus mirabilis","nome":"Proteus mirabilis","abbr":"P. mirabilis","g":"Enterobactérias","m":[{"mat":"Urina","id":"entero_urina__proteus_mirabilis"},{"mat":"Outros materiais","id":"entero_outros__proteus_mirabilis"}],"q":"proteus mirabilis p. mirabilis enterobacterias urina outros materiais"},{"k":"proteus vulgaris","nome":"Proteus vulgaris","abbr":"P. vulgaris","g":"Enterobactérias","m":[{"mat":"Urina","id":"entero_urina__proteus_vulgaris"}],"q":"proteus vulgaris p. vulgaris enterobacterias urina"},{"k":"morganella morganii","nome":"Morganella morganii","abbr":"M. morganii","g":"Enterobactérias","m":[{"mat":"Urina","id":"entero_urina__morganella_morganii"}],"q":"morganella morganii m. morganii enterobacterias urina"},{"k":"serratia marcescens","nome":"Serratia marcescens","abbr":"S. marcescens","g":"Enterobactérias","m":[{"mat":"Urina","id":"entero_urina__serratia_marcescens"}],"q":"serratia marcescens s. marcescens enterobacterias urina"},{"k":"providencia rettgeri","nome":"Providencia rettgeri","abbr":"P. rettgeri","g":"Enterobactérias","m":[{"mat":"Urina","id":"entero_urina__providencia_rettgeri"}],"q":"providencia rettgeri p. rettgeri enterobacterias urina"},{"k":"salmonella","nome":"Salmonella","abbr":"Salmonella","g":"Enterobactérias","m":[{"mat":"Urina","id":"entero_urina__salmonella_spp"},{"mat":"Outros materiais","id":"entero_outros__salmonella_sp"}],"q":"salmonella salmonella enterobacterias urina outros materiais"},{"k":"enterococcus faecalis","nome":"Enterococcus faecalis","abbr":"E. faecalis","g":"Enterococos","m":[{"mat":"Urina","id":"entcoc_urina__enterococcus_faecalis"},{"mat":"Outros materiais","id":"entcoc_outros__enterococos_faecalis"}],"q":"enterococcus faecalis e. faecalis enterococos urina outros materiais"},{"k":"staphylococcus aureus","nome":"Staphylococcus aureus","abbr":"S. aureus","g":"Staphylococcus","m":[{"mat":"Urina","id":"staph_urina__staphylococcus_aureus"},{"mat":"Outros materiais","id":"staph_outros__staphylococcus_aureus"}],"q":"staphylococcus aureus s. aureus staphylococcus urina outros materiais"},{"k":"staphylococcus capitis","nome":"Staphylococcus capitis","abbr":"S. capitis","g":"Staphylococcus","m":[{"mat":"Outros materiais","id":"staph_outros__staphylococcus_capitis"}],"q":"staphylococcus capitis s. capitis staphylococcus outros materiais"},{"k":"staphylococcus hominis","nome":"Staphylococcus hominis","abbr":"S. hominis","g":"Staphylococcus","m":[{"mat":"Outros materiais","id":"staph_outros__staphylococcus_hominis"}],"q":"staphylococcus hominis s. hominis staphylococcus outros materiais"},{"k":"staphylococcus saprophyticus","nome":"Staphylococcus saprophyticus","abbr":"S. saprophyticus","g":"Staphylococcus","m":[{"mat":"Outros materiais","id":"staph_outros__staphylococcus_saprophyticus"}],"q":"staphylococcus saprophyticus s. saprophyticus staphylococcus outros materiais"},{"k":"staphylococcus epidermidis","nome":"Staphylococcus epidermidis","abbr":"S. epidermidis","g":"Staphylococcus","m":[{"mat":"Outros materiais","id":"staph_outros__staphylococcus_epidermidis"}],"q":"staphylococcus epidermidis s. epidermidis staphylococcus outros materiais"},{"k":"complexo acinetobacter baumanni","nome":"Complexo Acinetobacter baumanni","abbr":"A. baumannii","g":"Não-fermentadores","m":[{"mat":"Todos os materiais","id":"acineto__complexo_acinetobacter_baumanni"}],"q":"complexo acinetobacter baumanni a. baumannii nao-fermentadores todos os materiais"},{"k":"burkholderia pseudomallei","nome":"Burkholderia pseudomallei","abbr":"B. pseudomallei","g":"Não-fermentadores","m":[{"mat":"Todos os materiais","id":"burkholderia__burkholderia_pseudomallei"}],"q":"burkholderia pseudomallei b. pseudomallei nao-fermentadores todos os materiais"},{"k":"stenotrophomonas maltophilia","nome":"Stenotrophomonas maltophilia","abbr":"S. maltophilia","g":"Não-fermentadores","m":[{"mat":"Todos os materiais","id":"malto__stenotrophomonas_maltophilia"}],"q":"stenotrophomonas maltophilia s. maltophilia nao-fermentadores todos os materiais"},{"k":"streptococcus pneumoniae","nome":"Streptococcus pneumoniae","abbr":"S. pneumoniae","g":"Streptococcus","m":[{"mat":"Gradiente de concentração","id":"strepto__streptococcus_pneumoniae"}],"q":"streptococcus pneumoniae s. pneumoniae streptococcus gradiente de concentracao"},{"k":"streptococcus pyogenes","nome":"Streptococcus pyogenes","abbr":"S. pyogenes","g":"Streptococcus","m":[{"mat":"Gradiente de concentração","id":"strepto__streptococcus_pyogenes"}],"q":"streptococcus pyogenes s. pyogenes streptococcus gradiente de concentracao"},{"k":"streptococcus acidominimus","nome":"Streptococcus acidominimus","abbr":"S. acidominimus","g":"Streptococcus","m":[{"mat":"Gradiente de concentração","id":"strepto__streptococcus_acidominimus"}],"q":"streptococcus acidominimus s. acidominimus streptococcus gradiente de concentracao"}];
+
+const CAT = {
+  SDP:  {txt:"Sensível, dose padrão",          cls:"sdp",  fill:"#B7E1CD"},
+  SAE:  {txt:"Sensível, aumentando exposição", cls:"sae",  fill:"#CFE2F3"},
+  RES:  {txt:"Resistente",                     cls:"res",  fill:"#F4CCCC"},
+  CONF: {txt:"CONFERIR RESULTADO",             cls:"warn", fill:"#FCE5CD"},
+  FALTA:{txt:"PREENCHER VALOR DE REFERÊNCIA",  cls:"warn", fill:"#FCE5CD"}
+};
+
+/* ==========================================================================
+   MOTOR — réplica da lógica da planilha (aba "fórmulas", coluna M).
+   Validado contra 328 resultados já calculados pelas planilhas: 328 conferem.
+   ========================================================================== */
+
+// ">8" => 8,0001 · "<8" => 7,9999 · "≤8"/"≥8" => 8 · "16/2" => 16 (só o 1º número)
+function parseCim(raw){
+  const s = String(raw == null ? "" : raw).trim();
+  if(!s) return "";
+  const m = s.match(/\d+(?:[.,]\d+)?/);
+  if(!m) return NaN;
+  let v = parseFloat(m[0].replace(",", "."));
+  if(s.indexOf(">") >= 0) v += 0.0001;
+  else if(s.indexOf("<") >= 0) v -= 0.0001;
+  return v;
+}
+function corteNum(raw, vazio){
+  const s = String(raw == null ? "" : raw).trim();
+  if(!s) return vazio;
+  const m = s.match(/\d+(?:[.,]\d+)?/);
+  return m ? parseFloat(m[0].replace(",", ".")) : vazio;
+}
+// "2 a 4" => [2,4] · "4" => [4,4] · "" => ["",""]
+function corteIntervalo(raw){
+  const s = String(raw == null ? "" : raw).trim();
+  if(!s) return ["", ""];
+  const n = s.match(/\d+(?:[.,]\d+)?/g);
+  if(!n) return ["", ""];
+  const a = parseFloat(n[0].replace(",", "."));
+  const b = parseFloat(n[n.length-1].replace(",", "."));
+  return a <= b ? [a, b] : [b, a];
+}
+function interpretar(cim, ref){
+  const I = corteNum(ref.sdp, 0);
+  const iv = corteIntervalo(ref.sae), J = iv[0], K = iv[1];
+  const L = corteNum(ref.res, "");
+
+  if(I === 0 && J === "" && K === "" && L === "") return CAT.FALTA;
+
+  const G = parseCim(cim);
+  if(G === "") return null;
+  if(Number.isNaN(G)) return CAT.CONF;
+
+  if(typeof J === "number" && typeof K === "number"){
+    if(G >= J && G <= K) return CAT.SAE;
+    if(G < J){
+      if(I === "" || I === 0) return CAT.SAE;
+      return G <= I ? CAT.SDP : CAT.CONF;
+    }
+    if(G > K){
+      if(L === "" || L === 0) return CAT.SAE;
+      return G > L ? CAT.RES : CAT.CONF;
+    }
+    return CAT.CONF;
+  }
+  if(I === "" || I === 0){
+    if(L === "" || L === 0) return CAT.SAE;
+    return G > L ? CAT.RES : CAT.CONF;
+  }
+  if(L === "" || L === 0) return G <= I ? CAT.SDP : CAT.CONF;
+  if(G <= I) return CAT.SDP;
+  return G > L ? CAT.RES : CAT.CONF;
+}
+// Triagem: positivo = resistência detectada
+function interpretarTriagem(v){
+  if(!v) return null;
+  return /^posit/i.test(v) ? {txt:v, cls:"res", fill:"#F4CCCC"} : {txt:v, cls:"sdp", fill:"#B7E1CD"};
+}
+
+/* ==========================================================================
+   ESTADO
+   ========================================================================== */
+const K_REF = "brcast.refs.v2", K_VAL = "brcast.valores.v2";
+const K_PEND = "brcast.pendentes.v1", K_REC = "brcast.recentes.v1";
+const K_ALIAS = "brcast.apelidos.v1";
+const K_LINHAS = "brcast.linhas.v1";   // lista de antimicrobianos, quando o laboratório alterou
+const K_FONTE  = "brcast.fonte.v1";       // {id, gid} da planilha do laboratório
+const K_CACHE  = "brcast.fontecache.v1";  // última sincronização boa — faz funcionar sem internet
+
+const ORGS = [], POR_ID = {};
+PANELS.forEach(function(p){
+  p.orgs.forEach(function(o){ o.painel = p; ORGS.push(o); POR_ID[o.id] = o; });
+});
+NAV.forEach(function(e){ e.m.forEach(function(m){ m.org = POR_ID[m.id]; }); });
+
+/* Lista de antimicrobianos em vigor: a editada pelo laboratório, ou a da planilha. */
+function rowsDe(org){
+  const c = linhasCustom[org.id];
+  return (c && c.length) ? c : org.rows;
+}
+function gravarLinhas(){ gravar(K_LINHAS, linhasCustom); }
+/* Só materializa a cópia editável no primeiro toque. */
+function rowsEditaveis(org){
+  if(!linhasCustom[org.id]) linhasCustom[org.id] = org.rows.map(function(r){ return JSON.parse(JSON.stringify(r)); });
+  return linhasCustom[org.id];
+}
+
+function refsPadrao(){
+  const r = {};
+  ORGS.forEach(function(o){
+    r[o.id] = {};
+    o.rows.forEach(function(row){
+      if(row.t === "cim") r[o.id][row.n] = {sdp:row.ref.sdp, sae:row.ref.sae, res:row.ref.res};
+    });
+  });
+  return r;
+}
+/* Os ids eram painel + posição do microrganismo no painel — resíduo da
+   extração das planilhas. Posição é frágil: regerar os dados noutra ordem
+   faria "entero_urina__0" apontar para outra bactéria, e os cortes grudariam
+   no microrganismo errado sem nenhum erro. Agora o id vem do nome. O mapa
+   abaixo aceita os ids antigos, para planilhas e dados já gravados
+   continuarem valendo. */
+const IDS_LEGADO = {"entero_urina__0":"entero_urina__escherichia_coli","entero_urina__1":"entero_urina__klebsiella_pneumoniae_ssp_pneumoniae","entero_urina__2":"entero_urina__citrobacter_koseri","entero_urina__3":"entero_urina__citrobacter_freundii","entero_urina__4":"entero_urina__klebsiella_aerogenes","entero_urina__5":"entero_urina__complexo_enterobacter_cloacae","entero_urina__6":"entero_urina__pluralibacter_gergoviae","entero_urina__7":"entero_urina__proteus_mirabilis","entero_urina__8":"entero_urina__proteus_vulgaris","entero_urina__9":"entero_urina__morganella_morganii","entero_urina__10":"entero_urina__serratia_marcescens","entero_urina__11":"entero_urina__providencia_rettgeri","entero_urina__12":"entero_urina__salmonella_spp","entero_outros__0":"entero_outros__escherichia_coli","entero_outros__1":"entero_outros__klebsiella_pneumoniae_ssp_pneumoniae","entero_outros__2":"entero_outros__proteus_mirabilis","entero_outros__3":"entero_outros__salmonella_sp","entcoc_urina__0":"entcoc_urina__enterococcus_faecalis","entcoc_outros__0":"entcoc_outros__enterococos_faecalis","staph_urina__0":"staph_urina__staphylococcus_aureus","staph_outros__0":"staph_outros__staphylococcus_aureus","staph_outros__1":"staph_outros__staphylococcus_capitis","staph_outros__2":"staph_outros__staphylococcus_hominis","staph_outros__3":"staph_outros__staphylococcus_saprophyticus","staph_outros__4":"staph_outros__staphylococcus_epidermidis","acineto__0":"acineto__complexo_acinetobacter_baumanni","burkholderia__0":"burkholderia__burkholderia_pseudomallei","malto__0":"malto__stenotrophomonas_maltophilia","strepto__0":"strepto__streptococcus_pneumoniae","strepto__1":"strepto__streptococcus_pyogenes","strepto__2":"strepto__streptococcus_acidominimus"};
+
+function ler(k, f){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; }catch(e){ return f; } }
+function gravar(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+/* Uma vez só: reescreve as chaves gravadas neste navegador para os ids novos,
+   para ninguém perder CIM digitado nem corte editado. */
+(function migrarIds(){
+  let mudou = false;
+  const remapear = function(o){
+    if(!o || typeof o !== "object") return o;
+    const novo = {};
+    Object.keys(o).forEach(function(k){
+      const n = IDS_LEGADO[k];
+      if(n && n !== k){ novo[n] = o[k]; mudou = true; }
+      else novo[k] = o[k];
+    });
+    return novo;
+  };
+  [K_REF, K_VAL, K_PEND, K_LINHAS].forEach(function(chave){
+    const v = ler(chave, null);
+    if(!v) return;
+    const novo = remapear(v);
+    if(mudou) gravar(chave, novo);
+  });
+})();
+
+let refs = (function(){
+  const base = refsPadrao(), salvo = ler(K_REF, null);
+  if(!salvo) return base;
+  ORGS.forEach(function(o){
+    if(!salvo[o.id]){ salvo[o.id] = base[o.id]; return; }
+    Object.keys(base[o.id]).forEach(function(a){
+      const v = salvo[o.id][a];
+      salvo[o.id][a] = v ? {sdp:v.sdp||"", sae:v.sae||"", res:v.res||""} : base[o.id][a];
+    });
+  });
+  return salvo;
+})();
+let valores   = ler(K_VAL, {});
+let pendentes = ler(K_PEND, {});   // {idDoRegistro: {antimicrobiano: true}}
+let recentes  = ler(K_REC, []);    // chaves da trilha, mais recente primeiro
+let apelidos  = ler(K_ALIAS, {});   // nome do outro sistema -> antimicrobiano daqui
+let linhasCustom = ler(K_LINHAS, {});  // sobrepõe a lista vinda da planilha
+/* Planilha do laboratório. O arquivo sai sem link: cada laboratório aponta
+   para a própria planilha na tela Fonte dos cortes. Sem link configurado o
+   programa usa os cortes embutidos e a tela de referências volta a ser
+   editável, como era antes da sincronização existir. */
+let fonte = (function(){
+  const v = ler(K_FONTE, null);
+  return (v && v.id) ? v : null;
+})();
+let fonteStat = {estado: fonte ? "pendente" : "desligado", quando:null, linhas:0, erro:null, origem:null};
+let imp = null;                    // painel de colar/importar
+
+let navAtual = NAV[0];
+let orgAtual = navAtual.m[0].org;
+let vista = "laudo";
+/* Telas de escopo geral: valem para todo o sistema, não para o microrganismo
+   selecionado. O cabeçalho e a navegação precisam refletir isso. */
+const TELAS_GERAIS = {obs:1, fonte:1};
+let busca = "";      // busca das observações
+let buscaOrg = "";   // busca da trilha
+
+/* ==========================================================================
+   FONTE DOS CORTES — planilha do laboratório
+
+   Os cortes são do laboratório, não da máquina. Quando há uma planilha
+   configurada ela manda, e a tela de referências vira somente leitura: é o
+   que impede dois PCs interpretarem a mesma cepa de formas diferentes.
+
+   O transporte é JSONP (<script src>), não fetch. Não é preferência: o
+   fetch do Google só devolve cabeçalho CORS quando existe uma origem para
+   espelhar, e um arquivo aberto do disco tem origem "null". Medido: fetch
+   do disco é bloqueado, <script> passa. Por isso o arquivo continua
+   funcionando com duplo clique, sem precisar de servidor.
+   ========================================================================== */
+const COLUNAS = ["painel","organismo_id","organismo","ordem","tipo",
+                 "antimicrobiano","sensivel_dose_padrao","aumentando_exposicao","resistente"];
+const TIPOS = {cim:"cim", triagem:"triagem", titulo:"tit"};
+const CORTES = ["sensivel_dose_padrao","aumentando_exposicao","resistente"];
+/* Edição do BrCAST. Vive na planilha, junto dos cortes que ela descreve — no
+   programa envelheceria calada. Coluna opcional: basta preencher uma célula,
+   em qualquer linha. Sem ela, o rodapé da marca mostra só o laboratório. */
+const COL_VERSAO = "versao";
+const VERSAO_EMBUTIDA = "BrCAST 2024";   // descreve os cortes que vêm no arquivo
+let versaoCortes = VERSAO_EMBUTIDA;
+
+/* Aceita o link de edição, o de compartilhar ou um já colado antes. */
+function lerLink(txt){
+  const t = String(txt == null ? "" : txt).trim();
+  if(!t) return {erro:"Cole o link da planilha."};
+  if(/\/d\/e\/2PACX-/.test(t))
+    return {erro:'Esse é o link de "Publicar na web", que só funciona com o programa hospedado. '+
+                 'Cole o link de edição da planilha — o que tem /d/<id>/edit.'};
+  const m = t.match(/\/spreadsheets\/d\/([A-Za-z0-9_-]{20,})/);
+  if(!m) return {erro:"Não reconheci um link de planilha do Google Sheets."};
+  const g = t.match(/[#&?]gid=(\d+)/);
+  return {id:m[1], gid:g ? g[1] : "0"};
+}
+function urlPlanilha(f){
+  return "https://docs.google.com/spreadsheets/d/"+f.id+"/edit#gid="+f.gid;
+}
+
+/* Uma célula do gviz vira sempre texto. O formatado (f) tem prioridade: se a
+   coluna for tipada como número, "8" volta em v como 8 e em f como "8". */
+function celula(c){
+  if(!c) return "";
+  let t;
+  if(c.f != null) t = String(c.f);
+  else if(c.v == null) t = "";
+  else if(typeof c.v === "number") t = String(c.v === Math.round(c.v) ? Math.round(c.v) : c.v);
+  else t = String(c.v);
+  t = t.trim();
+  // Quem formata a célula à mão às vezes digita o apóstrofo de forçar-texto
+  // do Sheets. Ele é marcação, não valor.
+  return t.charAt(0) === "'" ? t.slice(1).trim() : t;
+}
+
+let jsonpSeq = 0;
+function buscarPlanilha(f, ok, falha){
+  const cb = "__brcastCB" + (++jsonpSeq) + "_" + (+new Date());
+  const s = document.createElement("script");
+  let fim = false;
+  const limpar = function(){
+    try{ delete window[cb]; }catch(e){ window[cb] = undefined; }
+    if(s.parentNode) s.parentNode.removeChild(s);
+  };
+  const relogio = setTimeout(function(){
+    if(fim) return; fim = true; limpar();
+    falha("A planilha não respondeu em 20 segundos. Sem internet?");
+  }, 20000);
+  window[cb] = function(d){
+    if(fim) return; fim = true; clearTimeout(relogio); limpar();
+    try{
+      if(!d || !d.table || !d.table.cols) return falha("A planilha respondeu, mas sem tabela.");
+      if(d.status === "error"){
+        const e = (d.errors && d.errors[0]) || {};
+        return falha("O Google recusou: "+(e.detailed_message || e.message || "motivo não informado"));
+      }
+      const cols = d.table.cols.map(function(c){ return String(c.label == null ? "" : c.label).trim(); });
+      /* CSV que entrou sem ser dividido: a linha inteira num campo só. Sai como
+         "faltam todas as colunas", que não diz o que fazer. */
+      const primeira = (((d.table.rows || [])[0] || {}).c || [])[0];
+      const bruta = primeira ? String(primeira.v == null ? "" : primeira.v) : "";
+      if(cols.length <= 2 && bruta.indexOf(",") > 0 && bruta.indexOf("organismo_id") >= 0)
+        return falha("A planilha está com tudo numa coluna só — o CSV entrou sem ser separado. "+
+          "Reimporte por Arquivo ▸ Importar escolhendo o separador vírgula, ou selecione a coluna A "+
+          "e use Dados ▸ Dividir texto em colunas.");
+
+      const faltam = COLUNAS.filter(function(n){ return cols.indexOf(n) < 0; });
+      if(faltam.length)
+        return falha("Faltam colunas na planilha: "+faltam.join(", ")+
+                     ". A primeira linha tem que ser exatamente o cabeçalho do CSV original.");
+      const idx = {};
+      COLUNAS.forEach(function(n){ idx[n] = cols.indexOf(n); });
+
+      /* Guarda contra perda silenciosa. O Google infere um tipo por coluna: se
+         a maioria das células for numérica ele tipa a coluna como número e
+         devolve null em toda célula de texto — "≤8" e "2 a 4" somem sem erro
+         nenhum. Como célula vazia aqui é legítima, nada mais no programa
+         perceberia. Coluna de corte tem que ser texto; se não for, recusamos. */
+      const numericas = CORTES.filter(function(n){
+        const c = d.table.cols[idx[n]];
+        return c && c.type === "number";
+      });
+      if(numericas.length)
+        return falha("A coluna "+numericas.join(" e ")+" está como NÚMERO na planilha, e assim o Google "+
+          "não envia os cortes escritos com texto (≤8, 2 a 4). Correção: selecione a coluna inteira na "+
+          "planilha e use Formatar ▸ Número ▸ Texto simples. Os valores não estão perdidos — voltam a ser "+
+          "lidos assim que a coluna virar texto, sem precisar importar nada de novo. "+
+          "Depois clique em Sincronizar agora.");
+      const linhas = (d.table.rows || []).map(function(r){
+        const o = {};
+        COLUNAS.forEach(function(n){ o[n] = celula((r.c || [])[idx[n]]); });
+        return o;
+      }).filter(function(o){ return o.organismo_id || o.antimicrobiano; });
+
+      // primeira célula preenchida, em qualquer linha: sobrevive a reordenação
+      const iv = cols.indexOf(COL_VERSAO);
+      let versao = "";
+      if(iv >= 0) (d.table.rows || []).some(function(r){
+        const v = celula((r.c || [])[iv]);
+        if(v){ versao = v; return true; }
+        return false;
+      });
+      ok(linhas, versao);
+    }catch(e){ falha("Não consegui ler a resposta: "+e); }
+  };
+  s.onerror = function(){
+    if(fim) return; fim = true; clearTimeout(relogio); limpar();
+    falha("Não consegui abrir a planilha. Verifique se o compartilhamento está em "+
+          '"Qualquer pessoa com o link" como Leitor.');
+  };
+  s.src = "https://docs.google.com/spreadsheets/d/"+f.id+"/gviz/tq?gid="+
+          encodeURIComponent(f.gid)+"&tqx=responseHandler:"+cb;
+  document.head.appendChild(s);
+}
+
+/* Monta cortes e listas a partir das linhas. Recusa tudo se qualquer linha
+   estiver ruim: aplicar metade deixaria microrganismo sem antibiótico, e um
+   antibiótico que some da tela é mais perigoso que uma sincronização falha. */
+function montarConfig(linhas){
+  const refsN = {}, listasN = {}, erros = [];
+  if(!linhas.length) erros.push("A planilha está vazia.");
+  linhas.forEach(function(r, i){
+    const ln = i + 2;   // +1 do cabeçalho, +1 porque planilha conta de 1
+    const oid = r.organismo_id;
+    const alvo = POR_ID[oid] ? oid : IDS_LEGADO[oid];
+    if(!alvo || !POR_ID[alvo]){ erros.push("linha "+ln+': microrganismo desconhecido "'+oid+'"'); return; }
+    const t = TIPOS[r.tipo];
+    if(!t){ erros.push("linha "+ln+': tipo inválido "'+r.tipo+'" (use cim, triagem ou titulo)'); return; }
+    const nome = r.antimicrobiano;
+    if(!nome){ erros.push("linha "+ln+": sem nome na coluna antimicrobiano"); return; }
+    const row = {t:t, n:nome, _o:Number(r.ordem) || (i+1)};
+    if(t === "cim"){
+      row.ref = {sdp:r.sensivel_dose_padrao, sae:r.aumentando_exposicao, res:r.resistente};
+      if(!refsN[alvo]) refsN[alvo] = {};
+      if(refsN[alvo][nome]) erros.push("linha "+ln+': "'+nome+'" repetido em '+POR_ID[alvo].nome);
+      refsN[alvo][nome] = {sdp:row.ref.sdp, sae:row.ref.sae, res:row.ref.res};
+    }
+    (listasN[alvo] = listasN[alvo] || []).push(row);
+  });
+  const ausentes = ORGS.filter(function(o){ return !listasN[o.id]; });
+  if(ausentes.length && !erros.length)
+    erros.push("Sem nenhuma linha para: "+ausentes.map(function(o){ return o.nome; }).join(", "));
+  Object.keys(listasN).forEach(function(k){
+    listasN[k].sort(function(a,b){ return a._o - b._o; });
+    listasN[k].forEach(function(r){ delete r._o; });
+  });
+  return {refs:refsN, listas:listasN, erros:erros, total:linhas.length};
+}
+
+/* A config do laboratório entra só na memória. As chaves locais do navegador
+   ficam intactas, então desligar a sincronização devolve o que havia antes. */
+function aplicarConfig(cfg, origem, quando){
+  refs = cfg.refs;
+  linhasCustom = cfg.listas;
+  fonteStat = {estado:"ok", quando:quando, linhas:cfg.total, erro:null, origem:origem};
+}
+
+function sincronizar(opts){
+  opts = opts || {};
+  if(!fonte){ fonteStat.estado = "desligado"; return; }
+  fonteStat.estado = "buscando";
+  if(opts.aoMudar) opts.aoMudar();
+  buscarPlanilha(fonte, function(linhas, versao){
+    const cfg = montarConfig(linhas);
+    if(cfg.erros.length){
+      fonteStat.estado = usarCache() ? "erro-com-cache" : "erro";
+      fonteStat.erro = cfg.erros;
+      if(opts.aoMudar) opts.aoMudar();
+      return;
+    }
+    const quando = new Date().toISOString();
+    versaoCortes = versao || "";
+    aplicarConfig(cfg, "planilha", quando);
+    gravar(K_CACHE, {quando:quando, linhas:cfg.total, refs:cfg.refs, listas:cfg.listas,
+                     versao:versaoCortes});
+    if(opts.aoMudar) opts.aoMudar();
+  }, function(msg){
+    fonteStat.estado = usarCache() ? "offline" : "erro";
+    fonteStat.erro = [msg];
+    if(opts.aoMudar) opts.aoMudar();
+  });
+}
+
+/* Última sincronização boa. Sem internet o programa continua com os cortes
+   certos, avisando de quando eles são. */
+function usarCache(){
+  const c = ler(K_CACHE, null);
+  if(!c || !c.refs || !c.listas) return false;
+  refs = c.refs;
+  linhasCustom = c.listas;
+  versaoCortes = c.versao == null ? "" : c.versao;
+  fonteStat.quando = c.quando;
+  fonteStat.linhas = c.linhas;
+  fonteStat.origem = "cache";
+  return true;
+}
+
+function quandoTxt(iso){
+  if(!iso) return "nunca";
+  const d = new Date(iso);
+  if(isNaN(d)) return "nunca";
+  const p = function(n){ return (n < 10 ? "0" : "") + n; };
+  return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear()+" às "+p(d.getHours())+":"+p(d.getMinutes());
+}
+
+/* Uma linha de status que cabe em qualquer tela. */
+function selo(){
+  const q = quandoTxt(fonteStat.quando);
+  switch(fonteStat.estado){
+    case "ok":              return {cls:"ok",   txt:"Cortes da planilha do laboratório · sincronizado em "+q};
+    case "buscando":        return {cls:"neu",  txt:"Buscando os cortes na planilha…"};
+    case "offline":         return {cls:"aviso",txt:"Sem conexão com a planilha · usando a cópia de "+q};
+    case "erro-com-cache":  return {cls:"aviso",txt:"A planilha tem erro · usando a cópia boa de "+q};
+    case "erro":            return {cls:"ruim", txt:"Falha ao ler a planilha · usando os cortes de fábrica"};
+    case "pendente":        return {cls:"neu",  txt:"Ainda não sincronizado nesta sessão"};
+    default:                return {cls:"neu",  txt:"Cortes deste computador · sem planilha configurada"};
+  }
+}
+
+/* ==========================================================================
+   RENDER
+   ========================================================================== */
+const $ = function(id){ return document.getElementById(id); };
+function esc(s){
+  return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
+  });
+}
+const RETO = {"complexo":1,"ssp.":1,"spp.":1,"spp":1,"sp.":1,"sp":1};
+function nomeHTML(n){
+  return String(n).split(" ").map(function(w){
+    return RETO[w.toLowerCase()] ? esc(w) : "<i>"+esc(w)+"</i>";
+  }).join(" ");
+}
+function val(oid, n){ return (valores[oid] || {})[n] || ""; }
+function setVal(oid, n, v){
+  if(!valores[oid]) valores[oid] = {};
+  valores[oid][n] = v;
+  gravar(K_VAL, valores);
+}
+
+/* --- pendências: linhas herdadas da amostra anterior, ainda não conferidas --- */
+function pend(oid, n){ return !!(pendentes[oid] || {})[n]; }
+function confirmarLinha(oid, n){
+  if(!pendentes[oid] || !pendentes[oid][n]) return;
+  delete pendentes[oid][n];
+  gravar(K_PEND, pendentes);
+}
+function contaPend(oid){ return Object.keys(pendentes[oid] || {}).length; }
+
+/* --- trilha --- */
+function semAcento(s){
+  return String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+function usar(navEntry, org){
+  navAtual = navEntry;
+  orgAtual = org || navEntry.m[0].org;
+  recentes = [navEntry.k].concat(recentes.filter(function(k){ return k !== navEntry.k; })).slice(0, 5);
+  gravar(K_REC, recentes);
+}
+function porChave(k){
+  for(let i = 0; i < NAV.length; i++) if(NAV[i].k === k) return NAV[i];
+  return null;
+}
+
+function renderRail(){
+  const q = semAcento(buscaOrg.trim()).toLowerCase();
+  const lista = q ? NAV.filter(function(e){ return e.q.indexOf(q) >= 0; }) : NAV;
+
+  function item(e){
+    const mats = e.m.length > 1 ? '<span class="dois">2 materiais</span>' : "";
+    return '<button class="orgbtn" data-nav="'+esc(e.k)+'" aria-current="'+(e.k===navAtual.k)+'">'+
+           esc(e.abbr)+mats+'</button>';
+  }
+
+  let h = "";
+  if(!q && recentes.length){
+    const rec = recentes.map(porChave).filter(Boolean);
+    if(rec.length){
+      h += '<div class="grouphead">Recentes</div>' + rec.map(item).join("");
+    }
+  }
+  let grupo = null;
+  lista.forEach(function(e){
+    if(e.g !== grupo){ grupo = e.g; h += '<div class="grouphead">'+esc(grupo)+'</div>'; }
+    h += item(e);
+  });
+  if(!lista.length) h = '<div class="semnada">Nenhum microrganismo com “'+esc(buscaOrg)+'”.</div>';
+
+  $("orglist").innerHTML = h;
+  if(!q){
+    const at = $("orglist").querySelector('[aria-current="true"]');
+    if(at && at.scrollIntoView) at.scrollIntoView({block:"nearest"});
+  }
+}
+
+// Linhas do microrganismo já interpretadas
+function linhas(){
+  return rowsDe(orgAtual).map(function(row){
+    if(row.t === "tit") return {tipo:"tit", n:row.n};
+    const v = val(orgAtual.id, row.n);
+    const pnd = !!v && pend(orgAtual.id, row.n);
+    if(row.t === "triagem")
+      return {tipo:"triagem", n:row.n, v:v, op:row.op, cat:interpretarTriagem(v), pendente:pnd};
+    const ref = (refs[orgAtual.id] || {})[row.n] || {sdp:"",sae:"",res:""};
+    return {tipo:"cim", n:row.n, v:v, ref:ref, cat:interpretar(v, ref), src:row.src, pendente:pnd};
+  });
+}
+
+/* ==========================================================================
+   COLAR / IMPORTAR resultado de outro sistema
+   Formato desconhecido de propósito: lê linha a linha, tenta casar o nome do
+   antimicrobiano e o valor de CIM, e sempre mostra uma prévia antes de aplicar.
+   ========================================================================== */
+const RE_CIM = /^[<>≤≥=]{0,2}\s*\d+(?:[.,]\d+)?(?:\s*\/\s*\d+(?:[.,]\d+)?)?$/;
+
+function ehValor(t){ return RE_CIM.test(String(t).replace(/\s+/g, "")); }
+function normNome(t){
+  return semAcento(String(t)).toLowerCase()
+    .replace(/[^a-z0-9/ ]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+/* Uma linha do texto colado -> {nome, valor}. Aceita tabulação, ";", "|",
+   dois ou mais espaços, ou "Nome ≤4" numa coluna só. */
+function partirLinha(linha){
+  const l = String(linha).trim();
+  if(!l) return null;
+  let cels = l.split(/\t|;|\||\s{2,}/).map(function(x){ return x.trim(); })
+              .filter(function(x){ return x !== ""; });
+  if(cels.length === 1 && !ehValor(cels[0])){
+    const m = l.match(/^(.*?)\s+([<>≤≥=]{0,2}\s*\d+(?:[.,]\d+)?(?:\s*\/\s*\d+(?:[.,]\d+)?)?)$/);
+    if(m) cels = [m[1].trim(), m[2].trim()];
+  }
+  if(cels.length === 1) return ehValor(cels[0]) ? {nome:"", valor:cels[0].replace(/\s+/g,"")}
+                                                : {nome:cels[0], valor:""};
+  let valor = "";
+  for(let i = 1; i < cels.length; i++){
+    if(ehValor(cels[i])){ valor = cels[i].replace(/\s+/g, ""); break; }
+  }
+  return {nome:cels[0], valor:valor};
+}
+
+/* Casa um nome vindo de fora com uma das linhas ainda livres. Ambíguo devolve
+   null de propósito — quem escolhe é a pessoa, na prévia. */
+function acharLinha(nomeFonte, livres){
+  const q = normNome(nomeFonte);
+  if(!q) return null;
+  const ap = apelidos[q];
+  if(ap){
+    for(let i = 0; i < livres.length; i++) if(livres[i].n === ap) return livres[i];
+  }
+  const exatos = livres.filter(function(l){ return normNome(l.n) === q; });
+  if(exatos.length === 1) return exatos[0];
+  if(exatos.length > 1) return null;
+  const pre = livres.filter(function(l){
+    const a = normNome(l.n);
+    return a.indexOf(q) === 0 || q.indexOf(a) === 0;
+  });
+  return pre.length === 1 ? pre[0] : null;
+}
+
+function analisar(texto){
+  const brutas = String(texto).split(/\r\n|\r|\n/)
+    .map(function(x){ return x.trim(); }).filter(function(x){ return x !== ""; });
+  const alvos = linhas().filter(function(l){ return l.tipo === "cim"; });
+  if(!brutas.length) return {modo:"vazio", pares:[], sobras:[], alvos:alvos};
+
+  const lidas = brutas.map(partirLinha).filter(Boolean);
+  const semNome = lidas.filter(function(p){ return !p.nome; }).length;
+
+  // bloco só de valores -> aplica pela posição, como uma coluna de planilha
+  if(semNome >= lidas.length * 0.7){
+    const pares = [];
+    for(let i = 0; i < lidas.length && i < alvos.length; i++){
+      pares.push({linha:alvos[i], valor:lidas[i].valor || lidas[i].nome, fonte:brutas[i]});
+    }
+    return {modo:"posicao", pares:pares, sobras:[], alvos:alvos,
+            ignoradas:Math.max(0, lidas.length - alvos.length)};
+  }
+
+  const livres = alvos.slice(), pares = [], sobras = [];
+  lidas.forEach(function(p, i){
+    if(!p.nome) return;
+    const alvo = acharLinha(p.nome, livres);
+    if(alvo){
+      livres.splice(livres.indexOf(alvo), 1);
+      pares.push({linha:alvo, valor:p.valor, fonte:brutas[i]});
+    }else{
+      sobras.push({nome:p.nome, valor:p.valor, fonte:brutas[i]});
+    }
+  });
+  return {modo:"nome", pares:pares, sobras:sobras, alvos:alvos, livres:livres};
+}
+
+/* Exports do Windows costumam vir em windows-1252; UTF-8 primeiro, depois o resto. */
+function lerArquivoTexto(file, cb){
+  const fr = new FileReader();
+  fr.onload = function(){
+    let txt;
+    try{ txt = new TextDecoder("utf-8", {fatal:true}).decode(fr.result); }
+    catch(e){
+      try{ txt = new TextDecoder("windows-1252").decode(fr.result); }
+      catch(e2){ txt = new TextDecoder().decode(fr.result); }
+    }
+    cb(txt);
+  };
+  fr.onerror = function(){ toast("Não consegui ler o arquivo."); };
+  fr.readAsArrayBuffer(file);
+}
+
+function aplicarImportacao(){
+  const r = imp.res;
+  if(!r) return;
+  let n = 0, vazios = 0;
+  r.pares.forEach(function(par){
+    const v = trocarSimbolos(String(par.valor || "").trim(), 0)[0];
+    if(!v){ vazios++; return; }                 // sem valor na origem: não apaga o que já está aqui
+    setVal(orgAtual.id, par.linha.n, v);
+    if(!pendentes[orgAtual.id]) pendentes[orgAtual.id] = {};
+    pendentes[orgAtual.id][par.linha.n] = true;
+    n++;
+  });
+  gravar(K_PEND, pendentes);
+  imp = null;
+  renderLaudo();
+  toast(n + " valor" + (n === 1 ? "" : "es") + " aplicado" + (n === 1 ? "" : "s") +
+        (vazios ? " · " + vazios + " sem resultado na origem, mantido" + (vazios === 1 ? "" : "s") : "") +
+        " — confira antes de copiar.");
+}
+
+function painelImportHTML(){
+  if(!imp) return "";
+  if(imp.fase === "entrada"){
+    return '<div class="imp"><header><h3>Colar ou importar resultado</h3>'+
+      '<button class="btn ghost" id="impFechar">Fechar</button></header>'+
+      '<div class="corpo">'+
+        '<p class="nota">Cole o resultado do outro sistema, ou escolha um arquivo de texto '+
+        '(<strong>.txt</strong>, <strong>.csv</strong>, <strong>.tsv</strong>). Se as linhas tiverem o nome do '+
+        'antimicrobiano, ele casa pelo nome — a ordem não importa. Se for só uma coluna de valores, '+
+        'aplica na ordem da tabela. Nada entra sem você ver a prévia.</p>'+
+        '<textarea id="impTexto" spellcheck="false" placeholder="Amicacina&#9;&#8804;4&#10;Ampicilina&#9;&gt;8&#10;Cefepima&#9;&#8804;1"></textarea>'+
+        '<div class="linhabtn">'+
+          '<button class="btn primary" id="impLer">Ler</button>'+
+          '<button class="btn" id="impArquivo">Escolher arquivo…</button>'+
+        '</div>'+
+      '</div></div>';
+  }
+
+  const r = imp.res;
+  const usados = r.pares.filter(function(p){ return String(p.valor || "").trim(); }).length;
+  let placar;
+  if(r.modo === "posicao"){
+    placar = '<span class="bom">'+usados+'</span> valor(es) na ordem da tabela'+
+             (r.ignoradas ? ' · <span class="ruim">'+r.ignoradas+' a mais ignorado(s)</span>' : "");
+  }else{
+    placar = '<span class="bom">'+usados+'</span> de '+r.alvos.length+' linhas reconhecidas pelo nome'+
+             (r.sobras.length ? ' · <span class="ruim">'+r.sobras.length+' não reconhecida(s)</span>' : "");
+  }
+
+  const corpo = r.pares.map(function(par, i){
+    const v = trocarSimbolos(String(par.valor || "").trim(), 0)[0];
+    const atual = val(orgAtual.id, par.linha.n);
+    const cat = v ? interpretar(v, par.linha.ref) : null;
+    return '<tr>'+
+      '<td>'+esc(par.linha.n)+'</td>'+
+      '<td class="vnovo">'+(v ? esc(v) : '<span style="color:var(--ink-3)">—</span>')+'</td>'+
+      '<td>'+(atual && atual !== v ? '<span class="antes">'+esc(atual)+'</span>' : "")+'</td>'+
+      '<td>'+(cat ? '<span class="tag '+cat.cls+'" style="padding:3px 8px;font-size:11.5px">'+esc(cat.txt)+'</span>' : "")+'</td>'+
+    '</tr>';
+  }).join("");
+
+  const opcoes = (r.livres || []).map(function(l){
+    return '<option value="'+esc(l.n)+'">'+esc(l.n)+'</option>';
+  }).join("");
+  const sobras = r.sobras.map(function(sb, i){
+    return '<tr class="sobra">'+
+      '<td class="vsrc">'+esc(sb.fonte.length > 60 ? sb.fonte.slice(0,60)+"…" : sb.fonte)+'</td>'+
+      '<td colspan="3"><select data-sobra="'+i+'"><option value="">ignorar esta linha</option>'+opcoes+'</select></td>'+
+    '</tr>';
+  }).join("");
+
+  return '<div class="imp"><header><h3>Prévia da importação</h3>'+
+      '<span class="placar">'+placar+'</span>'+
+      '<button class="btn ghost" id="impVoltar">Voltar</button></header>'+
+    '<div class="corpo">'+
+      (r.modo === "posicao"
+        ? '<p class="nota">Nenhum nome de antimicrobiano no texto — os valores vão pela <strong>ordem da tabela</strong>. Confira linha a linha antes de aplicar.</p>'
+        : "")+
+      '<div class="cx"><table>'+corpo+sobras+'</table></div>'+
+      (r.sobras.length
+        ? '<p class="nota">Escolha a que linha cada não reconhecida corresponde — a associação fica gravada e da próxima vez ele já reconhece sozinho.</p>'
+        : "")+
+      '<div class="linhabtn">'+
+        '<button class="btn primary" id="impAplicar">Aplicar '+usados+' valor(es)</button>'+
+        '<button class="btn ghost" id="impCancelar">Cancelar</button>'+
+      '</div>'+
+      '<p class="nota">O que entrar fica marcado como <strong>não conferido</strong> até você passar o olho.</p>'+
+    '</div></div>';
+}
+
+function ligarImport(){
+  if(!imp) return;
+  const fechar = function(){ imp = null; renderLaudo(); };
+
+  if(imp.fase === "entrada"){
+    $("impFechar").addEventListener("click", fechar);
+    $("impLer").addEventListener("click", function(){
+      const t = $("impTexto").value;
+      if(!t.trim()){ toast("Cole o resultado ou escolha um arquivo."); return; }
+      imp = {fase:"previa", res:analisar(t)};
+      renderLaudo();
+    });
+    $("impArquivo").addEventListener("click", function(){
+      const inp = document.createElement("input");
+      inp.type = "file";
+      inp.accept = ".txt,.csv,.tsv,.tab,.text,text/plain,text/csv";
+      inp.addEventListener("change", function(){
+        const f = inp.files && inp.files[0];
+        if(!f) return;
+        lerArquivoTexto(f, function(txt){
+          imp = {fase:"previa", res:analisar(txt), arquivo:f.name};
+          renderLaudo();
+        });
+      });
+      inp.click();
+    });
+    const ta = $("impTexto");
+    if(ta) ta.focus();
+    return;
+  }
+
+  $("impVoltar").addEventListener("click", function(){ imp = {fase:"entrada"}; renderLaudo(); });
+  $("impCancelar").addEventListener("click", fechar);
+  $("impAplicar").addEventListener("click", aplicarImportacao);
+
+  $("content").querySelectorAll("[data-sobra]").forEach(function(sel){
+    sel.addEventListener("change", function(){
+      const sb = imp.res.sobras[Number(sel.dataset.sobra)];
+      if(!sel.value) return;
+      const alvo = imp.res.livres.filter(function(l){ return l.n === sel.value; })[0];
+      if(!alvo) return;
+      apelidos[normNome(sb.nome)] = alvo.n;          // aprende o vocabulário do outro sistema
+      gravar(K_ALIAS, apelidos);
+      imp.res.livres.splice(imp.res.livres.indexOf(alvo), 1);
+      imp.res.pares.push({linha:alvo, valor:sb.valor, fonte:sb.fonte});
+      imp.res.sobras.splice(imp.res.sobras.indexOf(sb), 1);
+      renderLaudo();
+    });
+  });
+}
+
+function renderLaudo(){
+  const L = linhas();
+  const c = {sdp:0, sae:0, res:0, warn:0, vazio:0};
+  let nPend = 0;
+  L.forEach(function(l){
+    if(l.tipo === "tit") return;
+    if(l.pendente) nPend++;
+    if(!l.cat) c.vazio++;
+    else if(l.cat.cls === "sdp") c.sdp++;
+    else if(l.cat.cls === "sae") c.sae++;
+    else if(l.cat.cls === "res") c.res++;
+    else c.warn++;
+  });
+
+  $("actions").innerHTML =
+    '<button class="btn ghost" id="btnLimpar">Limpar tudo</button>'+
+    '<button class="btn" id="btnImportar2">Colar / importar</button>'+
+    '<button class="btn" id="btnNova">Nova amostra</button>'+
+    '<button class="btn primary" id="btnCopiar">Copiar tabela</button>';
+
+  let i = 0;
+  const corpo = L.map(function(l){
+    if(l.tipo === "tit") return '<tr class="sec"><td colspan="4">'+esc(l.n)+'</td></tr>';
+    const idx = i++;
+    const tag = l.cat
+      ? '<span class="tag '+l.cat.cls+'">'+esc(l.cat.txt)+'</span>'
+      : '<span class="tag empty">'+(l.tipo === "triagem" ? "aguardando triagem" : "aguardando CIM")+'</span>';
+
+    const marca = l.pendente
+      ? '<button class="pend" data-pend="'+esc(l.n)+'" title="Ainda não conferido nesta amostra. Clique para confirmar." aria-label="Confirmar '+esc(l.n)+'"></button>'
+      : "";
+
+    let campo, corte;
+    if(l.tipo === "triagem"){
+      campo = '<select class="tri mono'+(l.pendente?" pendente":"")+'" data-n="'+esc(l.n)+'" data-i="'+idx+'" aria-label="Triagem '+esc(l.n)+'">'+
+              '<option value=""'+(l.v?"":" selected")+'>—</option>'+
+              l.op.map(function(o){ return '<option'+(l.v===o?" selected":"")+'>'+esc(o)+'</option>'; }).join("")+
+              '</select>';
+      corte = '<span>triagem fenotípica</span>';
+    }else{
+      campo = '<input class="cim mono'+(l.pendente?" pendente":"")+'" data-n="'+esc(l.n)+'" data-i="'+idx+
+              '" value="'+esc(l.v)+'" placeholder="—" spellcheck="false" autocomplete="off" aria-label="CIM de '+esc(l.n)+'">';
+      const p = [];
+      if(String(l.ref.sdp).trim()) p.push("<span><b>S</b> "+esc(l.ref.sdp)+"</span>");
+      if(String(l.ref.sae).trim()) p.push("<span><b>I</b> "+esc(l.ref.sae)+"</span>");
+      if(String(l.ref.res).trim()) p.push("<span><b>R</b> "+esc(l.ref.res)+"</span>");
+      corte = p.length ? p.join("") : '<span class="none">sem corte cadastrado</span>';
+    }
+    return '<tr>'+
+      '<td class="c-abx"><div class="abxrow"><span class="pendslot">'+marca+'</span><span>'+esc(l.n)+'</span></div></td>'+
+      '<td class="c-cim">'+campo+'</td>'+
+      '<td class="c-int">'+tag+'</td>'+
+      '<td class="c-corte"><div class="corte mono">'+corte+'</div></td>'+
+    '</tr>';
+  }).join("");
+
+  const aviso = nPend
+    ? '<div class="avisopend"><span>'+nPend+(nPend===1
+        ? ' linha ainda não conferida nesta amostra.'
+        : ' linhas ainda não conferidas nesta amostra.')+
+      '</span><button class="btn" id="btnConferirTodas">Conferir todas</button></div>'
+    : "";
+
+  $("content").innerHTML = painelImportHTML() + aviso +
+    '<div class="summary">'+
+      '<div class="sumcell sdp"><div class="k">Sensível, dose padrão</div><div class="v">'+c.sdp+'</div></div>'+
+      '<div class="sumcell sae"><div class="k">Aumentando exposição</div><div class="v">'+c.sae+'</div></div>'+
+      '<div class="sumcell res"><div class="k">Resistente</div><div class="v">'+c.res+'</div></div>'+
+      '<div class="sumcell warn"><div class="k">Conferir resultado</div><div class="v">'+c.warn+'</div></div>'+
+      '<div class="sumcell"><div class="k">Em branco</div><div class="v">'+c.vazio+'</div></div>'+
+      (nPend ? '<div class="sumcell pendente"><div class="k">Não conferidas</div><div class="v">'+nPend+'</div></div>' : "")+
+    '</div>'+
+    '<div class="panel"><div class="tablewrap"><table class="grid">'+
+      '<thead><tr><th>Antimicrobiano</th><th style="text-align:center">CIM (mg/L)</th>'+
+      '<th>Interpretação</th><th>Corte aplicado</th></tr></thead>'+
+      '<tbody>'+corpo+'</tbody></table></div></div>'+
+    '<p class="hint">Aceita <code>≤0,25</code>, <code>&gt;8</code>, <code>16/2</code>, <code>4</code>. '+
+    'Digite <code>&lt;=</code> ou <code>&gt;=</code> e vira <code>≤</code> / <code>≥</code> sozinho. '+
+    '<code>Enter</code> vai para o próximo campo, <code>Shift+Enter</code> volta. '+
+    'Colar várias linhas num campo preenche a coluna para baixo. '+
+    '<strong>Corte aplicado</strong> mostra qual regra decidiu — essa coluna não vai no copiar.</p>';
+
+  $("btnCopiar").addEventListener("click", copiar);
+  $("btnNova").addEventListener("click", novaAmostra);
+  $("btnLimpar").addEventListener("click", limpar);
+  $("btnImportar2").addEventListener("click", function(){
+    imp = imp ? null : {fase:"entrada"};
+    renderLaudo();
+  });
+  ligarImport();
+  const bt = $("btnConferirTodas");
+  if(bt) bt.addEventListener("click", function(){
+    pendentes[orgAtual.id] = {};
+    gravar(K_PEND, pendentes);
+    renderLaudo();
+    toast("Todas as linhas conferidas.");
+  });
+
+  $("content").querySelectorAll("button.pend").forEach(function(b){
+    b.addEventListener("click", function(){
+      confirmarLinha(orgAtual.id, b.dataset.pend);
+      const foco = b.closest("tr").querySelector("[data-i]");
+      const i = foco ? foco.dataset.i : null;
+      renderLaudo();
+      if(i !== null){
+        const novo = $("content").querySelector('[data-i="'+i+'"]');
+        if(novo) novo.focus();
+      }
+    });
+  });
+
+  // redesenha mantendo foco e cursor no mesmo campo
+  function refazer(i, pos){
+    renderLaudo();
+    const novo = $("content").querySelector('[data-i="'+i+'"]');
+    if(!novo) return;
+    novo.focus();
+    if(pos != null){ try{ novo.setSelectionRange(pos, pos); }catch(e){} }
+  }
+
+  $("content").querySelectorAll("input.cim").forEach(function(inp){
+    inp.addEventListener("input", function(){
+      const conv = trocarSimbolos(inp.value, inp.selectionStart);
+      if(conv[0] !== inp.value){ inp.value = conv[0]; try{ inp.setSelectionRange(conv[1], conv[1]); }catch(e){} }
+      setVal(orgAtual.id, inp.dataset.n, inp.value);
+      confirmarLinha(orgAtual.id, inp.dataset.n);
+      refazer(inp.dataset.i, inp.selectionStart);
+    });
+    inp.addEventListener("paste", function(e){
+      const t = (e.clipboardData || window.clipboardData).getData("text");
+      if(!t || !/[\r\n]/.test(t)) return;                    // colagem simples: comportamento normal
+      e.preventDefault();
+      colarColuna(Number(inp.dataset.i), t);
+    });
+    inp.addEventListener("keydown", function(e){
+      let d = 0;
+      if(e.key === "Enter") d = e.shiftKey ? -1 : 1;
+      else if(e.key === "ArrowDown") d = 1;
+      else if(e.key === "ArrowUp") d = -1;
+      else return;
+      e.preventDefault();
+      const alvo = $("content").querySelector('[data-i="'+(Number(inp.dataset.i)+d)+'"]');
+      if(alvo) alvo.focus(); else if(d > 0) inp.blur();
+    });
+  });
+
+  $("content").querySelectorAll("select.tri").forEach(function(sel){
+    sel.addEventListener("change", function(){
+      setVal(orgAtual.id, sel.dataset.n, sel.value);
+      confirmarLinha(orgAtual.id, sel.dataset.n);
+      refazer(sel.dataset.i, null);
+    });
+  });
+}
+
+/* `<=` e `>=` não existem no teclado brasileiro — converte enquanto digita,
+   mantendo o cursor no lugar. */
+function trocarSimbolos(v, pos){
+  let out = "", p = pos == null ? 0 : pos;
+  for(let i = 0; i < v.length; i++){
+    const par = v.substr(i, 2);
+    if(par === "<=" || par === "=<"){ out += "≤"; if(i < pos - 1) p--; i++; }
+    else if(par === ">=" || par === "=>"){ out += "≥"; if(i < pos - 1) p--; i++; }
+    else out += v[i];
+  }
+  return [out, p];
+}
+
+/* Colar um bloco de várias linhas distribui os valores coluna abaixo.
+   Entram marcados como a conferir — a ordem do equipamento pode não bater. */
+function colarColuna(inicio, texto){
+  const vals = texto.split(/\r\n|\r|\n/).map(function(x){ return x.trim(); });
+  while(vals.length && vals[vals.length-1] === "") vals.pop();
+  if(!vals.length) return;
+
+  const campos = [];
+  linhas().forEach(function(l){
+    if(l.tipo === "cim" || l.tipo === "triagem") campos.push(l);
+  });
+
+  let n = 0, k = 0;
+  for(let f = inicio; f < campos.length && k < vals.length; f++){
+    const l = campos[f];
+    if(l.tipo !== "cim") continue;               // triagem não consome valor da coluna
+    const v = trocarSimbolos(vals[k++], 0)[0];
+    setVal(orgAtual.id, l.n, v);
+    if(v){
+      if(!pendentes[orgAtual.id]) pendentes[orgAtual.id] = {};
+      pendentes[orgAtual.id][l.n] = true;
+    }else{
+      confirmarLinha(orgAtual.id, l.n);
+    }
+    n++;
+  }
+  gravar(K_PEND, pendentes);
+  renderLaudo();
+  const sobra = vals.length - k;
+  toast(n+" campo"+(n===1?"":"s")+" preenchido"+(n===1?"":"s")+
+        (sobra > 0 ? " · "+sobra+" valor"+(sobra===1?"":"es")+" a mais foi ignorado" : "")+
+        " — confira a ordem.");
+}
+
+/* --- edição da lista de antimicrobianos -------------------------------- */
+
+/* Renomear tem que arrastar junto o corte, o valor digitado, a pendência e os
+   apelidos aprendidos — todos são indexados pelo nome da linha. */
+function renomearLinha(org, de, para){
+  const novo = String(para).trim();
+  if(!novo || novo === de) return false;
+  if(rowsDe(org).some(function(r){ return r.n === novo; })){
+    toast("Já existe “"+novo+"” neste microrganismo.");
+    return false;
+  }
+  rowsEditaveis(org).forEach(function(r){ if(r.n === de) r.n = novo; });
+  gravarLinhas();
+  [[refs, K_REF], [valores, K_VAL], [pendentes, K_PEND]].forEach(function(par){
+    const mapa = par[0][org.id];
+    if(mapa && mapa[de] !== undefined){ mapa[novo] = mapa[de]; delete mapa[de]; }
+    gravar(par[1], par[0]);
+  });
+  Object.keys(apelidos).forEach(function(k){ if(apelidos[k] === de) apelidos[k] = novo; });
+  gravar(K_ALIAS, apelidos);
+  return true;
+}
+
+function excluirLinha(org, nome){
+  const i = rowsDe(org).findIndex(function(r){ return r.n === nome; });
+  if(i < 0) return;
+  rowsEditaveis(org).splice(i, 1);
+  gravarLinhas();
+  // o corte fica guardado: se a linha voltar com o mesmo nome, volta preenchida
+  [[valores, K_VAL], [pendentes, K_PEND]].forEach(function(par){
+    if(par[0][org.id]) delete par[0][org.id][nome];
+    gravar(par[1], par[0]);
+  });
+}
+
+function moverLinha(org, nome, d){
+  const atual = rowsDe(org);
+  const i = atual.findIndex(function(r){ return r.n === nome; });
+  const j = i + d;
+  if(i < 0 || j < 0 || j >= atual.length) return;
+  const rows = rowsEditaveis(org);
+  const tmp = rows[i]; rows[i] = rows[j]; rows[j] = tmp;
+  gravarLinhas();
+}
+
+function acrescentarLinha(org, nome){
+  const n = String(nome).trim();
+  if(!n) return false;
+  if(rowsDe(org).some(function(r){ return r.n === n; })){
+    toast("Já existe “"+n+"” neste microrganismo.");
+    return false;
+  }
+  rowsEditaveis(org).push({t:"cim", n:n, ref:{sdp:"",sae:"",res:""}});
+  gravarLinhas();
+  if(!refs[org.id]) refs[org.id] = {};
+  if(!refs[org.id][n]) refs[org.id][n] = {sdp:"",sae:"",res:""};
+  gravar(K_REF, refs);
+  return true;
+}
+
+function seloHTML(extra){
+  const e = selo();
+  return '<div class="selo '+e.cls+'"><span>'+esc(e.txt)+'</span>'+(extra || "")+'</div>';
+}
+
+/* Com planilha configurada os cortes são do laboratório: a tela mostra, não
+   edita. Editar aqui recriaria a divergência entre máquinas que a planilha
+   existe para eliminar. */
+function renderRefLeitura(){
+  $("actions").innerHTML =
+    '<button class="btn" id="btnSinc">Sincronizar agora</button>'+
+    '<button class="btn" id="btnExportar">Exportar backup</button>';
+  const rows = rowsDe(orgAtual);
+  const corpo = rows.map(function(row){
+    if(row.t === "tit") return '<tr class="sec"><td colspan="4">'+esc(row.n)+'</td></tr>';
+    if(row.t === "triagem")
+      return '<tr><td class="c-abx">'+esc(row.n)+'</td>'+
+             '<td colspan="3" style="padding:8px 14px;color:var(--ink-3);font-size:12.5px">'+
+             'Triagem fenotípica — sem valor de corte</td></tr>';
+    const r = (refs[orgAtual.id] || {})[row.n] || {sdp:"",sae:"",res:""};
+    const c = function(v){ return '<td class="c-ref" style="text-align:center">'+(esc(v) || '<span style="color:var(--ink-3)">—</span>')+'</td>'; };
+    return '<tr><td class="c-abx">'+esc(row.n)+'</td>'+c(r.sdp)+c(r.sae)+c(r.res)+'</tr>';
+  }).join("");
+
+  $("content").innerHTML =
+    seloHTML('<span class="dot2"><a href="'+esc(urlPlanilha(fonte))+'" target="_blank" rel="noopener">abrir planilha</a></span>')+
+    '<div class="panel">'+
+      '<div class="refhead"><strong>Antimicrobianos e cortes de '+nomeHTML(orgAtual.nome)+'</strong>'+
+      '<p>Somente leitura. Estes cortes vêm da planilha do laboratório e são os mesmos em todos os computadores. '+
+      'Para alterar, edite a planilha e clique em <strong>Sincronizar agora</strong>.</p></div>'+
+      '<div class="tablewrap"><table class="grid reftab"><thead><tr>'+
+        '<th>Antimicrobiano</th><th style="text-align:center">Sensível, dose padrão (≤)</th>'+
+        '<th style="text-align:center">Aumentando exposição</th><th style="text-align:center">Resistente (&gt;)</th>'+
+      '</tr></thead><tbody>'+corpo+'</tbody></table></div>'+
+    '</div>'+
+    '<p class="hint">Os CIM digitados, as marcas de não conferido e os recentes continuam neste computador — '+
+    'sincronizar não apaga amostra em andamento.</p>';
+
+  $("btnExportar").addEventListener("click", exportar);
+  $("btnSinc").addEventListener("click", function(){
+    // render() e não renderRef(): a versão do BrCAST fica na barra lateral
+    sincronizar({aoMudar:function(){ render(); }});
+  });
+}
+
+function renderRef(){
+  if(fonte) return renderRefLeitura();
+  const editada = !!linhasCustom[orgAtual.id];
+  $("actions").innerHTML =
+    '<button class="btn" id="btnImportar">Importar</button>'+
+    '<button class="btn" id="btnExportar">Exportar backup</button>'+
+    '<button class="btn" id="btnRestaurar">Restaurar padrão</button>';
+
+  const rows = rowsDe(orgAtual);
+  const corpo = rows.map(function(row, idx){
+    if(row.t === "tit")
+      return '<tr class="sec"><td colspan="5">'+esc(row.n)+'</td></tr>';
+
+    const setas =
+      '<div class="mover">'+
+        '<button data-mov="'+esc(row.n)+'" data-d="-1" title="Subir" aria-label="Subir '+esc(row.n)+'"'+(idx===0?" disabled":"")+'>&#9650;</button>'+
+        '<button data-mov="'+esc(row.n)+'" data-d="1" title="Descer" aria-label="Descer '+esc(row.n)+'"'+(idx===rows.length-1?" disabled":"")+'>&#9660;</button>'+
+      '</div>';
+    const excluir = '<button class="excluir" data-del="'+esc(row.n)+'" title="Excluir esta linha" aria-label="Excluir '+esc(row.n)+'">&#10005;</button>';
+    const acoes = '<td class="c-acoes"><div class="acoes">'+setas+excluir+'</div></td>';
+
+    const nomeCampo = '<input class="nome" data-nome="'+esc(row.n)+'" value="'+esc(row.n)+
+      '" title="'+esc(row.n)+'" spellcheck="false" aria-label="Nome do antimicrobiano">'+
+      (row.src ? '<div class="src">na planilha: '+esc(row.src)+'</div>' : "");
+
+    if(row.t === "triagem")
+      return '<tr><td class="c-abx">'+nomeCampo+'</td>'+
+             '<td colspan="3" style="padding:8px 14px;color:var(--ink-3);font-size:12.5px">'+
+             'Triagem fenotípica — sem valor de corte</td>'+acoes+'</tr>';
+
+    const r = (refs[orgAtual.id] || {})[row.n] || {sdp:"",sae:"",res:""};
+    function campo(k, v, ph){
+      return '<td class="c-ref"><input class="ref" data-n="'+esc(row.n)+'" data-k="'+k+
+             '" value="'+esc(v)+'" placeholder="'+ph+'" spellcheck="false" aria-label="'+k+' de '+esc(row.n)+'"></td>';
+    }
+    return '<tr><td class="c-abx">'+nomeCampo+'</td>'+
+      campo("sdp", r.sdp, "≤8") + campo("sae", r.sae, "2 a 4") + campo("res", r.res, ">8") + acoes + '</tr>';
+  }).join("");
+
+  $("content").innerHTML =
+    '<div class="panel">'+
+      '<div class="refhead"><strong>Antimicrobianos e cortes de '+nomeHTML(orgAtual.nome)+'</strong>'+
+      '<p>Edite o nome, os cortes, reordene com as setas, exclua com o ✕ ou acrescente no fim da tabela. '+
+      'Vale só para este microrganismo e fica salvo neste navegador. Deixe em branco a coluna que não se aplica.'+
+      (editada ? ' <strong>Esta lista foi alterada</strong> — o padrão da planilha volta em Restaurar padrão.' : "")+
+      '</p></div>'+
+      '<div class="tablewrap"><table class="grid reftab"><thead><tr>'+
+        '<th>Antimicrobiano</th><th style="text-align:center">Sensível, dose padrão (≤)</th>'+
+        '<th style="text-align:center">Aumentando exposição</th><th style="text-align:center">Resistente (&gt;)</th>'+
+        '<th style="text-align:center">Ordem</th>'+
+      '</tr></thead><tbody>'+corpo+'</tbody></table></div>'+
+      '<div class="addrow">'+
+        '<input id="novoAbx" placeholder="Nome do antimicrobiano a acrescentar" spellcheck="false" aria-label="Nome do antimicrobiano a acrescentar">'+
+        '<button class="btn" id="btnAdd">Acrescentar</button>'+
+      '</div>'+
+    '</div>'+
+    '<p class="hint">Intervalo aceita <code>2 a 4</code> ou um número só (<code>4</code>). '+
+    'Linha sem nenhum corte cadastrado aparece no laudo como <strong>PREENCHER VALOR DE REFERÊNCIA</strong>. '+
+    'Faça <strong>Exportar backup</strong> depois de ajustar — o arquivo leva os cortes e a lista, e restaura tudo em qualquer computador.</p>';
+
+  $("content").querySelectorAll("input.ref").forEach(function(inp){
+    inp.addEventListener("input", function(){
+      if(!refs[orgAtual.id]) refs[orgAtual.id] = {};
+      if(!refs[orgAtual.id][inp.dataset.n]) refs[orgAtual.id][inp.dataset.n] = {sdp:"",sae:"",res:""};
+      refs[orgAtual.id][inp.dataset.n][inp.dataset.k] = inp.value;
+      gravar(K_REF, refs);
+    });
+  });
+
+  $("content").querySelectorAll("input.nome").forEach(function(inp){
+    const aplicar = function(){
+      const de = inp.dataset.nome;
+      if(inp.value.trim() === de) return;
+      if(renomearLinha(orgAtual, de, inp.value)) renderRef();
+      else inp.value = de;
+    };
+    inp.addEventListener("change", aplicar);
+    inp.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); inp.blur(); } });
+  });
+
+  $("content").querySelectorAll("[data-mov]").forEach(function(b){
+    b.addEventListener("click", function(){
+      moverLinha(orgAtual, b.dataset.mov, Number(b.dataset.d));
+      renderRef();
+    });
+  });
+  $("content").querySelectorAll("[data-del]").forEach(function(b){
+    b.addEventListener("click", function(){
+      if(!confirm("Excluir “"+b.dataset.del+"” de "+orgAtual.nome+"?\n\nEle sai do laudo e da tabela copiada. Restaurar padrão traz de volta.")) return;
+      excluirLinha(orgAtual, b.dataset.del);
+      renderRef();
+      toast("Linha excluída.");
+    });
+  });
+
+  const novo = $("novoAbx");
+  const add = function(){
+    if(!acrescentarLinha(orgAtual, novo.value)) return;
+    const n = novo.value.trim();
+    renderRef();
+    toast("“"+n+"” acrescentado. Preencha os cortes.");
+    const alvo = $("content").querySelector('input.ref[data-n="'+n.replace(/"/g, '\\"')+'"]');
+    if(alvo) alvo.focus();
+  };
+  $("btnAdd").addEventListener("click", add);
+  novo.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); add(); } });
+
+  $("btnExportar").addEventListener("click", exportar);
+  $("btnImportar").addEventListener("click", importar);
+  $("btnRestaurar").addEventListener("click", function(){
+    if(!confirm("Restaurar "+orgAtual.nome+" para a planilha original?\n\nVolta a lista de antimicrobianos e os cortes de fábrica. Os valores digitados não são apagados.")) return;
+    delete linhasCustom[orgAtual.id];
+    gravarLinhas();
+    refs[orgAtual.id] = refsPadrao()[orgAtual.id];
+    gravar(K_REF, refs);
+    renderRef();
+    toast(orgAtual.abbr+" restaurado ao padrão da planilha.");
+  });
+}
+
+function renderFonte(){
+  $("actions").innerHTML =
+    (fonte ? '<button class="btn" id="btnSinc">Sincronizar agora</button>' : "")+
+    '<button class="btn" id="btnCSV">Gerar CSV para o Drive</button>';
+  const st = fonteStat;
+  const erros = (st.erro && st.erro.length)
+    ? '<ul class="erros">'+st.erro.map(function(e){ return '<li>'+esc(e)+'</li>'; }).join("")+'</ul>'
+    : "";
+
+  $("content").innerHTML =
+    seloHTML(fonte ? '<span class="dot2"><a href="'+esc(urlPlanilha(fonte))+'" target="_blank" rel="noopener">abrir planilha</a></span>' : "")+
+    erros+
+    '<div class="panel">'+
+      '<div class="refhead"><strong>Planilha do laboratório</strong>'+
+      '<p>Cole o link da planilha do Google Sheets com os cortes. Todos os computadores que usarem o mesmo link '+
+      'passam a interpretar igual. A planilha precisa estar compartilhada como '+
+      '<strong>Qualquer pessoa com o link · Leitor</strong>.</p></div>'+
+      '<div style="padding:0 14px 14px">'+
+        '<div class="fonte-campo">'+
+          '<input id="fonteURL" spellcheck="false" placeholder="https://docs.google.com/spreadsheets/d/…/edit" '+
+            'value="'+(fonte ? esc(urlPlanilha(fonte)) : "")+'" aria-label="Link da planilha">'+
+          '<button class="btn" id="btnSalvar">Salvar e testar</button>'+
+        '</div>'+
+        (fonte ? '<button class="btn ghost" id="btnDesligar">Desligar sincronização</button>' : "")+
+      '</div>'+
+    '</div>'+
+    '<div class="panel" style="margin-top:12px">'+
+      '<div class="refhead"><strong>Situação</strong></div>'+
+      '<div class="tablewrap"><table class="grid"><tbody>'+
+        '<tr><td>Última sincronização</td><td>'+esc(quandoTxt(st.quando))+'</td></tr>'+
+        '<tr><td>Linhas lidas</td><td>'+(st.linhas || 0)+'</td></tr>'+
+        '<tr><td>Edição do BrCAST</td><td>'+(versaoCortes
+            ? esc(versaoCortes)
+            : '<span style="color:var(--ink-3)">não informada — acrescente a coluna '+
+              '<code>versao</code> na planilha</span>')+'</td></tr>'+
+        '<tr><td>Origem em uso</td><td>'+esc(
+            st.origem === "planilha" ? "planilha (ao vivo)" :
+            st.origem === "cache"    ? "cópia local da última sincronização" :
+                                       "cortes de fábrica do programa")+'</td></tr>'+
+      '</tbody></table></div>'+
+    '</div>'+
+    '<p class="hint">O programa lê a planilha toda vez que abre. Sem internet, usa a última cópia boa e avisa a data. '+
+    'Os cortes de fábrica só entram se nunca houve uma sincronização bem-sucedida neste computador.</p>'+
+    '<div class="panel" style="margin-top:12px">'+
+      '<div class="refhead"><strong>Como apontar para outra planilha</strong>'+
+      '<p>O arquivo sai sem planilha configurada. Faça isto uma vez em cada computador, '+
+      'colando o link da planilha do laboratório.</p></div>'+
+      '<div style="padding:2px 14px 14px">'+
+        '<ol class="passos">'+
+          '<li><strong>Abra a planilha</strong> no Google Sheets e <strong>clique na aba dos cortes</strong>. '+
+            'A aba importa: o programa lê uma aba só, e é a que estiver aberta quando você copiar o link.</li>'+
+          '<li>Clique em <strong>Compartilhar</strong>, no canto superior direito.</li>'+
+          '<li>Em <strong>Acesso geral</strong>, troque de <em>Restrito</em> para '+
+            '<strong>Qualquer pessoa com o link</strong>, com o papel <strong>Leitor</strong>. '+
+            'Não serve <em>Qualquer pessoa da organização</em>: este programa lê a planilha sem fazer login, '+
+            'igual a um visitante anônimo.</li>'+
+          '<li><strong>Copie o endereço da barra do navegador</strong> — o que contém '+
+            '<code>/d/</code> e termina em <code>/edit</code>. Serve também o link do botão Copiar link.</li>'+
+          '<li><strong>Formate as três colunas de corte como texto — este passo não pode ser pulado.</strong> '+
+            'Selecione as colunas <code>sensivel_dose_padrao</code>, <code>aumentando_exposicao</code> e '+
+            '<code>resistente</code> inteiras e use <strong>Formatar ▸ Número ▸ Texto simples</strong>. '+
+            'Faça isso <em>antes</em> de colar os valores ou importar o CSV.'+
+            '<div class="cuidado" style="margin-top:8px"><b>Por quê.</b> '+
+            'A coluna do meio mistura números (<code>4</code>, <code>0,5</code>) com texto '+
+            '(<code>≤8</code>, <code>2 a 4</code>). Se ela não estiver marcada como texto, o Google decide '+
+            'sozinho que a coluna é numérica e <b>deixa de enviar todo valor escrito com texto</b> — na nossa '+
+            'tabela são 94 cortes que não chegariam, sem nenhuma mensagem de erro. '+
+            'Os valores continuam na planilha; o problema é só no envio. Por isso <b>basta formatar a coluna '+
+            'como texto para eles voltarem</b>, sem precisar importar nada de novo. '+
+            'Vale também para quem for <b>editar ou acrescentar</b> um antimicrobiano depois: com a coluna '+
+            'já como texto, digitar <code>4</code> ou <code>2 a 4</code> funciona nos dois casos. '+
+            'O programa confere isso a cada sincronização e recusa em vez de perder corte calado.</div></li>'+
+          '<li><strong>Cole no campo acima</strong> e clique em <strong>Salvar e testar</strong>.</li>'+
+        '</ol>'+
+        '<div class="cuidado"><b>Antes de compartilhar, confira as abas.</b> '+
+          '"Qualquer pessoa com o link" libera a leitura da <b>planilha inteira</b>, não só da aba dos cortes. '+
+          'Valores de corte e nomes de antimicrobiano são informação técnica pública do BrCAST e podem ficar assim. '+
+          'Dado de paciente, não: se houver qualquer aba com resultado de amostra, '+
+          'faça uma planilha separada só com os cortes.</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="panel" style="margin-top:12px">'+
+      '<div class="refhead"><strong>O que a planilha precisa ter</strong>'+
+      '<p>A primeira linha tem que ser exatamente este cabeçalho, nesta grafia. '+
+      'Uma linha por antimicrobiano.</p></div>'+
+      '<div class="tablewrap"><table class="grid"><tbody>'+
+        '<tr><td><code>organismo_id</code></td><td>Chave que liga a linha ao microrganismo. '+
+          '<strong>Nunca alterar.</strong> Vale proteger a coluna no Sheets.</td></tr>'+
+        '<tr><td><code>ordem</code></td><td>Posição da linha na tabela do laudo.</td></tr>'+
+        '<tr><td><code>tipo</code></td><td><code>cim</code>, <code>triagem</code> ou <code>titulo</code>.</td></tr>'+
+        '<tr><td><code>antimicrobiano</code></td><td>Nome que aparece no laudo.</td></tr>'+
+        '<tr><td><code>sensivel_dose_padrao</code></td><td>Corte S. Ex.: <code>≤8</code></td></tr>'+
+        '<tr><td><code>aumentando_exposicao</code></td><td>Faixa intermediária. Ex.: <code>2 a 4</code> ou <code>4</code></td></tr>'+
+        '<tr><td><code>resistente</code></td><td>Corte R. Ex.: <code>&gt;8</code></td></tr>'+
+        '<tr><td><code>painel</code> · <code>organismo</code></td><td>Só para leitura humana.</td></tr>'+
+        '<tr><td><code>versao</code><br><em style="color:var(--ink-3);font-size:11.5px">opcional</em></td>'+
+          '<td>Edição do BrCAST que estes cortes seguem — por exemplo <code>BrCAST 2024</code>. '+
+          'Aparece embaixo do nome do programa, na barra lateral. '+
+          '<strong>Basta preencher uma célula</strong>, em qualquer linha da coluna; o programa procura a '+
+          'primeira que estiver preenchida. Quando sair uma revisão nova do BrCAST, é esse único campo que muda.</td></tr>'+
+      '</tbody></table></div>'+
+    '</div>'+
+    '<div class="panel" style="margin-top:12px">'+
+      '<div class="refhead"><strong>Se der errado</strong></div>'+
+      '<div class="tablewrap"><table class="grid"><tbody>'+
+        '<tr><td>"Não consegui abrir a planilha"</td>'+
+          '<td>O compartilhamento não está em <strong>Qualquer pessoa com o link</strong>. '+
+          'Teste abrindo o endereço numa <strong>janela anônima</strong>: se pedir login, é isso.</td></tr>'+
+        '<tr><td>"Faltam colunas na planilha"</td>'+
+          '<td>O link aponta para a aba errada, ou a primeira linha não é o cabeçalho.</td></tr>'+
+        '<tr><td>"a coluna … está como número"</td>'+
+          '<td>Selecione a coluna inteira na planilha e use <strong>Formatar ▸ Número ▸ Texto simples</strong>, '+
+          'depois <strong>Sincronizar agora</strong>. Não precisa reimportar: os valores estão na planilha, '+
+          'só não estavam sendo enviados. O programa recusa nesse caso em vez de perder cortes em silêncio.</td></tr>'+
+        '<tr><td>"microrganismo desconhecido"</td>'+
+          '<td>Alguém editou a coluna <code>organismo_id</code>. A mensagem diz a linha.</td></tr>'+
+        '<tr><td>"Esse é o link de Publicar na web"</td>'+
+          '<td>Foi copiado o link de publicação. Use o endereço da barra do navegador, com <code>/edit</code>.</td></tr>'+
+        '<tr><td>Editei a planilha e não mudou aqui</td>'+
+          '<td>Clique em <strong>Sincronizar agora</strong>. O programa lê ao abrir; quem já estava com o arquivo aberto não recebe sozinho.</td></tr>'+
+        '<tr><td>Sem internet</td>'+
+          '<td>Continua funcionando com a última cópia boa, e a barra no topo mostra de quando ela é.</td></tr>'+
+      '</tbody></table></div>'+
+    '</div>'+
+    '<p class="hint">Cada computador precisa ter o arquivo e o link colado uma vez. '+
+    'Feito isso, ele sincroniza sozinho toda vez que abrir.</p>'+
+    '<div class="panel" style="margin-top:12px">'+
+      '<div class="refhead"><strong>Dar o sistema para outro laboratório</strong>'+
+      '<p>O arquivo já vai com todos os cortes dentro, então funciona assim que é aberto, '+
+      'mesmo antes de qualquer link ser colado. Para o outro laboratório ter a própria fonte '+
+      'sincronizada:</p></div>'+
+      '<div style="padding:2px 14px 14px">'+
+        '<ol class="passos">'+
+          '<li>Clique em <strong>Gerar CSV para o Drive</strong>, aqui em cima. '+
+            'Sai um <code>cortes-brcast.csv</code> com os cortes que estão valendo agora.</li>'+
+          '<li>Ele sobe o arquivo no <strong>Drive dele</strong> e abre com <strong>Google Planilhas</strong>. '+
+            'O CSV já sai protegido contra a conversão automática, então não precisa marcar nem desmarcar nada.</li>'+
+          '<li>Compartilha como <strong>Qualquer pessoa com o link · Leitor</strong>, '+
+            'pelos 5 passos acima.</li>'+
+          '<li>Cola o link no campo desta tela e clica em <strong>Salvar e testar</strong>.</li>'+
+        '</ol>'+
+        '<div class="cuidado">A partir daí os dois laboratórios ficam <b>independentes</b>: '+
+        'cada um com a sua planilha, e mudança de um não mexe no outro.</div>'+
+      '</div>'+
+    '</div>';
+
+  $("btnCSV").addEventListener("click", exportarCSV);
+
+  const campo = $("fonteURL");
+  const salvar = function(){
+    const r = lerLink(campo.value);
+    if(r.erro){ toast(r.erro); return; }
+    fonte = {id:r.id, gid:r.gid};
+    gravar(K_FONTE, fonte);
+    sincronizar({aoMudar:function(){
+      render();
+      if(fonteStat.estado === "ok") toast("Sincronizado: "+fonteStat.linhas+" linhas.");
+    }});
+  };
+  $("btnSalvar").addEventListener("click", salvar);
+  campo.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); salvar(); } });
+  if($("btnSinc")) $("btnSinc").addEventListener("click", function(){
+    sincronizar({aoMudar:function(){ render(); }});
+  });
+  if($("btnDesligar")) $("btnDesligar").addEventListener("click", function(){
+    if(!confirm("Desligar a sincronização?\n\nEste computador volta a usar os cortes guardados nele, e pode divergir dos outros.")) return;
+    fonte = null;
+    try{ localStorage.removeItem(K_FONTE); }catch(e){}
+    refs = ler(K_REF, null) || refsPadrao();
+    linhasCustom = ler(K_LINHAS, {});
+    versaoCortes = VERSAO_EMBUTIDA;
+    fonteStat = {estado:"desligado", quando:null, linhas:0, erro:null, origem:null};
+    render();
+    toast("Sincronização desligada.");
+  });
+}
+
+function renderObs(){
+  $("actions").innerHTML = "";
+  const q = busca.trim().toLowerCase();
+  const achados = OBS.filter(function(o){
+    return !q || o.c.toLowerCase().indexOf(q) >= 0 || o.t.toLowerCase().indexOf(q) >= 0;
+  });
+  function realce(t){
+    if(!q) return esc(t);
+    const partes = String(t).split(new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"));
+    return partes.map(function(p, i){ return i % 2 ? "<mark>"+esc(p)+"</mark>" : esc(p); }).join("");
+  }
+  $("content").innerHTML =
+    '<div class="searchbar"><input class="search" id="busca" placeholder="Buscar por código ou texto — ESBL, KPC, sonda, oxacilina…" value="'+esc(busca)+'" spellcheck="false"></div>'+
+    (achados.length
+      ? '<div class="obslist">'+achados.map(function(o, i){
+          return '<div class="obs"><div class="cod">'+esc(o.c)+'</div>'+
+                 '<div class="txt">'+realce(o.t)+'</div>'+
+                 '<button class="btn" data-obs="'+OBS.indexOf(o)+'">Copiar</button></div>';
+        }).join("")+'</div>'
+      : '<p class="empty-state">Nenhuma observação com “'+esc(busca)+'”.</p>');
+
+  const b = $("busca");
+  b.addEventListener("input", function(){ busca = b.value; renderObs(); });
+  b.focus();
+  try{ b.setSelectionRange(busca.length, busca.length); }catch(e){}
+  $("content").querySelectorAll("[data-obs]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      copiarTexto(OBS[Number(btn.dataset.obs)].t, "Observação "+OBS[Number(btn.dataset.obs)].c+" copiada.");
+    });
+  });
+}
+
+function render(){
+  renderRail();
+  $("marcaSub").textContent = "LEPAC" + (versaoCortes ? " · " + versaoCortes : "");
+  const p = orgAtual.painel;
+  const geral = !!TELAS_GERAIS[vista];
+  // com alternador visível o material já está ali — não repetir no supratítulo
+  // cada material tem sua própria tabela de cortes, então o alternador também
+  // vale na tela de referências; nas telas gerais nada disso se aplica
+  const comSeg = !geral && navAtual.m.length > 1;
+
+  if(geral){
+    const cab = vista === "fonte"
+      ? ["Configuração", "vale para todos os microrganismos", "Fonte dos cortes"]
+      : ["Texto de laudo", OBS.length+" observações", "Observações padrão"];
+    $("eyebrow").innerHTML = esc(cab[0])+'<span class="dot">·</span>'+esc(cab[1]);
+    $("titulo").textContent = cab[2];
+  }else{
+    $("eyebrow").innerHTML = [esc(p.fam)].concat(comSeg ? [] : [esc(p.mat)]).concat([esc(p.cartao)])
+      .join('<span class="dot">·</span>');
+    $("titulo").innerHTML = nomeHTML(orgAtual.nome);
+  }
+
+  const seg = $("matseg");
+  if(comSeg){
+    seg.className = "matseg";
+    seg.innerHTML = navAtual.m.map(function(m){
+      return '<button data-mat="'+esc(m.id)+'" aria-pressed="'+(m.id===orgAtual.id)+'">'+esc(m.mat)+'</button>';
+    }).join("");
+    seg.querySelectorAll("[data-mat]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if(b.dataset.mat === orgAtual.id) return;
+        orgAtual = POR_ID[b.dataset.mat];
+        imp = null;
+        render();
+      });
+    });
+  }else{
+    seg.className = "";
+    seg.innerHTML = "";
+  }
+  $("navLaudo").setAttribute("aria-current", vista === "laudo");
+  $("navRef").setAttribute("aria-current", vista === "ref");
+  $("navObs").setAttribute("aria-current", vista === "obs");
+  $("navFonte").setAttribute("aria-current", vista === "fonte");
+  if(vista === "laudo") renderLaudo();
+  else if(vista === "ref") renderRef();
+  else if(vista === "fonte") renderFonte();
+  else renderObs();
+}
+
+/* ==========================================================================
+   COPIAR — HTML formatado igual à planilha (Arial 9pt, bordas, cores)
+   ========================================================================== */
+function tabelaHTML(){
+  const B = "border:1px solid #000000;padding:1px 4px;";
+  const F = "font-family:Arial,Helvetica,sans-serif;font-size:9pt;color:#000000;";
+  let h = '<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;'+F+'">'+
+    '<tr><td width="380" style="'+B+F+'">Microrganismo:&nbsp; '+esc(orgAtual.nome)+'</td>'+
+    '<td width="70" style="'+B+F+'"></td><td width="185" style="'+B+F+'"></td></tr>'+
+    '<tr><td style="'+B+F+'font-weight:bold;">ANTIMICROBIANOS</td>'+
+    '<td style="'+B+F+'font-weight:bold;text-align:center;">CIM (mg/L)</td>'+
+    '<td style="'+B+F+'font-weight:bold;">INTERPRETAÇÃO</td></tr>';
+  linhas().forEach(function(l){
+    if(l.tipo === "tit"){
+      h += '<tr><td colspan="3" style="'+B+F+'font-weight:bold;">'+esc(l.n)+'</td></tr>';
+      return;
+    }
+    const bg = l.cat ? "background-color:"+l.cat.fill+";" : "";
+    h += '<tr><td style="'+B+F+'">'+esc(l.n)+'</td>'+
+         '<td style="'+B+F+'text-align:center;">'+esc(l.tipo === "triagem" ? "" : l.v)+'</td>'+
+         '<td style="'+B+F+bg+'">'+(l.cat ? esc(l.cat.txt) : "")+'</td></tr>';
+  });
+  return h + "</table>";
+}
+function tabelaTexto(){
+  let t = "Microrganismo:  "+orgAtual.nome+"\t\t\n"+
+          "ANTIMICROBIANOS\tCIM (mg/L)\tINTERPRETAÇÃO\n";
+  linhas().forEach(function(l){
+    if(l.tipo === "tit"){ t += l.n+"\t\t\n"; return; }
+    t += l.n+"\t"+(l.tipo === "triagem" ? "" : l.v)+"\t"+(l.cat ? l.cat.txt : "")+"\n";
+  });
+  return t;
+}
+async function copiar(){
+  const n = contaPend(orgAtual.id);
+  if(n && !confirm(n+(n===1
+        ? " linha ainda não foi conferida nesta amostra."
+        : " linhas ainda não foram conferidas nesta amostra.")+
+      "\n\nCopiar assim mesmo?")) return;
+  const html = tabelaHTML(), texto = tabelaTexto();
+  try{
+    if(navigator.clipboard && window.ClipboardItem){
+      await navigator.clipboard.write([new ClipboardItem({
+        "text/html":  new Blob([html],  {type:"text/html"}),
+        "text/plain": new Blob([texto], {type:"text/plain"})
+      })]);
+      toast("Tabela copiada com as cores.");
+      return;
+    }
+  }catch(e){}
+  copiarRico(html);
+}
+function copiarRico(html){
+  const d = document.createElement("div");
+  d.setAttribute("style", "position:fixed;left:-10000px;top:0;background:#fff;");
+  d.innerHTML = html;
+  document.body.appendChild(d);
+  const r = document.createRange(); r.selectNodeContents(d);
+  const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+  let ok = false;
+  try{ ok = document.execCommand("copy"); }catch(e){}
+  sel.removeAllRanges(); d.remove();
+  toast(ok ? "Tabela copiada com as cores."
+           : "Não consegui copiar. Selecione a tabela na tela e use Ctrl+C.");
+}
+async function copiarTexto(t, msg){
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(t); toast(msg); return;
+    }
+  }catch(e){}
+  const ta = document.createElement("textarea");
+  ta.value = t; ta.setAttribute("style", "position:fixed;left:-10000px;top:0;");
+  document.body.appendChild(ta); ta.select();
+  let ok = false;
+  try{ ok = document.execCommand("copy"); }catch(e){}
+  ta.remove();
+  toast(ok ? msg : "Não consegui copiar. Selecione o texto e use Ctrl+C.");
+}
+
+/* Nova amostra: guarda os valores e marca tudo como a conferir.
+   Entre amostras poucos valores mudam — redigitar tudo é o que atrasa. */
+function novaAmostra(){
+  const v = valores[orgAtual.id] || {};
+  const marcas = {};
+  Object.keys(v).forEach(function(k){ if(v[k]) marcas[k] = true; });
+  pendentes[orgAtual.id] = marcas;
+  gravar(K_PEND, pendentes);
+  renderLaudo();
+  const p = $("content").querySelector("input.cim, select.tri");
+  if(p) p.focus();
+  const n = Object.keys(marcas).length;
+  toast(n ? n+" linha"+(n===1?"":"s")+" a conferir — mexa só no que mudou."
+          : "Tabela em branco, pode digitar.");
+}
+
+function limpar(){
+  const v = valores[orgAtual.id] || {};
+  const tem = Object.keys(v).some(function(k){ return v[k]; });
+  if(tem && !confirm("Apagar todos os valores digitados de "+orgAtual.nome+"?")) return;
+  valores[orgAtual.id] = {};
+  pendentes[orgAtual.id] = {};
+  gravar(K_VAL, valores);
+  gravar(K_PEND, pendentes);
+  renderLaudo();
+  const p = $("content").querySelector("input.cim, select.tri");
+  if(p) p.focus();
+}
+/* Monta o CSV no mesmo formato que o programa lê. Fecha o ciclo: quem recebe
+   o arquivo gera o CSV daqui, sobe no Drive dele, compartilha e cola o link —
+   passa a ter a própria fonte, sem depender da planilha de outro laboratório. */
+function gerarCSV(){
+  const cel = function(v){
+    const t = String(v == null ? "" : v);
+    return /[",\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t;
+  };
+  const TIPO = {cim:"cim", triagem:"triagem", tit:"titulo"};
+  const linhas = [["painel","organismo_id","organismo","ordem","tipo","antimicrobiano",
+                   "sensivel_dose_padrao","aumentando_exposicao","resistente", COL_VERSAO]];
+  let versaoPendente = versaoCortes;   // só na primeira linha; a leitura procura em todas
+  PANELS.forEach(function(p){
+    const painel = p.fam+" · "+p.mat;
+    p.orgs.forEach(function(o){
+      rowsDe(o).forEach(function(row, i){
+        const r = (row.t === "cim") ? ((refs[o.id] || {})[row.n] || {sdp:"",sae:"",res:""})
+                                    : {sdp:"",sae:"",res:""};
+        linhas.push([painel, o.id, o.nome, i+1, TIPO[row.t] || row.t, row.n, r.sdp, r.sae, r.res,
+                     versaoPendente]);
+        versaoPendente = "";
+      });
+    });
+  });
+  // BOM para o Sheets e o Excel abrirem os acentos certos
+  return "﻿" + linhas.map(function(l){ return l.map(cel).join(","); }).join("\r\n");
+}
+
+/* Diz de onde vieram os valores. Sem isso é fácil exportar a cópia local
+   antiga achando que se está exportando o que a tela mostra. */
+function origemTxt(){
+  if(fonteStat.origem === "planilha") return "da planilha, sincronizada em "+quandoTxt(fonteStat.quando);
+  if(fonteStat.origem === "cache")    return "da CÓPIA LOCAL de "+quandoTxt(fonteStat.quando)+", não da planilha";
+  return "os cortes de fábrica do programa";
+}
+
+async function exportarCSV(){
+  const csv = gerarCSV();
+  const n = csv.split("\r\n").length - 1;
+  const de = " — "+origemTxt();
+  let dl = null;
+  try{ if(window.claude && window.claude.use) dl = await window.claude.use("downloads"); }catch(e){}
+  if(dl){
+    try{ await dl.save({filename:"cortes-brcast.csv", data:csv}); toast("CSV gerado: "+n+" linhas"+de+"."); }
+    catch(e){ if(e && e.code === "declined") return;
+              copiarTexto(csv, "CSV copiado. Cole num arquivo .csv."); }
+    return;
+  }
+  if(window.claude){ copiarTexto(csv, "CSV copiado. Cole num arquivo .csv."); return; }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
+  a.download = "cortes-brcast.csv";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  toast("CSV gerado: "+n+" linhas"+de+".");
+}
+
+async function exportar(){
+  const json = JSON.stringify({versao:2, cortes:refs, linhas:linhasCustom, apelidos:apelidos}, null, 1);
+
+  // Publicado como página web: o download passa pela confirmação do visualizador.
+  let dl = null;
+  try{ if(window.claude && window.claude.use) dl = await window.claude.use("downloads"); }catch(e){}
+  if(dl){
+    try{ await dl.save({filename:"cortes-brcast.json", data:json}); toast("Backup salvo."); }
+    catch(e){
+      if(e && e.code === "declined") return;
+      copiarTexto(json, "Backup copiado. Cole num arquivo .json para guardar.");
+    }
+    return;
+  }
+  if(window.claude){
+    copiarTexto(json, "Backup copiado. Cole num arquivo .json para guardar.");
+    return;
+  }
+
+  // Arquivo local: download direto.
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([json], {type:"application/json"}));
+  a.download = "cortes-brcast.json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  toast("Backup gerado.");
+}
+function importar(){
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.accept = "application/json,.json";
+  inp.addEventListener("change", function(){
+    const f = inp.files && inp.files[0];
+    if(!f) return;
+    const fr = new FileReader();
+    fr.onload = function(){
+      try{
+        const bruto = JSON.parse(String(fr.result));
+        // backup antigo era só o mapa de cortes; o novo traz lista e apelidos junto
+        const cortes = bruto && bruto.versao ? (bruto.cortes || {}) : bruto;
+        const listas = bruto && bruto.versao ? (bruto.linhas || {}) : {};
+        const aps    = bruto && bruto.versao ? (bruto.apelidos || {}) : {};
+        if(!cortes || typeof cortes !== "object") throw new Error("formato");
+
+        const base = refsPadrao(), montado = {};
+        ORGS.forEach(function(o){
+          const vindo = cortes[o.id];
+          if(!vindo){ montado[o.id] = base[o.id]; return; }
+          montado[o.id] = {};
+          // mantém tudo que veio no arquivo, inclusive antimicrobianos acrescentados
+          Object.keys(vindo).forEach(function(a){
+            const v = vindo[a] || {};
+            montado[o.id][a] = {sdp:v.sdp||"", sae:v.sae||"", res:v.res||""};
+          });
+          Object.keys(base[o.id]).forEach(function(a){
+            if(!montado[o.id][a]) montado[o.id][a] = base[o.id][a];
+          });
+        });
+
+        const listasOk = {};
+        Object.keys(listas).forEach(function(id){
+          if(POR_ID[id] && Array.isArray(listas[id]) && listas[id].length) listasOk[id] = listas[id];
+        });
+
+        refs = montado;         gravar(K_REF, refs);
+        linhasCustom = listasOk; gravarLinhas();
+        apelidos = Object.assign({}, apelidos, aps); gravar(K_ALIAS, apelidos);
+        render();
+        const nl = Object.keys(listasOk).length;
+        toast("Backup importado." + (nl ? " " + nl + " microrganismo(s) com lista própria." : ""));
+      }catch(e){ toast("Arquivo inválido. Use um backup gerado por este sistema."); }
+    };
+    fr.readAsText(f);
+  });
+  inp.click();
+}
+
+let tT;
+function toast(msg){
+  const el = $("toast");
+  el.textContent = msg; el.classList.add("on");
+  clearTimeout(tT);
+  tT = setTimeout(function(){ el.classList.remove("on"); }, 2600);
+}
+
+$("orglist").addEventListener("click", function(e){
+  const b = e.target.closest("[data-nav]");
+  if(!b) return;
+  const entrada = porChave(b.dataset.nav);
+  if(!entrada) return;
+  // ao voltar num microrganismo já usado, mantém o material que estava aberto
+  let org = null;
+  if(entrada === navAtual) org = orgAtual;
+  usar(entrada, org);
+  if(TELAS_GERAIS[vista]) vista = "laudo";
+  imp = null;
+  render();
+});
+
+const campoBusca = $("buscaOrg");
+campoBusca.addEventListener("input", function(){ buscaOrg = campoBusca.value; renderRail(); });
+campoBusca.addEventListener("keydown", function(e){
+  if(e.key === "Escape"){ campoBusca.value = ""; buscaOrg = ""; renderRail(); return; }
+  if(e.key !== "Enter") return;
+  const primeiro = $("orglist").querySelector("[data-nav]");
+  if(!primeiro) return;
+  e.preventDefault();
+  const entrada = porChave(primeiro.dataset.nav);
+  if(!entrada) return;
+  usar(entrada, null);
+  if(TELAS_GERAIS[vista]) vista = "laudo";
+  campoBusca.value = ""; buscaOrg = "";
+  render();
+  const p = $("content").querySelector("input.cim, select.tri");
+  if(p) p.focus();
+});
+
+// "/" devolve o foco para a busca de qualquer lugar
+document.addEventListener("keydown", function(e){
+  if(e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+  const a = document.activeElement, tag = a ? a.tagName : "";
+  if(tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+  e.preventDefault();
+  campoBusca.focus();
+  campoBusca.select();
+});
+$("navLaudo").addEventListener("click", function(){ vista = "laudo"; render(); });
+$("navFonte").addEventListener("click", function(){ vista = "fonte"; imp = null; render(); });
+$("navRef").addEventListener("click",   function(){ vista = "ref";   imp = null; render(); });
+$("navObs").addEventListener("click",   function(){ vista = "obs";   imp = null; render(); });
+
+/* Ao abrir: cópia local primeiro para a tela nascer com os cortes certos,
+   depois a planilha por cima. Nunca fica esperando rede para ser usável. */
+if(fonte){
+  usarCache();
+  sincronizar({aoMudar:function(){ render(); }});
+}
+
+render();
+campoBusca.focus();
+</script>
+
+</body>
+</html>

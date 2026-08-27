@@ -1,0 +1,113 @@
+# Corte BrCAST
+
+Interpretação de antibiograma segundo o BrCAST, para o LEPAC.
+
+Digite os valores de CIM e o sistema devolve a interpretação colorida — *Sensível, dose padrão* · *Sensível, aumentando exposição* · *Resistente* — pronta para copiar no laudo. 31 microrganismos, 408 antimicrobianos, 10 painéis.
+
+**É um único arquivo HTML.** Sem servidor, sem instalação, sem banco de dados. Abre com duplo clique e funciona.
+
+---
+
+## Para quem vai usar no dia a dia
+
+1. Abra o `Corte-BrCAST.html`
+2. Escolha o microrganismo na lista à esquerda e o material no alto
+3. Digite os CIM — `Enter` pula para o próximo campo, `Shift+Enter` volta
+4. **Copiar tabela** leva a tabela formatada para colar no outro sistema
+
+O campo aceita `≤0,25`, `>8`, `16/2` ou só o número. Digitar `<=` ou `>=` vira `≤` / `≥` sozinho.
+
+A coluna **Corte aplicado** mostra qual regra decidiu cada linha — ela não vai junto quando você copia.
+
+**Colar / importar** preenche vários resultados de uma vez, colados do outro sistema.
+
+### Observações padrão
+
+68 textos de laudo (Bac 1 a Bac 71), com busca por código ou conteúdo. Clicar copia.
+
+### O que fica no seu computador
+
+Os CIM digitados, as marcas de *não conferido* e o histórico ficam **no navegador daquela máquina**. Não são compartilhados, não saem dali, e sincronizar não apaga amostra em andamento.
+
+**Nenhum dado de paciente sai do computador.** O programa não envia nada para lugar nenhum.
+
+---
+
+## Para quem administra os cortes
+
+Os valores de corte vêm de **uma planilha do Google**, para que todos os computadores interpretem igual. Sem isso, cada máquina teria sua cópia e elas divergiriam em silêncio — a mesma cepa interpretada de dois jeitos, sem ninguém perceber.
+
+### Montar a planilha
+
+1. Na tela **Fonte dos cortes**, clique em **Gerar CSV para o Drive**
+2. Suba o arquivo no Drive e abra com **Google Planilhas**
+3. Selecione as colunas `sensivel_dose_padrao`, `aumentando_exposicao` e `resistente` e use **Formatar ▸ Número ▸ Texto simples**
+4. **Compartilhar ▸ Acesso geral ▸ Qualquer pessoa com o link ▸ Leitor**
+5. Copie o endereço da barra do navegador e cole na tela **Fonte dos cortes**
+
+> **O passo 3 não pode ser pulado.** A coluna do meio mistura números (`4`, `0,5`) com texto (`≤8`, `2 a 4`). Se ela não for marcada como texto, o Google decide que a coluna é numérica e **deixa de enviar todo valor escrito com texto** — 94 cortes que não chegariam. O programa detecta e recusa a sincronização nesse caso, em vez de perder corte calado.
+
+> **"Qualquer pessoa com o link" libera a planilha inteira**, não só a aba dos cortes. Valores de corte e nomes de antimicrobiano são informação técnica pública do BrCAST e podem ficar assim. Dado de paciente, não — se houver qualquer aba com resultado de amostra, faça uma planilha separada.
+
+### Colunas
+
+| Coluna | Para que serve |
+|---|---|
+| `organismo_id` | Liga a linha ao microrganismo. **Nunca alterar** — vale proteger a coluna |
+| `ordem` | Posição da linha na tabela do laudo |
+| `tipo` | `cim`, `triagem` ou `titulo` |
+| `antimicrobiano` | Nome que aparece no laudo |
+| `sensivel_dose_padrao` | Corte S. Ex.: `≤8` |
+| `aumentando_exposicao` | Faixa intermediária. Ex.: `2 a 4` ou `4` |
+| `resistente` | Corte R. Ex.: `>8` |
+| `painel` · `organismo` | Só para leitura humana |
+| `versao` *(opcional)* | Edição do BrCAST — ex.: `BrCAST 2024`. Basta **uma célula** preenchida, em qualquer linha. Aparece na barra lateral |
+
+### Depois de configurado
+
+- O programa lê a planilha **toda vez que abre**
+- Editou um corte? Quem já estava com o arquivo aberto clica em **Sincronizar agora**
+- Enquanto houver planilha configurada, a tela **Valores de referência** fica **somente leitura** — editar ali recriaria a divergência que a planilha existe para eliminar
+- **Sem internet**, o programa usa a última cópia boa e mostra a data no topo
+
+### Quando algo não bate
+
+O programa **recusa a sincronização inteira** e diz a linha e o motivo. Nunca aplica pela metade: um microrganismo que perde antibióticos em silêncio é pior que uma sincronização que falha visivelmente.
+
+| Mensagem | O que fazer |
+|---|---|
+| "Não consegui abrir a planilha" | Compartilhamento não está em *Qualquer pessoa com o link*. Teste numa janela anônima |
+| "a coluna … está como número" | Formate as colunas de corte como **Texto simples** e sincronize de novo. Os valores não se perderam — só não estavam sendo enviados |
+| "tudo numa coluna só" | O CSV entrou sem separador. `Dados ▸ Dividir texto em colunas`, vírgula |
+| "microrganismo desconhecido" | Alguém editou `organismo_id`. A mensagem diz a linha |
+| "Faltam colunas" | O link aponta para a aba errada, ou a primeira linha não é o cabeçalho |
+
+---
+
+## Distribuir para os computadores
+
+Cada PC precisa do arquivo e do link colado uma vez.
+
+**Numa pasta de rede** é mais prático: uma cópia só do `Corte-BrCAST.html`, um atalho na área de trabalho de cada máquina. Versão nova = trocar um arquivo.
+
+> Não adianta pôr o **CSV** na pasta de rede. Por segurança, o navegador proíbe uma página aberta do disco de ler outros arquivos — a mesma regra que impede um anexo de e-mail de varrer o seu computador. Os cortes precisam vir da planilha, que é acesso à internet e autorizado pelo servidor do Google.
+
+### Atalho com ícone
+
+1. Deixe o `corte-brcast.ico` junto do programa
+2. Botão direito na área de trabalho → **Novo ▸ Atalho** → aponte para o `Corte-BrCAST.html`
+3. Botão direito no atalho → **Propriedades ▸ Alterar ícone ▸ Procurar** → escolha o `.ico`
+
+---
+
+## Arquivos
+
+| | |
+|---|---|
+| `Corte-BrCAST.html` | O programa. É só isto que precisa ser distribuído |
+| `corte-brcast.ico` | Ícone para o atalho do Windows, 7 tamanhos |
+| `corte-brcast.svg` | Fonte do ícone, para editar |
+
+## Nota técnica
+
+Sem dependências, sem build, sem back-end. A única requisição de rede é a leitura da planilha, feita por `<script>` no endpoint `gviz` do Google — não por `fetch`, porque um arquivo aberto do disco tem origem `null` e o Google só devolve cabeçalho CORS quando existe uma origem para espelhar. Medido: `fetch` do disco é bloqueado, `<script>` passa. É o que permite o arquivo funcionar com duplo clique, sem servidor.
