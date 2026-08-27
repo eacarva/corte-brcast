@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corte BrCAST</title>
+<link rel="icon" href="corte-brcast.svg">
+<style>
+  :root{
+    --ground:#f4f6f8; --surface:#ffffff; --ink:#101820; --ink-2:#48555f; --ink-3:#78858f;
+    --rule:#d3dae0; --accent:#0d6c72; --accent-ink:#ffffff;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ground:#0c1116; --surface:#141c22; --ink:#e4ebf0; --ink-2:#9aa8b3; --ink-3:#6d7b86;
+      --rule:#26323b; --accent:#4fb9bd; --accent-ink:#07171a;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);
+       font:15.5px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
+       display:flex;justify-content:center;padding:40px 20px 60px}
+  .col{width:100%;max-width:640px}
+  header{display:flex;align-items:center;gap:16px;margin-bottom:26px}
+  .marca{width:64px;height:64px;flex-shrink:0}
+  h1{margin:0;font-size:27px;letter-spacing:-.01em}
+  .sub{color:var(--ink-2);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+  .lead{font-size:17px;line-height:1.55;margin:0 0 26px}
+  .acoes{display:flex;flex-wrap:wrap;gap:11px;margin-bottom:34px}
+  .btn{display:inline-block;padding:11px 20px;border-radius:9px;text-decoration:none;
+       font-weight:600;font-size:14.5px;border:1px solid var(--rule);color:var(--ink);
+       background:var(--surface)}
+  .btn.primario{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+  .card{background:var(--surface);border:1px solid var(--rule);border-radius:12px;
+        padding:18px 20px;margin-bottom:14px}
+  .card h2{margin:0 0 8px;font-size:15px;letter-spacing:.01em}
+  .card p{margin:0;color:var(--ink-2);font-size:14.5px}
+  ol{margin:8px 0 0;padding-left:20px;color:var(--ink-2);font-size:14.5px}
+  ol li{margin:5px 0}
+  code{background:var(--ground);border:1px solid var(--rule);border-radius:4px;
+       padding:1px 5px;font-size:12.5px}
+  footer{margin-top:30px;color:var(--ink-3);font-size:13px;line-height:1.55}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="col">
+
+  <header>
+    <svg class="marca" viewBox="0 0 512 512" aria-hidden="true">
+      <defs><clipPath id="m"><rect width="512" height="512" rx="112"/></clipPath></defs>
+      <g clip-path="url(#m)">
+        <rect width="512" height="512" fill="#0F171D"/>
+        <path d="M0 0 H244 L206 512 H0 Z"     fill="#6FC49B"/>
+        <path d="M268 0 H320 L282 512 H230 Z" fill="#8FBEE6"/>
+        <path d="M344 0 H512 V512 H306 Z"     fill="#E58880"/>
+      </g>
+    </svg>
+    <div>
+      <h1>Corte BrCAST</h1>
+      <div class="sub">LEPAC</div>
+    </div>
+  </header>
+
+  <p class="lead">Interpretação de antibiograma segundo o BrCAST. Digite os valores de CIM
+  e saia com a interpretação colorida, pronta para copiar no laudo.
+  <strong>31 microrganismos, 408 antimicrobianos, um arquivo só.</strong></p>
+
+  <div class="acoes">
+    <a class="btn primario" href="Corte-BrCAST.html" download>Baixar o programa</a>
+    <a class="btn" href="Corte-BrCAST.html">Abrir agora</a>
+    <a class="btn" href="https://github.com/eacarva/corte-brcast#readme">Como usar</a>
+  </div>
+
+  <div class="card">
+    <h2>Sem instalação</h2>
+    <p>É um arquivo HTML. Baixa, dá duplo clique e funciona — sem servidor, sem banco de dados,
+    sem internet obrigatória. Copiar para outro computador é a instalação inteira.</p>
+  </div>
+
+  <div class="card">
+    <h2>Nenhum dado de paciente sai da máquina</h2>
+    <p>Os CIM digitados ficam no navegador de quem digitou. O programa não envia resultado
+    para lugar nenhum.</p>
+  </div>
+
+  <div class="card">
+    <h2>Os cortes ficam iguais em todos os computadores</h2>
+    <p>Os valores de corte vêm de uma planilha do Google que o laboratório mantém.
+    Sem isso, cada máquina teria a própria cópia e elas divergiriam em silêncio —
+    a mesma cepa interpretada de dois jeitos, sem ninguém perceber.</p>
+    <ol>
+      <li>Na tela <strong>Fonte dos cortes</strong>, clique em <strong>Gerar CSV para o Drive</strong></li>
+      <li>Suba no Drive e abra com Google Planilhas</li>
+      <li>Formate as colunas de corte como <strong>Texto simples</strong></li>
+      <li>Compartilhe como <strong>Qualquer pessoa com o link · Leitor</strong></li>
+      <li>Cole o endereço na tela <strong>Fonte dos cortes</strong></li>
+    </ol>
+  </div>
+
+  <footer>
+    Ao abrir por este endereço, o programa vem com os cortes de fábrica
+    (<code>BrCAST 2024</code>) e sem planilha configurada — dá para experimentar à vontade.
+    O que você digitar aqui fica só no seu navegador.<br><br>
+    Código, ícone e documentação em
+    <a href="https://github.com/eacarva/corte-brcast">github.com/eacarva/corte-brcast</a>.
+  </footer>
+
+</div>
+</body>
+</html>
