@@ -116,9 +116,9 @@ Sem dependências, sem build, sem back-end. A única requisição de rede é a l
 
 ## Autoria
 
-**Elisson Andrade** — LEPAC. Concepção, direção do projeto e validação clínica:
-definiu o que o sistema deveria fazer, forneceu os dados de referência, conduziu
-as decisões de arquitetura e testou cada versão contra a rotina real do laboratório.
+**Elisson Andrade de Carvalho** — concepção e direção do projeto: definiu o que o
+sistema deveria fazer, reuniu os dados de referência, conduziu as decisões de
+arquitetura e testou cada versão contra a rotina real do laboratório.
 
 Implementação em par com Claude (Anthropic).
 
