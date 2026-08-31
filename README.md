@@ -72,8 +72,8 @@ reativar, e falta de linha ninguém percebe.
 
 ### Observações do laudo
 
-Ficam **abaixo do quadro**, na própria tela do laudo: escolhe as que valem para
-aquela amostra e elas saem coladas junto quando se clica em *Copiar tabela*.
+Ficam **abaixo do quadro**, na própria tela do laudo: digita parte do texto ou
+o código — `sonda`, `ESBL`, `Bac 12` — escolhe as que valem para aquela amostra e elas saem coladas junto quando se clica em *Copiar tabela*.
 Antes era preciso copiar o quadro, colar, voltar ao programa, achar a
 observação, copiar de novo e colar embaixo — a cada observação.
 

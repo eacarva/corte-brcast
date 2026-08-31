@@ -229,9 +229,20 @@ tr.omitida .abxnome{text-decoration:line-through}
           transition:color .12s, background .12s, border-color .12s}
 .obstirar svg{width:15px; height:15px; display:block}
 .obstirar:hover{color:var(--res-ink); background:var(--surface); border-color:var(--rule)}
-.obsadd select{width:100%; max-width:100%; font-family:inherit; font-size:13px;
-               padding:9px 11px; border:1px solid var(--rule-strong); border-radius:7px;
-               background:var(--surface); color:var(--ink)}
+.obsadd .search{width:100%; font-family:inherit; font-size:13.5px;
+                padding:10px 12px; border:1px solid var(--rule-strong); border-radius:7px;
+                background:var(--surface); color:var(--ink)}
+.obsadd .search:focus{outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent)}
+.obsdica{margin:9px 2px 0; font-size:12px; color:var(--ink-3)}
+.obsachados{margin-top:9px; border:1px solid var(--rule); border-radius:8px; overflow:hidden}
+.obsop{display:flex; gap:10px; align-items:flex-start; width:100%; text-align:left;
+       background:var(--surface); border:0; border-bottom:1px solid var(--rule);
+       padding:9px 12px; cursor:pointer; font-family:inherit; font-size:12.5px;
+       line-height:1.45; color:var(--ink-2)}
+.obsop:last-child{border-bottom:0}
+.obsop:hover, .obsop:focus-visible{background:var(--accent-soft); color:var(--ink)}
+.obsop-txt{flex:1; min-width:0}
+.obsop mark{background:var(--warn); color:var(--warn-ink); border-radius:2px; padding:0 1px}
 .avisofora{display:flex; align-items:center; gap:11px; flex-wrap:wrap; margin-bottom:14px;
            border-left:3px solid var(--warn-ink); background:var(--surface-2);
            padding:9px 13px; font-size:13px; color:var(--ink-2)}
@@ -631,6 +642,7 @@ let omitidos = ler(K_OMIT, {});
    do caso em curso: "Nova amostra" e "Limpar tudo" zeram. Observação de um
    paciente colada no laudo de outro seria erro grave e silencioso. */
 let obsSel = ler(K_OBSSEL, {});
+let buscaObs = "";                     // só da sessão: some ao fechar
 
 function obsDaAmostra(){ return (obsSel[orgAtual.id] || []).slice(); }
 function gravarObsSel(lista){
@@ -708,7 +720,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.01.3";
+const VERSAO_APP = "2026.09.01.4";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -1441,11 +1453,55 @@ function painelObsHTML(){
     '</div>';
   }).join("");
 
+  /* Escolher entre 68 observações numa lista suspensa é rolar às cegas: o
+     código não diz o que a observação fala, e o texto é longo demais para
+     caber numa linha de <option>. Campo com filtro deixa procurar pelo que se
+     lembra — "sonda", "ESBL", "KPC" — ou pelo código, quando já se sabe qual é. */
   const disponiveis = L.filter(function(o){ return sel.indexOf(o.c) < 0; });
-  const opcoes = disponiveis.map(function(o){
-    const resumo = o.t.replace(/\s+/g, " ").slice(0, 90);
-    return '<option value="'+esc(o.c)+'">'+esc(o.c)+" — "+esc(resumo)+(o.t.length>90?"…":"")+'</option>';
-  }).join("");
+  const q = semAcento(buscaObs).toLowerCase().trim();
+  const achados = !q ? [] : disponiveis.filter(function(o){
+    return semAcento(o.c).toLowerCase().indexOf(q) >= 0 ||
+           semAcento(o.t).toLowerCase().indexOf(q) >= 0;
+  });
+
+  function realce(t){
+    if(!q) return esc(t);
+    const partes = String(t).split(new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"));
+    return partes.map(function(x, i){ return i % 2 ? "<mark>"+esc(x)+"</mark>" : esc(x); }).join("");
+  }
+
+  /* Mostra o pedaço em volta do que foi procurado, não o começo do texto. Uma
+     observação longa quase nunca traz a palavra buscada nas primeiras linhas:
+     o resultado aparecia sem o termo à vista e não dava para saber por que
+     aquela linha casou. */
+  function trecho(t){
+    const limpo = String(t).replace(/\s+/g, " ");
+    const i = q ? semAcento(limpo).toLowerCase().indexOf(q) : -1;
+    if(i < 0) return {txt:limpo.slice(0,150), fim:limpo.length > 150};
+    const ini = Math.max(0, i - 45);
+    const corte = limpo.slice(ini, ini + 170);
+    return {txt:(ini > 0 ? "…" : "") + corte, fim:(ini + 170) < limpo.length};
+  }
+
+  const MAX = 8;
+  let lista;
+  if(!q){
+    lista = '<p class="obsdica">'+disponiveis.length+' observaç'+(disponiveis.length===1?'ão':'ões')+
+            ' disponíveis. Digite parte do texto ou o código.</p>';
+  }else if(!achados.length){
+    lista = '<p class="obsdica">Nenhuma observação com “'+esc(buscaObs)+'”.</p>';
+  }else{
+    lista = '<div class="obsachados">'+achados.slice(0, MAX).map(function(o){
+      const tr = trecho(o.t);
+      return '<button class="obsop" data-obspor="'+esc(o.c)+'">'+
+             '<span class="obscod">'+realce(o.c)+'</span>'+
+             '<span class="obsop-txt">'+realce(tr.txt)+(tr.fim?"…":"")+'</span>'+
+             '</button>';
+    }).join("")+
+    (achados.length > MAX
+      ? '<p class="obsdica">e mais '+(achados.length-MAX)+' — escreva mais para afinar.</p>'
+      : "")+'</div>';
+  }
 
   return '<div class="panel obsbox">'+
     '<div class="refhead"><strong>Observações do laudo</strong>'+
@@ -1455,9 +1511,10 @@ function painelObsHTML(){
       (sel.length ? '<div class="obslista">'+escolhidas+'</div>'
                   : '<p class="obsvazio">Nenhuma observação escolhida — o laudo sai só com o quadro.</p>')+
       '<div class="obsadd">'+
-        '<select id="obsEscolher" aria-label="Escolher observação para o laudo">'+
-          '<option value="">Escolher uma observação…</option>'+opcoes+
-        '</select>'+
+        '<input id="obsBusca" class="search" spellcheck="false" autocomplete="off" '+
+          'placeholder="Digite para achar uma observação — sonda, ESBL, KPC, Bac 12…" '+
+          'aria-label="Procurar observação para o laudo" value="'+esc(buscaObs)+'">'+
+        lista+
       '</div>'+
     '</div></div>';
 }
@@ -1595,13 +1652,36 @@ function renderLaudo(){
     toast("Todas as linhas conferidas.");
   });
 
-  const selObs = $("obsEscolher");
-  if(selObs) selObs.addEventListener("change", function(){
-    const cod = selObs.value;
-    if(!cod) return;
-    const atual = obsDaAmostra();
-    if(atual.indexOf(cod) < 0){ atual.push(cod); gravarObsSel(atual); }
-    renderLaudo();
+  const bo = $("obsBusca");
+  if(bo){
+    bo.addEventListener("input", function(){
+      buscaObs = bo.value;
+      renderLaudo();
+    });
+    /* Enter pega o primeiro achado: quem já sabe o que quer digita três letras
+       e confirma, sem tirar a mão do teclado. */
+    bo.addEventListener("keydown", function(e){
+      if(e.key === "Escape"){ buscaObs = ""; renderLaudo(); return; }
+      if(e.key !== "Enter") return;
+      e.preventDefault();
+      const primeiro = $("content").querySelector("[data-obspor]");
+      if(primeiro) primeiro.click();
+    });
+    if(buscaObs){
+      bo.focus();
+      try{ bo.setSelectionRange(buscaObs.length, buscaObs.length); }catch(e){}
+    }
+  }
+  $("content").querySelectorAll("[data-obspor]").forEach(function(b){
+    b.addEventListener("click", function(){
+      const atual = obsDaAmostra();
+      const cod = b.dataset.obspor;
+      if(atual.indexOf(cod) < 0){ atual.push(cod); gravarObsSel(atual); }
+      buscaObs = "";                    // achou e usou: limpa para a próxima
+      renderLaudo();
+      const c = $("obsBusca");
+      if(c) c.focus();
+    });
   });
   $("content").querySelectorAll("button[data-obstirar]").forEach(function(b){
     b.addEventListener("click", function(){
