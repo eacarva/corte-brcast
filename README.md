@@ -132,6 +132,11 @@ terceiro comanda a troca nas máquinas instaladas: o navegador só percebe que
 há versão nova porque o `sw.js` mudou de conteúdo. Sem mexer nele, quem
 instalou continua na versão antiga.
 
+Correções só na página de entrada (`index.html`) aparecem sem precisar de
+número novo: ela é buscada da rede a cada visita, com o cache apenas como
+reserva para quando não há rede. O programa é o contrário — vem do disco,
+para abrir instantâneo e sem internet —, e por isso depende do número.
+
 ### Instalar como programa (recomendado nas máquinas fixas)
 
 O Chrome instala a página como programa: vira ícone na área de trabalho,
