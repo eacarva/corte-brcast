@@ -47,6 +47,7 @@
   .selo{display:inline-block;background:var(--accent);color:var(--accent-ink);
         font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
         padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:2px}
+  .selo.ok::before{content:"\2713\00a0"}
 
   .btn{display:inline-block;padding:11px 20px;border-radius:9px;text-decoration:none;
        font-weight:600;font-size:14.5px;border:1px solid var(--rule);color:var(--ink);
@@ -64,6 +65,12 @@
           padding:14px 20px;margin-bottom:12px;color:var(--ink-2);font-size:14.5px}
   details summary{cursor:pointer;color:var(--ink);font-weight:600;font-size:15px}
   details[open] summary{margin-bottom:10px}
+  .escolha .dobra{background:none;border:0;border-top:1px solid var(--rule);
+                  border-radius:0;padding:10px 0 0;margin:12px 0 0;font-size:14px}
+  .escolha .dobra summary{font-size:14px}
+  .escolha .dobra p{margin:0 0 8px}
+  .escolha .dobra p:last-child{margin-bottom:0}
+  .escolha .dobra ol{margin:0 0 9px}
   code{background:var(--ground);border:1px solid var(--rule);border-radius:4px;
        padding:1px 5px;font-size:12.5px}
   hr{border:0;border-top:1px solid var(--rule);margin:34px 0 26px}
@@ -110,7 +117,7 @@
 
   <div class="escolha destaque" id="blocoInstalar">
     <div class="txt">
-      <b>Deixar no computador<span class="selo" id="seloRec">Recomendado</span></b>
+      <b><span id="tituloInstalar">Deixar no computador</span><span class="selo" id="seloRec">Recomendado</span></b>
       <p id="txtInstalar">Cria um ícone na área de trabalho, como qualquer outro programa.
       Depois abre mesmo sem internet, e quando sai uma versão nova ele se atualiza
       sozinho — ninguém precisa baixar de novo.</p>
@@ -127,24 +134,23 @@
     <a class="btn" href="Corte-BrCAST.html" download>Baixar</a>
   </div>
 
-  <div id="ajudaIcone" hidden>
-    <div class="card">
-      <h3>Já está instalado neste computador</h3>
-      <p>Por isso o botão não aparece. Procure por <strong>Corte BrCAST</strong> no menu
-      Iniciar, no Launchpad ou na área de trabalho.</p>
-      <p><strong>Sumiu o ícone?</strong> O programa continua instalado — só o atalho
-      se perdeu. Para trazer de volta:</p>
-      <ol>
-        <li>Na barra de endereço do Chrome, escreva <code>chrome://apps</code> e aperte Enter</li>
-        <li>Clique com o <strong>botão direito</strong> em <strong>Corte BrCAST</strong></li>
-        <li>Escolha <strong>Criar atalhos…</strong></li>
-      </ol>
-      <p>Se não aparecer essa opção, ainda dá pelo caminho longo: nessa mesma tela,
-      botão direito ▸ <strong>Remover do Chrome</strong>, volte aqui e clique em
-      <strong>Instalar</strong>. Nada se perde — o programa não guarda nada que dependa
-      da instalação.</p>
-    </div>
-  </div>
+  <!-- Fica aqui guardado e o script encaixa dentro do bloco "Deixar no
+       computador" quando descobre que ja esta instalado. E a mesma decisao:
+       separar em outro card manda a pessoa procurar a resposta longe da
+       pergunta. -->
+  <details id="detalhesIcone" class="dobra" hidden>
+    <summary>Sumiu o ícone?</summary>
+    <p>O programa continua instalado — só o atalho se perdeu. Para trazer de volta:</p>
+    <ol>
+      <li>Na barra de endereço do Chrome, escreva <code>chrome://apps</code> e aperte Enter</li>
+      <li>Clique com o <strong>botão direito</strong> em <strong>Corte BrCAST</strong></li>
+      <li>Escolha <strong>Criar atalhos…</strong></li>
+    </ol>
+    <p>Se não aparecer essa opção, tem o caminho longo: nessa mesma tela, botão
+    direito ▸ <strong>Remover do Chrome</strong>, volte aqui e clique em
+    <strong>Instalar</strong>. Nada se perde — o programa não guarda nada que
+    dependa da instalação.</p>
+  </details>
 
   <div id="ajudaInstalar" hidden>
     <div class="card">
@@ -243,14 +249,13 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
 var eventoInstalar = null;
 var btn = document.getElementById("btnInstalar");
 var ajuda = document.getElementById("ajudaInstalar");
-var ajudaIcone = document.getElementById("ajudaIcone");
+var detalhesIcone = document.getElementById("detalhesIcone");
 
 window.addEventListener("beforeinstallprompt", function(e){
   e.preventDefault();
   eventoInstalar = e;
   btn.hidden = false;
   ajuda.hidden = true;
-  ajudaIcone.hidden = true;
 });
 
 btn.addEventListener("click", function(){
@@ -262,14 +267,22 @@ btn.addEventListener("click", function(){
 
 window.addEventListener("appinstalled", function(){ marcarInstalado(); });
 
+/* O bloco "Deixar no computador" vira o bloco "ja esta instalado", no mesmo
+   lugar. E a resposta a mesma pergunta: nao faz sentido responder em outro
+   canto da pagina. */
 function marcarInstalado(){
-  document.getElementById("txtInstalar").textContent =
-    "Já está no seu computador. Procure por Corte BrCAST no menu Iniciar, no " +
-    "Launchpad ou na área de trabalho.";
-  document.getElementById("seloRec").hidden = true;
+  var alvo = document.getElementById("txtInstalar");
+  alvo.innerHTML = "Procure por <strong>Corte BrCAST</strong> no menu Iniciar, no " +
+                   "Launchpad ou na área de trabalho.";
+  document.getElementById("tituloInstalar").textContent = "Já está no seu computador";
+  var selo = document.getElementById("seloRec");
+  selo.textContent = "Instalado";
+  selo.className = "selo ok";
+  document.getElementById("blocoInstalar").classList.add("pronto");
+  alvo.parentNode.appendChild(detalhesIcone);
+  detalhesIcone.hidden = false;
   btn.hidden = true;
   ajuda.hidden = true;
-  ajudaIcone.hidden = false;
 }
 
 /* O botão some por dois motivos opostos: ja instalado, ou este navegador nao
