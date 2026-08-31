@@ -1,0 +1,74 @@
+/* Service worker do Corte BrCAST.
+
+   Existe para uma coisa só: deixar o programa instalado em cada máquina,
+   funcionando offline, e trocando de versão sozinho quando o laboratório
+   publica uma. O arquivo solto continua existindo — isto é o caminho das
+   máquinas fixas, não o substituto dele.
+
+   REGRA QUE NÃO PODE SER QUEBRADA: só mexe no que é do próprio site. Os
+   cortes vêm de uma planilha do Google, por rede, em outro domínio. Se este
+   arquivo guardasse aquelas respostas, o laboratório publicaria uma correção
+   de corte e as máquinas continuariam interpretando pelo valor antigo, em
+   silêncio, sem erro nenhum na tela. Por isso todo pedido para fora passa
+   direto, sem tocar no cache. */
+
+const VERSAO = "2026.08.31.2";
+const CACHE  = "corte-brcast-" + VERSAO;
+
+/* O que a máquina precisa ter no disco para abrir sem rede. */
+const NUCLEO = [
+  "./",
+  "./index.html",
+  "./Corte-BrCAST.html",
+  "./manifest.webmanifest",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./icon-maskable-512.png"
+];
+
+self.addEventListener("install", function(e){
+  e.waitUntil(
+    caches.open(CACHE)
+      .then(function(c){ return c.addAll(NUCLEO); })
+      .then(function(){ return self.skipWaiting(); })
+  );
+});
+
+/* Versão nova entrou: apaga as anteriores. Sem isto o disco só cresce, e uma
+   cópia velha poderia ressuscitar. */
+self.addEventListener("activate", function(e){
+  e.waitUntil(
+    caches.keys().then(function(ks){
+      return Promise.all(ks.map(function(k){
+        return k === CACHE ? null : caches.delete(k);
+      }));
+    }).then(function(){ return self.clients.claim(); })
+  );
+});
+
+self.addEventListener("fetch", function(e){
+  const req = e.request;
+  if(req.method !== "GET") return;
+
+  const url = new URL(req.url);
+
+  // Planilha de cortes, fontes, qualquer outro domínio: não é da nossa conta.
+  if(url.origin !== self.location.origin) return;
+
+  // O aviso de versão só serve se for sempre fresco. Guardá-lo seria dizer
+  // para sempre que a versão instalada é a última.
+  if(url.pathname.endsWith("/version.json")) return;
+
+  e.respondWith(
+    caches.match(req).then(function(hit){
+      if(hit) return hit;
+      return fetch(req).then(function(r){
+        if(r && r.ok && r.type === "basic"){
+          const copia = r.clone();
+          caches.open(CACHE).then(function(c){ c.put(req, copia); });
+        }
+        return r;
+      });
+    })
+  );
+});

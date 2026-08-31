@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Corte BrCAST</title>
+<meta name="theme-color" content="#0d6c72">
+<!-- Instalação como programa. Só valem servidos por https; abertos do disco,
+     o navegador ignora os dois em silêncio e nada muda. -->
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@1,400;1,500&display=swap">
@@ -574,7 +578,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.08.31";
+const VERSAO_APP = "2026.08.31.2";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 
 /* Aceita o link de edição, o de compartilhar ou um já colado antes. */
@@ -2119,13 +2123,41 @@ campoBusca.focus();
    pergunta: não baixa, não se reescreve, não toca em corte nenhum — o que
    decide laudo continua sendo apenas o que está neste arquivo. Sem rede,
    falha calado, porque não ter aviso já é o estado correto. */
+/* Instala o programa na máquina quando ele vem do site. Do disco (file://)
+   nem tenta: não existe service worker sem https, e o arquivo solto continua
+   funcionando exatamente como sempre funcionou. */
+if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
+  // updateViaCache "none": o navegador nunca serve este script do próprio
+  // cache HTTP. Sem isso ele pode adiar a checagem e a máquina ficaria numa
+  // versão velha sem motivo aparente.
+  navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).catch(function(){});
+}
+
 fetch(URL_VERSAO, {cache:"no-store"})
   .then(function(r){ return r.ok ? r.json() : null; })
   .then(function(v){
     if(!v || !v.versao || v.versao === VERSAO_APP) return;
     const a = $("avisoNova");
-    a.textContent = "Versão nova: " + v.versao;
-    a.title = (v.notas ? v.notas + " — " : "") + "abre a página para baixar";
+    /* Instalado, a versão nova chega sozinha ao disco e só falta recarregar.
+       Solto em file://, daqui não há como trocar o arquivo da pessoa: o
+       melhor que se faz é levá-la à página de download. */
+    const instalado = "serviceWorker" in navigator && !!navigator.serviceWorker.controller;
+    a.textContent = "Versão nova: " + v.versao + (instalado ? " — atualizar" : "");
+    a.title = (v.notas ? v.notas + " — " : "") +
+              (instalado ? "recarrega já na versão nova" : "abre a página para baixar");
+    if(instalado){
+      a.href = "#";
+      a.removeAttribute("target");
+      a.addEventListener("click", function(ev){
+        ev.preventDefault();
+        // força a checagem antes de recarregar, senão a primeira recarga
+        // ainda pode servir a cópia velha e o aviso volta
+        navigator.serviceWorker.getRegistration()
+          .then(function(reg){ return reg ? reg.update() : null; })
+          .catch(function(){})
+          .then(function(){ location.reload(); });
+      });
+    }
     a.classList.add("mostra");
   })
   .catch(function(){});

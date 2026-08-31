@@ -108,17 +108,44 @@ Ele **só pergunta**. Não baixa nada, não se reescreve e não muda nenhum
 corte: o que decide laudo é apenas o que está dentro do arquivo que você
 tem na mão.
 
-**Ao publicar uma versão nova**, subir o mesmo número nos dois lugares:
+**Ao publicar uma versão nova**, subir o mesmo número nos três lugares:
 
 | | |
 |---|---|
 | `Corte-BrCAST.html` | a constante `VERSAO_APP` |
 | `version.json` | o campo `versao` |
+| `sw.js` | a constante `VERSAO` |
 
-Se um ficar para trás, o aviso mente: ou some quando devia aparecer, ou
-aparece para sempre em quem já está atualizado.
+Os dois primeiros comandam o aviso: se um ficar para trás, ele mente — ou some
+quando devia aparecer, ou aparece para sempre em quem já está atualizado. O
+terceiro comanda a troca nas máquinas instaladas: o navegador só percebe que
+há versão nova porque o `sw.js` mudou de conteúdo. Sem mexer nele, quem
+instalou continua na versão antiga.
 
-### Atalho com ícone
+### Instalar como programa (recomendado nas máquinas fixas)
+
+O Chrome instala a página como programa: vira ícone na área de trabalho,
+abre em janela própria, funciona sem internet igual ao arquivo — e **troca de
+versão sozinho**. O ícone vem do `manifest.webmanifest`; ninguém precisa criar
+atalho nem escolher figura.
+
+1. Abrir <https://eacarva.github.io/corte-brcast/>
+2. Clicar no ícone de instalar na barra de endereço (ou **menu ⋮ ▸ Transmitir,
+   salvar e compartilhar ▸ Instalar página como app**)
+3. Confirmar em **Instalar**
+
+Precisa de internet **uma vez**, só para instalar. Depois disso a máquina tem
+tudo em disco.
+
+Se o Chrome do laboratório for gerenciado pela TI, o administrador consegue
+instalar em todas as máquinas de uma vez por política, sem ninguém clicar em
+nada — vale perguntar.
+
+O botão pode não aparecer: navegador antigo, Safari, ou política que proíbe
+instalar. Nesse caso o arquivo solto continua sendo o caminho, e é exatamente
+para isso que ele existe.
+
+### Atalho com ícone (para o arquivo solto)
 
 1. Deixe o `corte-brcast.ico` junto do programa
 2. Botão direito na área de trabalho → **Novo ▸ Atalho** → aponte para o `Corte-BrCAST.html`
@@ -132,6 +159,10 @@ aparece para sempre em quem já está atualizado.
 |---|---|
 | `Corte-BrCAST.html` | O programa. É só isto que precisa ser distribuído |
 | `version.json` | Última versão publicada. É o que o programa consulta para avisar |
+| `sw.js` | Faz a instalação funcionar offline e trocar de versão sozinha |
+| `manifest.webmanifest` | Nome, cores e ícones do programa instalado |
+| `icon-*.png` | Ícones do programa instalado, gerados do `.svg` |
+| `index.html` | Página de entrada em eacarva.github.io/corte-brcast |
 | `corte-brcast.ico` | Ícone para o atalho do Windows, 7 tamanhos |
 | `corte-brcast.svg` | Fonte do ícone, para editar |
 
