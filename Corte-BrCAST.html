@@ -720,7 +720,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.01.7";
+const VERSAO_APP = "2026.09.01.8";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -742,6 +742,28 @@ function urlPlanilha(f){
 
 /* Uma célula do gviz vira sempre texto. O formatado (f) tem prioridade: se a
    coluna for tipada como número, "8" volta em v como 8 e em f como "8". */
+/* Onde estão os nomes das colunas.
+
+   Planilha nativa do Google: o cabeçalho vem em cols[].label e a primeira
+   linha já é dado. Mas um .xlsx subido ao Drive sem converter continua sendo
+   um .xlsx, e aí o Google devolve label vazio e manda o cabeçalho como
+   primeira linha. Os dois casos são normais — a pessoa nem sabe que subiu de
+   um jeito ou de outro, e o arquivo que o programa gera é justamente um
+   .xlsx. Então procura nos dois lugares. */
+function acharCabecalho(tb, obrigatorias){
+  const porLabel = tb.cols.map(function(c){ return String(c.label == null ? "" : c.label).trim(); });
+  if(obrigatorias.every(function(n){ return porLabel.indexOf(n) >= 0; }))
+    return {cols:porLabel, pular:0};
+
+  const linha0 = ((tb.rows || [])[0] || {}).c || [];
+  const porLinha = tb.cols.map(function(_, i){ return celula(linha0[i]); });
+  if(obrigatorias.every(function(n){ return porLinha.indexOf(n) >= 0; }))
+    return {cols:porLinha, pular:1};
+
+  // nenhum dos dois serve: devolve o que houver, para a mensagem de erro dizer o que falta
+  return {cols:porLabel.some(Boolean) ? porLabel : porLinha, pular:0};
+}
+
 function celula(c){
   if(!c) return "";
   let t;
@@ -787,14 +809,15 @@ function buscarObs(f, ok, falha){
     try{
       if(d && d.status === "error") return falha("sem aba");
       if(!d || !d.table || !d.table.cols) return falha("sem aba");
-      const cols = d.table.cols.map(function(c){ return String(c.label == null ? "" : c.label).trim(); });
+      const cab = acharCabecalho(d.table, COLS_OBS);
+      const cols = cab.cols;
       const faltam = COLS_OBS.filter(function(n){ return cols.indexOf(n) < 0; });
       if(faltam.length)
         return falha('A aba "'+ABA_OBS+'" precisa das colunas '+COLS_OBS.join(" e ")+
                      ". Faltou: "+faltam.join(", ")+".");
       const ic = cols.indexOf("codigo"), it = cols.indexOf("texto");
       const lista = [];
-      (d.table.rows || []).forEach(function(r){
+      (d.table.rows || []).slice(cab.pular).forEach(function(r){
         const c = celula((r.c || [])[ic]), t = celula((r.c || [])[it]);
         if(c && t) lista.push({c:c, t:t});
       });
@@ -830,7 +853,8 @@ function buscarPlanilha(f, ok, falha){
         const e = (d.errors && d.errors[0]) || {};
         return falha("O Google recusou: "+(e.detailed_message || e.message || "motivo não informado"));
       }
-      const cols = d.table.cols.map(function(c){ return String(c.label == null ? "" : c.label).trim(); });
+      const cab = acharCabecalho(d.table, COLUNAS);
+      const cols = cab.cols;
       /* CSV que entrou sem ser dividido: a linha inteira num campo só. Sai como
          "faltam todas as colunas", que não diz o que fazer. */
       const primeira = (((d.table.rows || [])[0] || {}).c || [])[0];
@@ -852,7 +876,10 @@ function buscarPlanilha(f, ok, falha){
          devolve null em toda célula de texto — "≤8" e "2 a 4" somem sem erro
          nenhum. Como célula vazia aqui é legítima, nada mais no programa
          perceberia. Coluna de corte tem que ser texto; se não for, recusamos. */
-      const numericas = CORTES.filter(function(n){
+      /* Só vale conferir o tipo quando o Google inferiu a coluna. Num .xlsx não
+         convertido ele devolve tudo como texto, que é o que queremos, e o
+         cabeçalho ocupa a primeira linha — o tipo ali não diria nada. */
+      const numericas = cab.pular ? [] : CORTES.filter(function(n){
         const c = d.table.cols[idx[n]];
         return c && c.type === "number";
       });
@@ -863,7 +890,7 @@ function buscarPlanilha(f, ok, falha){
           "lidos assim que a coluna virar texto, sem precisar importar nada de novo. "+
           "Depois clique em Sincronizar agora.");
       const ic = cols.indexOf(COL_CARTAO);
-      const linhas = (d.table.rows || []).map(function(r){
+      const linhas = (d.table.rows || []).slice(cab.pular).map(function(r){
         const o = {};
         COLUNAS.forEach(function(n){ o[n] = celula((r.c || [])[idx[n]]); });
         if(ic >= 0) o.cartao = celula((r.c || [])[ic]);
@@ -873,7 +900,7 @@ function buscarPlanilha(f, ok, falha){
       // primeira célula preenchida, em qualquer linha: sobrevive a reordenação
       const iv = cols.indexOf(COL_VERSAO);
       let versao = "";
-      if(iv >= 0) (d.table.rows || []).some(function(r){
+      if(iv >= 0) (d.table.rows || []).slice(cab.pular).some(function(r){
         const v = celula((r.c || [])[iv]);
         if(v){ versao = v; return true; }
         return false;
