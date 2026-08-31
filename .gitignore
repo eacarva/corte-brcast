@@ -3,6 +3,7 @@
 .codex/
 .agents/
 .claude/settings.local.json
+.impeccable/
 
 # macOS
 .DS_Store
