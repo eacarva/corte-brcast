@@ -285,6 +285,13 @@ tr.omitida .abxnome{text-decoration:line-through}
 .sumcell.res .v{color:var(--res-ink)} .sumcell.warn .v{color:var(--warn-ink)}
 
 .hint{font-size:12.5px; color:var(--ink-3); margin:13px 2px 0; max-width:76ch}
+.dicas{display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+       gap:10px 22px; margin:16px 2px 0}
+.dicas > div{font-size:12.5px; line-height:1.5; color:var(--ink-3); max-width:52ch}
+.dicas b{display:block; color:var(--ink-2); font-weight:600; font-size:11px;
+         text-transform:uppercase; letter-spacing:.06em; margin-bottom:2px}
+.dicas code{font-family:"IBM Plex Mono",monospace; background:var(--surface-2);
+            padding:1px 4px; border-radius:3px; font-size:11.5px}
 .hint code{font-family:"IBM Plex Mono",monospace; background:var(--surface-2); padding:1px 4px; border-radius:3px; font-size:11.5px}
 .hint strong{color:var(--ink-2); font-weight:600}
 
@@ -701,7 +708,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.01.2";
+const VERSAO_APP = "2026.09.01.3";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -1556,13 +1563,21 @@ function renderLaudo(){
       '<th>Interpretação</th><th>Corte aplicado</th><th></th></tr></thead>'+
       '<tbody>'+corpo+'</tbody></table></div></div>'+
     painelObsHTML()+
-    '<p class="hint">Aceita <code>≤0,25</code>, <code>&gt;8</code>, <code>16/2</code>, <code>4</code>. '+
-    'Digite <code>&lt;=</code> ou <code>&gt;=</code> e vira <code>≤</code> / <code>≥</code> sozinho. '+
-    '<code>Enter</code> vai para o próximo campo, <code>Shift+Enter</code> volta. '+
-    'Colar várias linhas num campo preenche a coluna para baixo. '+
-    '<strong>Corte aplicado</strong> mostra qual regra decidiu — essa coluna não vai no copiar. '+
-    'O <strong>olho</strong> no fim de cada linha decide se aquele antimicrobiano sai no laudo. '+
-    'Olho cortado = fica de fora do que você copia, mas continua aqui na tela.</p>';
+    /* Em parágrafo corrido isto virava um bloco estreito com um vazio enorme à
+       direita: linha de texto tem limite de leitura, mas a tela é larga. Como
+       são avisos independentes, e não uma explicação que se lê do começo ao
+       fim, cada um vira um item e a grade preenche a largura. */
+    '<div class="dicas">'+
+      '<div><b>Valores</b>Aceita <code>≤0,25</code>, <code>&gt;8</code>, <code>16/2</code>, '+
+        '<code>4</code>. Digitar <code>&lt;=</code> ou <code>&gt;=</code> vira '+
+        '<code>≤</code> / <code>≥</code> sozinho.</div>'+
+      '<div><b>Teclado</b><code>Enter</code> vai para o próximo campo, '+
+        '<code>Shift+Enter</code> volta.</div>'+
+      '<div><b>Colar</b>Várias linhas num campo só preenchem a coluna para baixo.</div>'+
+      '<div><b>Corte aplicado</b>Mostra qual regra decidiu. Essa coluna não vai no copiar.</div>'+
+      '<div><b>O olho no fim da linha</b>Decide se aquele antimicrobiano sai no laudo. '+
+        'Cortado, fica fora do que você copia — mas continua aqui na tela.</div>'+
+    '</div>';
 
   $("btnCopiar").addEventListener("click", copiar);
   $("btnNova").addEventListener("click", novaAmostra);
