@@ -270,7 +270,13 @@ tr.omitida .abxnome{text-decoration:line-through}
                 padding:10px 12px; border:1px solid var(--rule-strong); border-radius:7px;
                 background:var(--surface); color:var(--ink)}
 .obsadd .search:focus{outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent)}
-.obsdica{margin:9px 2px 0; font-size:12px; color:var(--ink-3)}
+.obsdica{margin:9px 2px 0; font-size:12px; color:var(--ink-2)}
+.obstodas{display:flex; align-items:center; gap:11px; flex-wrap:wrap; margin-top:10px}
+.obstodas .obsdica{margin:0}
+.obsver{font-size:12.5px; padding:7px 12px; min-height:38px}
+/* A lista inteira são 68 itens: rola dentro da própria caixa em vez de
+   empurrar o resto da tela para longe. */
+.obsrolagem{max-height:290px; overflow-y:auto}
 .obsachados{margin-top:9px; border:1px solid var(--rule); border-radius:8px; overflow:hidden}
 .obsop{display:flex; gap:10px; align-items:flex-start; width:100%; text-align:left;
        background:var(--surface); border:0; border-bottom:1px solid var(--rule);
@@ -701,6 +707,7 @@ let omitidos = ler(K_OMIT, {});
 let obsSel = ler(K_OBSSEL, {});
 let erroCampo = "";                    // erro do link, mostrado junto do campo
 let buscaObs = "";                     // só da sessão: some ao fechar
+let verTodasObs = false;               // lista inteira aberta, para folhear
 
 function obsDaAmostra(){ return (obsSel[orgAtual.id] || []).slice(); }
 function gravarObsSel(lista){
@@ -778,7 +785,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.02.3";
+const VERSAO_APP = "2026.09.02.4";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -1571,8 +1578,25 @@ function painelObsHTML(){
   const MAX = 8;
   let lista;
   if(!q){
-    lista = '<p class="obsdica">'+disponiveis.length+' observaç'+(disponiveis.length===1?'ão':'ões')+
-            ' disponíveis. Digite parte do texto ou o código.</p>';
+    /* Sem termo, a lista inteira fica a um clique. Buscar só serve para quem
+       lembra alguma palavra; quem não lembra precisa poder folhear — e é o
+       caso de quem usa isto poucas vezes por mês. As duas portas para a mesma
+       lista, e não uma escolha entre elas. */
+    lista = '<div class="obstodas">'+
+      '<button class="btn obsver" id="obsVerTodas" aria-expanded="'+(verTodasObs?"true":"false")+'">'+
+        (verTodasObs ? "Esconder a lista" : "Ver as "+disponiveis.length+" observações")+
+      '</button>'+
+      '<span class="obsdica">ou digite acima para achar pelo texto</span>'+
+    '</div>'+
+    (verTodasObs
+      ? '<div class="obsachados obsrolagem">'+disponiveis.map(function(o){
+          const resumo = o.t.replace(/\s+/g, " ");
+          return '<button class="obsop" data-obspor="'+esc(o.c)+'">'+
+                 '<span class="obscod">'+esc(o.c)+'</span>'+
+                 '<span class="obsop-txt">'+esc(resumo.slice(0,150))+(resumo.length>150?"…":"")+'</span>'+
+                 '</button>';
+        }).join("")+'</div>'
+      : "");
   }else if(!achados.length){
     lista = '<p class="obsdica">Nenhuma observação com “'+esc(buscaObs)+'”.</p>';
   }else{
@@ -1739,6 +1763,13 @@ function renderLaudo(){
     toast("Todas as linhas conferidas.");
   });
 
+  const btTodas = $("obsVerTodas");
+  if(btTodas) btTodas.addEventListener("click", function(){
+    verTodasObs = !verTodasObs;
+    renderLaudo();
+    const volta = $("obsVerTodas");
+    if(volta) volta.focus();
+  });
   const bo = $("obsBusca");
   if(bo){
     bo.addEventListener("input", function(){
