@@ -50,7 +50,7 @@ Nada entra sem a prévia, e o que entra fica marcado como **não conferido**.
 ### Tirar um antimicrobiano do laudo
 
 Em alguns casos o antimicrobiano não deve ser mostrado. Passando o mouse na
-linha aparece um **✕** à direita do nome; clicando, ela sai do que é copiado.
+linha aparece um **✕** no fim dela; clicando, ela sai do que é copiado.
 
 A linha **continua na tela**, riscada e com o selo *fora do laudo* — o valor e
 a interpretação seguem à vista. Esconder da tela deixaria a própria pessoa sem

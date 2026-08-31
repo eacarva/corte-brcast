@@ -188,13 +188,14 @@ input.cim.pendente{color:var(--warn-ink); font-style:italic}
    Apagar de vez esconderia da própria pessoa aquilo que ela tirou. */
 tr.omitida .abxnome, tr.omitida .c-cim, tr.omitida .c-int{opacity:.4}
 tr.omitida .abxnome{text-decoration:line-through}
-.abxrow .omitir{margin-left:auto; flex:none; border:0; background:none; cursor:pointer;
-                color:var(--ink-3); font-size:11.5px; line-height:1; padding:3px 6px;
-                border-radius:5px; opacity:0; transition:opacity .12s; font-family:inherit}
+.c-fim{width:1%; padding:0 12px 0 4px; text-align:right; white-space:nowrap}
+.omitir{border:0; background:none; cursor:pointer; color:var(--ink-3); font-size:11.5px;
+        line-height:1; padding:4px 7px; border-radius:5px; opacity:0;
+        transition:opacity .12s; font-family:inherit}
 tr:hover .omitir, .omitir:focus-visible, .omitir.ativo{opacity:1}
-.abxrow .omitir:hover{background:var(--surface-2); color:var(--ink)}
-.abxrow .omitir.ativo{color:var(--warn-ink); background:var(--warn); font-weight:700;
-                      text-transform:uppercase; letter-spacing:.03em; font-size:9.5px}
+.omitir:hover{background:var(--surface-2); color:var(--ink)}
+.omitir.ativo{color:var(--warn-ink); background:var(--warn); font-weight:700;
+              text-transform:uppercase; letter-spacing:.03em; font-size:9.5px}
 .avisofora{display:flex; align-items:center; gap:11px; flex-wrap:wrap; margin-bottom:14px;
            border-left:3px solid var(--warn-ink); background:var(--surface-2);
            padding:9px 13px; font-size:13px; color:var(--ink-2)}
@@ -642,7 +643,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.08.31.15";
+const VERSAO_APP = "2026.08.31.16";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -1284,7 +1285,7 @@ function renderLaudo(){
 
   let i = 0;
   const corpo = L.map(function(l){
-    if(l.tipo === "tit") return '<tr class="sec"><td colspan="4">'+esc(l.n)+'</td></tr>';
+    if(l.tipo === "tit") return '<tr class="sec"><td colspan="5">'+esc(l.n)+'</td></tr>';
     const idx = i++;
     const tag = l.cat
       ? '<span class="tag '+l.cat.cls+'">'+esc(l.cat.txt)+'</span>'
@@ -1323,10 +1324,11 @@ function renderLaudo(){
 
     return '<tr'+(l.omitido?' class="omitida"':'')+'>'+
       '<td class="c-abx"><div class="abxrow"><span class="pendslot">'+marca+'</span>'+
-      '<span class="abxnome">'+esc(l.n)+'</span>'+btnOmitir+'</div></td>'+
+      '<span class="abxnome">'+esc(l.n)+'</span></div></td>'+
       '<td class="c-cim">'+campo+'</td>'+
       '<td class="c-int">'+tag+'</td>'+
       '<td class="c-corte"><div class="corte mono">'+corte+'</div></td>'+
+      '<td class="c-fim">'+btnOmitir+'</td>'+
     '</tr>';
   }).join("");
 
@@ -1358,7 +1360,7 @@ function renderLaudo(){
     '</div>'+
     '<div class="panel"><div class="tablewrap"><table class="grid">'+
       '<thead><tr><th>Antimicrobiano</th><th style="text-align:center">CIM (mg/L)</th>'+
-      '<th>Interpretação</th><th>Corte aplicado</th></tr></thead>'+
+      '<th>Interpretação</th><th>Corte aplicado</th><th></th></tr></thead>'+
       '<tbody>'+corpo+'</tbody></table></div></div>'+
     '<p class="hint">Aceita <code>≤0,25</code>, <code>&gt;8</code>, <code>16/2</code>, <code>4</code>. '+
     'Digite <code>&lt;=</code> ou <code>&gt;=</code> e vira <code>≤</code> / <code>≥</code> sozinho. '+
@@ -1366,7 +1368,7 @@ function renderLaudo(){
     'Colar várias linhas num campo preenche a coluna para baixo. '+
     '<strong>Corte aplicado</strong> mostra qual regra decidiu — essa coluna não vai no copiar. '+
     'Para não mostrar um antimicrobiano no laudo, passe o mouse na linha dele e clique no '+
-    '<code>✕</code> do lado direito do nome — ele continua aqui, mas fica fora do que você copia.</p>';
+    '<code>✕</code> no fim da linha — ele continua aqui, mas fica fora do que você copia.</p>';
 
   $("btnCopiar").addEventListener("click", copiar);
   $("btnNova").addEventListener("click", novaAmostra);
