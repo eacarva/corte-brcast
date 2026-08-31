@@ -37,8 +37,9 @@
   /* Cada jeito de usar é um bloco só: o botão e a explicação do que ele faz
      ficam juntos. Botões enfileirados sem legenda obrigam a pessoa a adivinhar
      a diferença entre baixar, abrir e instalar. */
-  .escolha{display:flex;gap:14px;align-items:flex-start;background:var(--surface);
+  .escolha{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;background:var(--surface);
            border:1px solid var(--rule);border-radius:12px;padding:16px 18px;margin-bottom:12px}
+  .escolha > .dobra{flex-basis:100%}
   .escolha.destaque{border-color:var(--accent);background:var(--realce)}
   .escolha .txt{flex:1;min-width:0}
   .escolha b{display:block;font-size:16px;margin-bottom:3px}
@@ -123,6 +124,34 @@
       sozinho — ninguém precisa baixar de novo.</p>
     </div>
     <button class="btn primario" id="btnInstalar" hidden>Instalar</button>
+
+  <!-- Fica dentro do proprio bloco de instalar: e a resposta a mesma pergunta.
+       Nao ha como saber se o botao sumiu por ja estar instalado ou por este
+       navegador nao instalar -- getInstalledRelatedApps responde vazio mesmo
+       com o app instalado, testado. Entao o texto cobre todos os casos em vez
+       de escolher um e errar. -->
+  <details id="ajudaInstalar" class="dobra" hidden>
+    <summary>O botão de instalar não apareceu</summary>
+    <p>Ele só aparece quando dá para instalar de verdade. Os motivos mais comuns:</p>
+    <ul>
+      <li><strong>Já está instalado.</strong> Procure por <strong>Corte BrCAST</strong>
+          no menu Iniciar, no Launchpad ou na área de trabalho.</li>
+      <li><strong>É uma janela anônima.</strong> O Chrome não instala programas ali.
+          Abra esta página numa janela normal.</li>
+      <li><strong>É o Firefox.</strong> Ele não instala programas assim — use o Chrome
+          ou o Edge. No Safari do Mac, o caminho é
+          <strong>Compartilhar ▸ Adicionar à Dock</strong>.</li>
+    </ul>
+    <p>No Chrome dá para instalar pelo menu, sem o botão: <strong>três pontinhos</strong>
+    no canto superior direito ▸ <strong>Transmitir, salvar e compartilhar</strong> ▸
+    <strong>Instalar página como app</strong>.</p>
+    <p><strong>Está instalado mas o ícone sumiu?</strong> O programa continua na máquina
+    — só o atalho se perdeu. Na barra de endereço, escreva <code>chrome://apps</code>,
+    clique com o <strong>botão direito</strong> em <strong>Corte BrCAST</strong> e
+    escolha <strong>Criar atalhos…</strong></p>
+    <p>Se nada disso funcionar, use o <strong>Baixar</strong> abaixo. O arquivo faz
+    exatamente a mesma coisa — só não se atualiza sozinho.</p>
+  </details>
   </div>
 
   <div class="escolha">
@@ -132,48 +161,6 @@
       mensagem, ou usar em máquina que não tem internet nenhuma.</p>
     </div>
     <a class="btn" href="Corte-BrCAST.html" download>Baixar</a>
-  </div>
-
-  <!-- Fica aqui guardado e o script encaixa dentro do bloco "Deixar no
-       computador" quando descobre que ja esta instalado. E a mesma decisao:
-       separar em outro card manda a pessoa procurar a resposta longe da
-       pergunta. -->
-  <details id="detalhesIcone" class="dobra" hidden>
-    <summary>Sumiu o ícone?</summary>
-    <p>O programa continua instalado — só o atalho se perdeu. Para trazer de volta:</p>
-    <ol>
-      <li>Na barra de endereço do Chrome, escreva <code>chrome://apps</code> e aperte Enter</li>
-      <li>Clique com o <strong>botão direito</strong> em <strong>Corte BrCAST</strong></li>
-      <li>Escolha <strong>Criar atalhos…</strong></li>
-    </ol>
-    <p>Se não aparecer essa opção, tem o caminho longo: nessa mesma tela, botão
-    direito ▸ <strong>Remover do Chrome</strong>, volte aqui e clique em
-    <strong>Instalar</strong>. Nada se perde — o programa não guarda nada que
-    dependa da instalação.</p>
-  </details>
-
-  <div id="ajudaInstalar" hidden>
-    <div class="card">
-      <h3>O botão de instalar não apareceu</h3>
-      <p>Ele só aparece quando dá para instalar de verdade. Os motivos mais comuns:</p>
-      <ul>
-        <li><strong>Já está instalado</strong> neste computador. Procure por
-            <strong>Corte BrCAST</strong> no menu Iniciar, no Launchpad ou na área
-            de trabalho — e se o ícone sumiu, dá para criar de novo por
-            <code>chrome://apps</code>.</li>
-        <li><strong>É uma janela anônima.</strong> O Chrome não instala programas em
-            janela anônima. Abra esta página numa janela normal.</li>
-        <li><strong>É o Firefox.</strong> Ele não instala programas assim. Use o Chrome
-            ou o Edge. No Safari do Mac, o caminho é
-            <strong>Compartilhar ▸ Adicionar à Dock</strong>.</li>
-      </ul>
-      <p>No Chrome também dá para instalar pelo menu, sem o botão:
-      <strong>três pontinhos</strong> no canto superior direito ▸
-      <strong>Transmitir, salvar e compartilhar</strong> ▸
-      <strong>Instalar página como app</strong>.</p>
-      <p>Se nada disso funcionar, use o <strong>Baixar</strong> acima. O arquivo faz
-      exatamente a mesma coisa — só não se atualiza sozinho.</p>
-    </div>
   </div>
 
   <hr>
@@ -272,7 +259,6 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
 var eventoInstalar = null;
 var btn = document.getElementById("btnInstalar");
 var ajuda = document.getElementById("ajudaInstalar");
-var detalhesIcone = document.getElementById("detalhesIcone");
 
 window.addEventListener("beforeinstallprompt", function(e){
   e.preventDefault();
@@ -290,20 +276,18 @@ btn.addEventListener("click", function(){
 
 window.addEventListener("appinstalled", function(){ marcarInstalado(); });
 
-/* O bloco "Deixar no computador" vira o bloco "ja esta instalado", no mesmo
-   lugar. E a resposta a mesma pergunta: nao faz sentido responder em outro
-   canto da pagina. */
+/* Depois de instalar aqui, o bloco passa a dizer o que aconteceu. So vale
+   quando a instalacao acontece nesta aba: em qualquer outra abertura nao ha
+   como saber se ja esta instalado, e por isso o dobravel abaixo responde a
+   todos os casos de uma vez. */
 function marcarInstalado(){
-  var alvo = document.getElementById("txtInstalar");
-  alvo.innerHTML = "Procure por <strong>Corte BrCAST</strong> no menu Iniciar, no " +
-                   "Launchpad ou na área de trabalho.";
+  document.getElementById("txtInstalar").innerHTML =
+    "Procure por <strong>Corte BrCAST</strong> no menu Iniciar, no Launchpad ou " +
+    "na área de trabalho.";
   document.getElementById("tituloInstalar").textContent = "Já está no seu computador";
   var selo = document.getElementById("seloRec");
   selo.textContent = "Instalado";
   selo.className = "selo ok";
-  document.getElementById("blocoInstalar").classList.add("pronto");
-  alvo.parentNode.appendChild(detalhesIcone);
-  detalhesIcone.hidden = false;
   btn.hidden = true;
   ajuda.hidden = true;
 }
@@ -313,15 +297,12 @@ function marcarInstalado(){
    que esta pergunta seja possivel — sem isso a resposta vem sempre vazia e a
    pagina teria de adivinhar. Quando nem assim der para saber, cai no texto que
    responde a todos os casos. */
+/* Sem o aviso do navegador em alguns segundos, o botao nao vem: ou ja esta
+   instalado, ou este navegador nao instala. getInstalledRelatedApps parecia
+   resolver a duvida, mas responde vazio mesmo com o app instalado -- testado
+   nesta maquina. Entao abre-se o dobravel, que responde aos dois. */
 setTimeout(function(){
-  if(!btn.hidden) return;
-  var pergunta = navigator.getInstalledRelatedApps
-    ? navigator.getInstalledRelatedApps()
-    : Promise.reject();
-  pergunta.then(function(lista){
-    if(lista && lista.length) marcarInstalado();
-    else ajuda.hidden = false;
-  }, function(){ ajuda.hidden = false; });
+  if(btn.hidden) ajuda.hidden = false;
 }, 2500);
 </script>
 </body>
