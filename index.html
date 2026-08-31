@@ -133,6 +133,16 @@
 
 </div>
 <script>
+/* Esta página é a porta de entrada, não o destino. Quando ela abre dentro da
+   janela do programa instalado — o que o Chrome faz logo depois de instalar,
+   abrindo onde a pessoa estava — quem instalou vê a tela de download e conclui
+   que deu errado. Aqui ela sai da frente e entrega o programa. */
+if(matchMedia("(display-mode: standalone)").matches ||
+   matchMedia("(display-mode: window-controls-overlay)").matches ||
+   navigator.standalone === true){
+  location.replace("Corte-BrCAST.html");
+}
+
 /* Registrado aqui também para que o Chrome ofereça a instalação já nesta
    página — quem chega para baixar vê o botão sem precisar abrir o programa. */
 if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){

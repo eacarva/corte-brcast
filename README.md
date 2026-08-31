@@ -137,6 +137,10 @@ atalho nem escolher figura.
 Precisa de internet **uma vez**, só para instalar. Depois disso a máquina tem
 tudo em disco.
 
+Logo depois de instalar, o Chrome abre a janela do programa na página em que a
+pessoa estava — a de download. Não deu errado, e essa página se desvia sozinha
+para o programa. Nas aberturas seguintes, pelo ícone, já entra direto.
+
 Se o Chrome do laboratório for gerenciado pela TI, o administrador consegue
 instalar em todas as máquinas de uma vez por política, sem ninguém clicar em
 nada — vale perguntar.
