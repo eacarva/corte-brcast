@@ -12,7 +12,7 @@
    silêncio, sem erro nenhum na tela. Por isso todo pedido para fora passa
    direto, sem tocar no cache. */
 
-const VERSAO = "2026.08.31.2";
+const VERSAO = "2026.08.31.3";
 const CACHE  = "corte-brcast-" + VERSAO;
 
 /* O que a máquina precisa ter no disco para abrir sem rede. */
@@ -27,9 +27,19 @@ const NUCLEO = [
 ];
 
 self.addEventListener("install", function(e){
+  /* cache:"reload" obriga cada arquivo a vir da rede. Sem isso o navegador
+     entrega o que tem no próprio cache HTTP — e o GitHub Pages manda
+     max-age=600, então uma versão publicada há menos de dez minutos seria
+     guardada aqui com o conteúdo velho dentro. A máquina ficaria com o
+     rótulo da versão nova e o programa antigo, avisando para sempre que há
+     atualização. Foi exatamente o que aconteceu ao testar. */
   e.waitUntil(
     caches.open(CACHE)
-      .then(function(c){ return c.addAll(NUCLEO); })
+      .then(function(c){
+        return c.addAll(NUCLEO.map(function(u){
+          return new Request(u, {cache:"reload"});
+        }));
+      })
       .then(function(){ return self.skipWaiting(); })
   );
 });
