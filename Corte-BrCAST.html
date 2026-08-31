@@ -720,7 +720,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.01.5";
+const VERSAO_APP = "2026.09.01.6";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -2077,9 +2077,7 @@ function renderSobre(){
 function renderFonte(){
   $("actions").innerHTML =
     (fonte ? '<button class="btn" id="btnSinc">Sincronizar agora</button>' : "")+
-    '<button class="btn" id="btnXLSX">Gerar planilha</button>'+
-    '<button class="btn ghost" id="btnCSV">CSV dos cortes</button>'+
-    '<button class="btn ghost" id="btnCSVObs">CSV das observações</button>';
+    '<button class="btn" id="btnXLSX">Gerar planilha</button>';
   const st = fonteStat;
   const erros = (st.erro && st.erro.length)
     ? '<ul class="erros">'+st.erro.map(function(e){ return '<li>'+esc(e)+'</li>'; }).join("")+'</ul>'
@@ -2226,9 +2224,6 @@ function renderFonte(){
 
   const bx = $("btnXLSX");
   if(bx) bx.addEventListener("click", exportarPlanilha);
-  $("btnCSV").addEventListener("click", exportarCSV);
-  const bo = $("btnCSVObs");
-  if(bo) bo.addEventListener("click", exportarCSVObs);
 
   const campo = $("fonteURL");
   const salvar = function(){
@@ -2458,37 +2453,6 @@ function limpar(){
   const p = $("content").querySelector("input.cim, select.tri");
   if(p) p.focus();
 }
-/* Monta o CSV no mesmo formato que o programa lê. Fecha o ciclo: quem recebe
-   o arquivo gera o CSV daqui, sobe no Drive dele, compartilha e cola o link —
-   passa a ter a própria fonte, sem depender da planilha de outro laboratório. */
-function gerarCSV(){
-  const cel = function(v){
-    const t = String(v == null ? "" : v);
-    return /[",\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t;
-  };
-  const TIPO = {cim:"cim", triagem:"triagem", tit:"titulo"};
-  const linhas = [["painel","organismo_id","organismo","ordem","tipo","antimicrobiano",
-                   "sensivel_dose_padrao","aumentando_exposicao","resistente",
-                   COL_VERSAO, COL_CARTAO]];
-  let versaoPendente = versaoCortes;   // só na primeira linha; a leitura procura em todas
-  PANELS.forEach(function(p){
-    const painel = p.fam+" · "+p.mat;
-    let cartaoPendente = cartaoDe(p);   // uma vez por painel, na primeira linha dele
-    p.orgs.forEach(function(o){
-      rowsDe(o).forEach(function(row, i){
-        const r = (row.t === "cim") ? ((refs[o.id] || {})[row.n] || {sdp:"",sae:"",res:""})
-                                    : {sdp:"",sae:"",res:""};
-        linhas.push([painel, o.id, o.nome, i+1, TIPO[row.t] || row.t, row.n, r.sdp, r.sae, r.res,
-                     versaoPendente, cartaoPendente]);
-        versaoPendente = "";
-        cartaoPendente = "";
-      });
-    });
-  });
-  // BOM para o Sheets e o Excel abrirem os acentos certos
-  return "﻿" + linhas.map(function(l){ return l.map(cel).join(","); }).join("\r\n");
-}
-
 /* Diz de onde vieram os valores. Sem isso é fácil exportar a cópia local
    antiga achando que se está exportando o que a tela mostra. */
 function origemTxt(){
@@ -2613,36 +2577,6 @@ function gerarXLSX(abas){
   return zipar(arquivos);
 }
 
-/* CSV da aba de observações. Sai separado do outro porque vira outra aba:
-   colar os dois na mesma planilha misturaria colunas que não se parecem. */
-function gerarCSVObs(){
-  const cel = function(v){
-    const t = String(v == null ? "" : v);
-    return /[",\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t;
-  };
-  const linhas = [COLS_OBS.slice()];
-  listaObs().forEach(function(o){ linhas.push([o.c, o.t]); });
-  return "\ufeff" + linhas.map(function(l){ return l.map(cel).join(","); }).join("\r\n");
-}
-
-async function baixarCSV(csv, nome, msg){
-  let dl = null;
-  try{ if(window.claude && window.claude.use) dl = await window.claude.use("downloads"); }catch(e){}
-  if(dl){
-    try{ await dl.save({filename:nome, data:csv}); toast(msg); }
-    catch(e){ if(e && e.code === "declined") return;
-              copiarTexto(csv, "CSV copiado. Cole num arquivo .csv."); }
-    return;
-  }
-  if(window.claude){ copiarTexto(csv, "CSV copiado. Cole num arquivo .csv."); return; }
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
-  a.download = nome;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
-  toast(msg);
-}
-
 /* Estado da aba de observações, na mesma tela da fonte dos cortes. Sem aba é
    situação normal e não erro: o programa já vem com as observações dentro. */
 function painelObsFonteHTML(){
@@ -2671,9 +2605,6 @@ function painelObsFonteHTML(){
         '<li>Compartilhe como <strong>Qualquer pessoa com o link · Leitor</strong> '+
           'e cole o link nesta tela.</li>'+
       '</ol>'+
-      '<p class="nota" style="margin:0 0 10px">Já tem a planilha montada e quer só as '+
-      'observações? Use <strong>CSV das observações</strong> e cole numa aba nova chamada '+
-      'exatamente <code>'+ABA_OBS+'</code>.</p>'+
       '<div class="cuidado">O <b>código</b> é o que amarra a observação ao laudo. '+
       'Mudando o código de uma observação já escolhida numa amostra, ela aparece como '+
       'não encontrada em vez de trocar de texto em silêncio.</div>'+
@@ -2729,7 +2660,7 @@ async function exportarPlanilha(){
       toast(msg);
     }catch(e){
       if(e && e.code === "declined") return;
-      toast("Não consegui salvar aqui. Use os botões de CSV.");
+      toast("Não consegui salvar a planilha aqui.");
     }
     return;
   }
@@ -2739,34 +2670,6 @@ async function exportarPlanilha(){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
   toast(msg);
-}
-
-async function exportarCSVObs(){
-  const csv = gerarCSVObs();
-  const n = csv.split("\r\n").length - 1;
-  await baixarCSV(csv, "observacoes-brcast.csv",
-    "CSV das observações: "+n+" linha"+(n===1?"":"s")+'. Suba numa aba chamada "'+ABA_OBS+'".');
-}
-
-async function exportarCSV(){
-  const csv = gerarCSV();
-  const n = csv.split("\r\n").length - 1;
-  const de = " — "+origemTxt();
-  let dl = null;
-  try{ if(window.claude && window.claude.use) dl = await window.claude.use("downloads"); }catch(e){}
-  if(dl){
-    try{ await dl.save({filename:"cortes-brcast.csv", data:csv}); toast("CSV gerado: "+n+" linhas"+de+"."); }
-    catch(e){ if(e && e.code === "declined") return;
-              copiarTexto(csv, "CSV copiado. Cole num arquivo .csv."); }
-    return;
-  }
-  if(window.claude){ copiarTexto(csv, "CSV copiado. Cole num arquivo .csv."); return; }
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
-  a.download = "cortes-brcast.csv";
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
-  toast("CSV gerado: "+n+" linhas"+de+".");
 }
 
 async function exportar(){

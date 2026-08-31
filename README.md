@@ -87,10 +87,9 @@ zeram.
 chamada exatamente `observacoes`, com as colunas `codigo` e `texto`. É
 opcional: sem a aba valem as que vieram no programa.
 
-O jeito mais curto de montar tudo é **Gerar planilha** na tela *Fonte dos
-cortes*: sai um `corte-brcast.xlsx` com as duas abas já criadas e nomeadas —
-sobe no Drive, abre com Planilhas e pronto. Os botões de CSV continuam ali
-para quem já tem a planilha montada e quer só uma das partes.
+Para montar tudo, use **Gerar planilha** na tela *Fonte dos cortes*: sai um
+`corte-brcast.xlsx` com as duas abas já criadas e nomeadas — sobe no Drive,
+abre com Planilhas e pronto.
 
 O `codigo` é o que amarra a observação à amostra. Mudando o código de uma
 observação já escolhida, ela aparece como não encontrada em vez de trocar de
@@ -110,13 +109,21 @@ Os valores de corte vêm de **uma planilha do Google**, para que todos os comput
 
 ### Montar a planilha
 
-1. Na tela **Fonte dos cortes**, clique em **Gerar CSV para o Drive**
-2. Suba o arquivo no Drive e abra com **Google Planilhas**
-3. Selecione as colunas `sensivel_dose_padrao`, `aumentando_exposicao` e `resistente` e use **Formatar ▸ Número ▸ Texto simples**
-4. **Compartilhar ▸ Acesso geral ▸ Qualquer pessoa com o link ▸ Leitor**
-5. Copie o endereço da barra do navegador e cole na tela **Fonte dos cortes**
+1. Na tela **Fonte dos cortes**, clique em **Gerar planilha**
+2. Suba o `corte-brcast.xlsx` no Drive e abra com **Google Planilhas**
+3. **Compartilhar ▸ Acesso geral ▸ Qualquer pessoa com o link ▸ Leitor**
+4. Copie o endereço da barra do navegador e cole na tela **Fonte dos cortes**
 
-> **O passo 3 não pode ser pulado.** A coluna do meio mistura números (`4`, `0,5`) com texto (`≤8`, `2 a 4`). Se ela não for marcada como texto, o Google decide que a coluna é numérica e **deixa de enviar todo valor escrito com texto** — 94 cortes que não chegariam. O programa detecta e recusa a sincronização nesse caso, em vez de perder corte calado.
+O arquivo já vem com as duas abas prontas — `cortes` e `observacoes` — e com os
+cortes marcados como texto. Não há nada para criar, nomear ou formatar.
+
+> Antes o programa gerava CSV, e havia um passo que **não podia ser pulado**:
+> formatar as colunas de corte como texto. A coluna do meio mistura números
+> (`4`, `0,5`) com texto (`≤8`, `2 a 4`), e o Google decidia que a coluna era
+> numérica e **deixava de enviar todo valor escrito com texto** — 94 cortes que
+> não chegariam. O programa detecta e recusa a sincronização nesse caso, então
+> nunca se perdeu corte calado; mas era um passo fácil de esquecer. O `.xlsx`
+> já marca cada célula como texto, e o problema deixou de existir.
 
 > **"Qualquer pessoa com o link" libera a planilha inteira**, não só a aba dos cortes. Valores de corte e nomes de antimicrobiano são informação técnica pública do BrCAST e podem ficar assim. Dado de paciente, não — se houver qualquer aba com resultado de amostra, faça uma planilha separada.
 
@@ -153,7 +160,7 @@ O programa **recusa a sincronização inteira** e diz a linha e o motivo. Nunca 
 |---|---|
 | "Não consegui abrir a planilha" | Compartilhamento não está em *Qualquer pessoa com o link*. Teste numa janela anônima |
 | "a coluna … está como número" | Formate as colunas de corte como **Texto simples** e sincronize de novo. Os valores não se perderam — só não estavam sendo enviados |
-| "tudo numa coluna só" | O CSV entrou sem separador. `Dados ▸ Dividir texto em colunas`, vírgula |
+| "tudo numa coluna só" | Um CSV foi colado sem separador. `Dados ▸ Dividir texto em colunas`, vírgula. Não acontece com o `.xlsx` |
 | "microrganismo desconhecido" | Alguém editou `organismo_id`. A mensagem diz a linha |
 | "Faltam colunas" | O link aponta para a aba errada, ou a primeira linha não é o cabeçalho |
 
@@ -165,7 +172,7 @@ Cada PC precisa do arquivo e do link colado uma vez.
 
 **Numa pasta de rede** é mais prático: uma cópia só do `Corte-BrCAST.html`, um atalho na área de trabalho de cada máquina. Versão nova = trocar um arquivo.
 
-> Não adianta pôr o **CSV** na pasta de rede. Por segurança, o navegador proíbe uma página aberta do disco de ler outros arquivos — a mesma regra que impede um anexo de e-mail de varrer o seu computador. Os cortes precisam vir da planilha, que é acesso à internet e autorizado pelo servidor do Google.
+> Não adianta pôr a **planilha** na pasta de rede. Por segurança, o navegador proíbe uma página aberta do disco de ler outros arquivos — a mesma regra que impede um anexo de e-mail de varrer o seu computador. Os cortes precisam vir da planilha, que é acesso à internet e autorizado pelo servidor do Google.
 
 ### Aviso de versão nova
 
