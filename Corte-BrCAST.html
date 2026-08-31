@@ -226,19 +226,32 @@ tr:hover .omitir{opacity:.75}
 tr.omitida{background:var(--surface-2)}
 tr.omitida .abxnome, tr.omitida .c-cim, tr.omitida .c-int, tr.omitida .c-corte{opacity:.42}
 tr.omitida .abxnome{text-decoration:line-through}
-/* Ajuda que abre e fecha. Mesma forma para todos os blocos: a pessoa aprende
-   uma vez onde clicar e vale para a tela inteira. */
-.ajuda{background:var(--surface); border:1px solid var(--rule); border-radius:9px;
-       box-shadow:var(--shadow); margin-top:10px; overflow:hidden}
-.ajuda > summary{cursor:pointer; padding:13px 18px; font-weight:600; font-size:14px;
-                 color:var(--ink); list-style:none; display:flex; align-items:center; gap:9px;
-                 background:var(--surface-2); border-bottom:1px solid transparent}
+/* A tela tinha duas zonas com o mesmo peso visual: o que se faz aqui e o que
+   se consulta. Cinco caixas cinzas com sombra, iguais entre si e iguais aos
+   painéis de ação, viravam um empilhamento sem hierarquia — a documentação
+   ocupava mais tela que a tarefa.
+
+   Agora a ajuda é um bloco só, com divisores finos por dentro. Some a moldura
+   repetida, e a diferença entre agir e consultar volta a ser visível. */
+.ajudas{border:1px solid var(--rule); border-radius:10px; overflow:hidden;
+        background:var(--surface); margin-top:10px}
+/* Esta tela é de ler e decidir, não de olhar tabela larga. Sem limite, as
+   linhas passavam de cem caracteres nas telas do laboratório. */
+#content .panel, #content .ajudas, #content .ajudas-titulo, #content .selo,
+#content .hint, #content .erros{max-width:920px}
+.ajudas-titulo{font-size:11px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+               color:var(--ink-3); margin:26px 2px 9px}
+.ajuda{border-bottom:1px solid var(--rule)}
+.ajuda:last-child{border-bottom:0}
+.ajuda > summary{cursor:pointer; padding:13px 18px; font-weight:600; font-size:13.5px;
+                 color:var(--ink-2); list-style:none; display:flex; align-items:center; gap:10px}
 .ajuda > summary::-webkit-details-marker{display:none}
-.ajuda > summary::before{content:"▸"; color:var(--ink-3); font-size:11px; transition:transform .12s}
-.ajuda[open] > summary{border-bottom-color:var(--rule)}
+.ajuda > summary::before{content:"▸"; color:var(--ink-3); font-size:11px;
+                         transition:transform .12s; flex:none}
+.ajuda[open] > summary{color:var(--ink); background:var(--surface-2)}
 .ajuda[open] > summary::before{transform:rotate(90deg)}
 .ajuda > summary:hover{color:var(--accent-ink)}
-.ajuda-corpo{padding-bottom:2px}
+.ajuda-corpo{padding-bottom:6px; border-top:1px solid var(--rule)}
 .ajuda-sub{margin:13px 18px 0; font-size:12.5px; color:var(--ink-2); max-width:76ch}
 .ajuda .tablewrap{margin-top:4px}
 
@@ -806,7 +819,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.02.6";
+const VERSAO_APP = "2026.09.02.7";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -2433,14 +2446,18 @@ function renderFonte(){
   const inicio = !fonte;
 
   $("content").innerHTML =
-    seloHTML(fonte ? '<span class="dot2"><a href="'+esc(urlPlanilha(fonte))+'" target="_blank" rel="noopener">abrir planilha</a></span>' : "")+
+    /* Sem planilha, a faixa dizia "sem planilha configurada" logo acima de um
+       painel que diz a mesma coisa com mais palavras. Duas vezes o mesmo
+       recado é ruído, não reforço. */
+    (inicio ? "" : seloHTML('<span class="dot2"><a href="'+esc(urlPlanilha(fonte))+'" target="_blank" rel="noopener">abrir planilha</a></span>'))+
     erros+
     (inicio ? primeiraVezHTML() : "")+
     (inicio ? "" :
     '<div class="panel">'+
       '<div class="refhead"><strong>Planilha do laboratório</strong>'+
-      '<p>Cole o link da planilha do Google Sheets com os cortes. Todos os computadores que usarem o mesmo link '+
-      'passam a interpretar igual. A planilha precisa estar compartilhada como '+
+      /* Já configurado, o parágrafo que ensina a colar virou passado: quem abre
+         esta tela agora quer trocar o link ou conferir qual está valendo. */
+      '<p>Para trocar de planilha, cole outro link. Ele precisa estar compartilhado como '+
       '<strong>Qualquer pessoa com o link · Leitor</strong>.</p></div>'+
       '<div style="padding:0 14px 14px">'+
         '<div class="fonte-campo">'+
@@ -2478,9 +2495,12 @@ function renderFonte(){
             st.origem === "cache"    ? "cópia local da última sincronização" :
                                        "cortes de fábrica do programa")+'</td></tr>'+
       '</tbody></table></div>'+
-    '</div>'+
-    '<p class="hint">O programa lê a planilha toda vez que abre. Sem internet, usa a última cópia boa e avisa a data. '+
-    'Os cortes de fábrica só entram se nunca houve uma sincronização bem-sucedida neste computador.</p>')+
+      '<p class="nota" style="margin:12px 18px 14px; max-width:76ch">O programa lê a planilha '+
+      'toda vez que abre. Sem internet, usa a última cópia boa e avisa a data. Os cortes de '+
+      'fábrica só entram se nunca houve uma sincronização bem-sucedida neste computador.</p>'+
+    '</div>')+
+    '<p class="ajudas-titulo">Ajuda</p>'+
+    '<div class="ajudas">'+
     ajuda('Como apontar para outra planilha',
       '<p class="ajuda-sub">O arquivo sai sem planilha configurada. Faça isto uma vez em cada '+
       'computador, colando o link da planilha do laboratório.</p>'+
@@ -2549,8 +2569,6 @@ function renderFonte(){
           '<td>Continua funcionando com a última cópia boa, e a barra no topo mostra de quando ela é.</td></tr>'+
       '</tbody></table></div>'+
       '')+
-    '<p class="hint">Cada computador precisa ter o arquivo e o link colado uma vez. '+
-    'Feito isso, ele sincroniza sozinho toda vez que abrir.</p>'+
     painelObsFonteHTML()+
     ajuda('Dar o sistema para outro laboratório',
       '<p class="ajuda-sub">O arquivo já vai com todos os cortes dentro, então funciona assim '+
@@ -2570,7 +2588,8 @@ function renderFonte(){
         '<div class="cuidado">A partir daí os dois laboratórios ficam <b>independentes</b>: '+
         'cada um com a sua planilha, e mudança de um não mexe no outro.</div>'+
       '</div>'+
-      '');
+      '')+
+    '</div>';
 
   $("content").querySelectorAll("details[data-ajuda]").forEach(function(d){
     d.addEventListener("toggle", function(){ ajudaAberta[d.dataset.ajuda] = d.open; });
