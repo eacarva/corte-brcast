@@ -96,6 +96,28 @@ Cada PC precisa do arquivo e do link colado uma vez.
 
 > Não adianta pôr o **CSV** na pasta de rede. Por segurança, o navegador proíbe uma página aberta do disco de ler outros arquivos — a mesma regra que impede um anexo de e-mail de varrer o seu computador. Os cortes precisam vir da planilha, que é acesso à internet e autorizado pelo servidor do Google.
 
+### Aviso de versão nova
+
+Cada máquina tem a sua cópia, e uma cópia velha não avisa que é velha. Por
+isso, ao abrir, o programa pergunta uma vez ao site se existe versão mais
+nova publicada. Se existir, acende um aviso âmbar no rodapé da barra
+lateral, com link para baixar. Sem internet, nenhum aviso aparece — e é o
+comportamento certo, porque o programa continua inteiro.
+
+Ele **só pergunta**. Não baixa nada, não se reescreve e não muda nenhum
+corte: o que decide laudo é apenas o que está dentro do arquivo que você
+tem na mão.
+
+**Ao publicar uma versão nova**, subir o mesmo número nos dois lugares:
+
+| | |
+|---|---|
+| `Corte-BrCAST.html` | a constante `VERSAO_APP` |
+| `version.json` | o campo `versao` |
+
+Se um ficar para trás, o aviso mente: ou some quando devia aparecer, ou
+aparece para sempre em quem já está atualizado.
+
 ### Atalho com ícone
 
 1. Deixe o `corte-brcast.ico` junto do programa
@@ -109,6 +131,7 @@ Cada PC precisa do arquivo e do link colado uma vez.
 | | |
 |---|---|
 | `Corte-BrCAST.html` | O programa. É só isto que precisa ser distribuído |
+| `version.json` | Última versão publicada. É o que o programa consulta para avisar |
 | `corte-brcast.ico` | Ícone para o atalho do Windows, 7 tamanhos |
 | `corte-brcast.svg` | Fonte do ícone, para editar |
 

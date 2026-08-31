@@ -106,6 +106,13 @@ button,input,select{font:inherit; color:inherit}
 .btn.ghost{border-color:transparent; background:none; color:var(--ink-2); text-align:left}
 .btn.ghost:hover{background:var(--surface-2); color:var(--ink)}
 .btn.ghost[aria-current="true"]{background:var(--accent-soft); color:var(--accent-ink); font-weight:600}
+/* Aviso de versao nova. Vem depois de .btn de proposito: mesma
+   especificidade, entao quem manda e a ordem. Nasce escondido: o estado normal e nao ter aviso.
+   So a rede o acende, e so quando ha mesmo versao diferente publicada. */
+.avisonova{display:none; text-decoration:none; margin-bottom:5px; font-weight:600;
+           background:var(--warn); border-color:var(--warn); color:var(--warn-ink)}
+.avisonova.mostra{display:block}
+.avisonova:hover{color:var(--warn-ink); filter:brightness(.96)}
 
 .content{padding:20px 28px 90px; max-width:1220px}
 .panel{background:var(--surface); border:1px solid var(--rule); border-radius:9px; box-shadow:var(--shadow); overflow:hidden}
@@ -319,6 +326,8 @@ input.search:focus{outline:2px solid var(--accent); outline-offset:-1px}
     </div>
     <div class="orglist" id="orglist"></div>
     <div class="rail-foot">
+      <a class="btn avisonova" id="avisoNova" href="https://eacarva.github.io/corte-brcast/"
+         target="_blank" rel="noopener"></a>
       <button class="btn ghost" id="navLaudo" aria-current="true">Laudo</button>
       <button class="btn ghost" id="navRef">Valores de referência</button>
       <button class="btn ghost" id="navObs">Observações padrão</button>
@@ -559,6 +568,14 @@ const CORTES = ["sensivel_dose_padrao","aumentando_exposicao","resistente"];
 const COL_VERSAO = "versao";
 const VERSAO_EMBUTIDA = "BrCAST 2024";   // descreve os cortes que vêm no arquivo
 let versaoCortes = VERSAO_EMBUTIDA;
+
+/* Versão do programa. Não confundir com a do BrCAST acima: aquela descreve os
+   cortes, esta descreve o arquivo. O programa vive solto, uma cópia por
+   máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
+   subir este número e o de version.json juntos — se um ficar para trás, o
+   aviso mente. */
+const VERSAO_APP = "2026.08.31";
+const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 
 /* Aceita o link de edição, o de compartilhar ou um já colado antes. */
 function lerLink(txt){
@@ -2097,6 +2114,21 @@ if(fonte){
 
 render();
 campoBusca.focus();
+
+/* Pergunta uma vez, ao abrir, se existe versão mais nova publicada. Só
+   pergunta: não baixa, não se reescreve, não toca em corte nenhum — o que
+   decide laudo continua sendo apenas o que está neste arquivo. Sem rede,
+   falha calado, porque não ter aviso já é o estado correto. */
+fetch(URL_VERSAO, {cache:"no-store"})
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(v){
+    if(!v || !v.versao || v.versao === VERSAO_APP) return;
+    const a = $("avisoNova");
+    a.textContent = "Versão nova: " + v.versao;
+    a.title = (v.notas ? v.notas + " — " : "") + "abre a página para baixar";
+    a.classList.add("mostra");
+  })
+  .catch(function(){});
 </script>
 
 </body>
