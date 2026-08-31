@@ -720,7 +720,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.01.4";
+const VERSAO_APP = "2026.09.01.5";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -2077,8 +2077,9 @@ function renderSobre(){
 function renderFonte(){
   $("actions").innerHTML =
     (fonte ? '<button class="btn" id="btnSinc">Sincronizar agora</button>' : "")+
-    '<button class="btn" id="btnCSV">Gerar CSV dos cortes</button>'+
-    '<button class="btn" id="btnCSVObs">Gerar CSV das observações</button>';
+    '<button class="btn" id="btnXLSX">Gerar planilha</button>'+
+    '<button class="btn ghost" id="btnCSV">CSV dos cortes</button>'+
+    '<button class="btn ghost" id="btnCSVObs">CSV das observações</button>';
   const st = fonteStat;
   const erros = (st.erro && st.erro.length)
     ? '<ul class="erros">'+st.erro.map(function(e){ return '<li>'+esc(e)+'</li>'; }).join("")+'</ul>'
@@ -2209,10 +2210,11 @@ function renderFonte(){
       'sincronizada:</p></div>'+
       '<div style="padding:2px 14px 14px">'+
         '<ol class="passos">'+
-          '<li>Clique em <strong>Gerar CSV dos cortes</strong>, aqui em cima. '+
-            'Sai um <code>cortes-brcast.csv</code> com os cortes que estão valendo agora.</li>'+
+          '<li>Clique em <strong>Gerar planilha</strong>, aqui em cima. Sai um '+
+            '<code>corte-brcast.xlsx</code> com os cortes que estão valendo agora e as observações, '+
+            'cada um na sua aba.</li>'+
           '<li>Ele sobe o arquivo no <strong>Drive dele</strong> e abre com <strong>Google Planilhas</strong>. '+
-            'O CSV já sai protegido contra a conversão automática, então não precisa marcar nem desmarcar nada.</li>'+
+            'Nada para formatar: o xlsx já leva os cortes como texto.</li>'+
           '<li>Compartilha como <strong>Qualquer pessoa com o link · Leitor</strong>, '+
             'pelos 5 passos acima.</li>'+
           '<li>Cola o link no campo desta tela e clica em <strong>Salvar e testar</strong>.</li>'+
@@ -2222,6 +2224,8 @@ function renderFonte(){
       '</div>'+
     '</div>';
 
+  const bx = $("btnXLSX");
+  if(bx) bx.addEventListener("click", exportarPlanilha);
   $("btnCSV").addEventListener("click", exportarCSV);
   const bo = $("btnCSVObs");
   if(bo) bo.addEventListener("click", exportarCSVObs);
@@ -2493,6 +2497,122 @@ function origemTxt(){
   return "os cortes de fábrica do programa";
 }
 
+/* ==========================================================================
+   PLANILHA .XLSX COM AS DUAS ABAS
+   Um .xlsx é um ZIP de arquivos XML. Escrito à mão aqui porque o programa é um
+   arquivo só e não busca biblioteca nenhuma — e porque o CSV obrigava a criar
+   a aba e acertar o nome na mão, que é justamente onde se erra.
+   O ZIP sai sem compressão: é mais código comprimir do que o arquivo pesa.
+   ========================================================================== */
+const TAB_CRC = (function(){
+  const t = new Uint32Array(256);
+  for(let n = 0; n < 256; n++){
+    let c = n;
+    for(let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+
+function crc32(bytes){
+  let c = 0xFFFFFFFF;
+  for(let i = 0; i < bytes.length; i++) c = TAB_CRC[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+function zipar(arquivos){
+  const enc = new TextEncoder();
+  const partes = [], central = [];
+  let desloc = 0;
+
+  const u16 = function(n){ return [n & 255, (n >>> 8) & 255]; };
+  const u32 = function(n){ return [n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255]; };
+
+  arquivos.forEach(function(a){
+    const nome = enc.encode(a.nome), dados = enc.encode(a.txt), crc = crc32(dados);
+    const cab = [].concat([0x50,0x4B,0x03,0x04], u16(20), u16(0), u16(0), u16(0), u16(0),
+                          u32(crc), u32(dados.length), u32(dados.length),
+                          u16(nome.length), u16(0));
+    partes.push(new Uint8Array(cab), nome, dados);
+    central.push({nome:nome, crc:crc, tam:dados.length, desloc:desloc});
+    desloc += cab.length + nome.length + dados.length;
+  });
+
+  const dir = [];
+  central.forEach(function(c){
+    dir.push(new Uint8Array([].concat([0x50,0x4B,0x01,0x02], u16(20), u16(20), u16(0), u16(0),
+                                      u16(0), u16(0), u32(c.crc), u32(c.tam), u32(c.tam),
+                                      u16(c.nome.length), u16(0), u16(0), u16(0), u16(0),
+                                      u32(0), u32(c.desloc))), c.nome);
+  });
+  let tamDir = 0;
+  dir.forEach(function(d){ tamDir += d.length; });
+  const fim = new Uint8Array([].concat([0x50,0x4B,0x05,0x06], u16(0), u16(0),
+                                       u16(central.length), u16(central.length),
+                                       u32(tamDir), u32(desloc), u16(0)));
+  return new Blob(partes.concat(dir, [fim]), {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+
+function xmlEsc(t){
+  return String(t == null ? "" : t)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    /* O XML do xlsx não aceita caractere de controle. Tabulação, quebra de
+       linha e retorno passam; o resto sairia como arquivo corrompido. */
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "");
+}
+
+function colunaLetra(i){
+  let s = "";
+  for(i += 1; i > 0; i = Math.floor((i - 1) / 26)) s = String.fromCharCode(65 + ((i - 1) % 26)) + s;
+  return s;
+}
+
+function abaXML(linhas){
+  const rows = linhas.map(function(l, y){
+    const cels = l.map(function(v, x){
+      if(v == null || v === "") return "";
+      return '<c r="'+colunaLetra(x)+(y+1)+'" t="inlineStr"><is><t xml:space="preserve">'+
+             xmlEsc(v)+'</t></is></c>';
+    }).join("");
+    return '<row r="'+(y+1)+'">'+cels+'</row>';
+  }).join("");
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
+    '<sheetData>'+rows+'</sheetData></worksheet>';
+}
+
+function gerarXLSX(abas){
+  const REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+  const arquivos = [
+    {nome:"[Content_Types].xml", txt:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
+      '<Default Extension="xml" ContentType="application/xml"/>'+
+      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+
+      abas.map(function(a, i){
+        return '<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>';
+      }).join("")+'</Types>'},
+    {nome:"_rels/.rels", txt:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+      '<Relationship Id="rId1" Type="'+REL+'/officeDocument" Target="xl/workbook.xml"/></Relationships>'},
+    {nome:"xl/workbook.xml", txt:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="'+REL+'">'+
+      '<sheets>'+abas.map(function(a, i){
+        return '<sheet name="'+xmlEsc(a.nome)+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>';
+      }).join("")+'</sheets></workbook>'},
+    {nome:"xl/_rels/workbook.xml.rels", txt:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+      abas.map(function(a, i){
+        return '<Relationship Id="rId'+(i+1)+'" Type="'+REL+'/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>';
+      }).join("")+'</Relationships>'}
+  ];
+  abas.forEach(function(a, i){
+    arquivos.push({nome:"xl/worksheets/sheet"+(i+1)+".xml", txt:abaXML(a.linhas)});
+  });
+  return zipar(arquivos);
+}
+
 /* CSV da aba de observações. Sai separado do outro porque vira outra aba:
    colar os dois na mesma planilha misturaria colunas que não se parecem. */
 function gerarCSVObs(){
@@ -2543,18 +2663,82 @@ function painelObsFonteHTML(){
     '<div style="padding:2px 14px 14px">'+
       '<p class="nota" style="margin:0 0 10px">'+linha+'</p>'+
       '<ol class="passos">'+
-        '<li>Clique em <strong>Gerar CSV das observações</strong>, aqui em cima.</li>'+
-        '<li>Na sua planilha, crie uma aba e dê a ela exatamente o nome '+
-          '<code>'+ABA_OBS+'</code> — sem acento e sem maiúscula.</li>'+
-        '<li>Abra o CSV e cole o conteúdo nessa aba. A primeira linha tem que ficar '+
-          'sendo <code>codigo</code> e <code>texto</code>.</li>'+
-        '<li>Clique em <strong>Sincronizar agora</strong>.</li>'+
+        '<li>Clique em <strong>Gerar planilha</strong>, aqui em cima. Sai um '+
+          '<code>corte-brcast.xlsx</code> já com as duas abas prontas: '+
+          '<code>cortes</code> e <code>'+ABA_OBS+'</code>.</li>'+
+        '<li>Suba no Drive e abra com <strong>Google Planilhas</strong>. '+
+          'Não precisa criar aba nem acertar nome nenhum.</li>'+
+        '<li>Compartilhe como <strong>Qualquer pessoa com o link · Leitor</strong> '+
+          'e cole o link nesta tela.</li>'+
       '</ol>'+
+      '<p class="nota" style="margin:0 0 10px">Já tem a planilha montada e quer só as '+
+      'observações? Use <strong>CSV das observações</strong> e cole numa aba nova chamada '+
+      'exatamente <code>'+ABA_OBS+'</code>.</p>'+
       '<div class="cuidado">O <b>código</b> é o que amarra a observação ao laudo. '+
       'Mudando o código de uma observação já escolhida numa amostra, ela aparece como '+
       'não encontrada em vez de trocar de texto em silêncio.</div>'+
     '</div>'+
   '</div>';
+}
+
+/* As mesmas linhas que vão para o CSV, sem virar texto: o xlsx recebe os
+   valores direto, então não há vírgula nem aspas para escapar — nem risco de
+   uma célula com quebra de linha estourar a coluna. */
+function linhasCortes(){
+  const TIPO = {cim:"cim", triagem:"triagem", tit:"titulo"};
+  const L = [["painel","organismo_id","organismo","ordem","tipo","antimicrobiano",
+              "sensivel_dose_padrao","aumentando_exposicao","resistente", COL_VERSAO, COL_CARTAO]];
+  let versaoPendente = versaoCortes;
+  PANELS.forEach(function(p){
+    const painel = p.fam+" · "+p.mat;
+    let cartaoPendente = cartaoDe(p);
+    p.orgs.forEach(function(o){
+      rowsDe(o).forEach(function(row, i){
+        const r = (row.t === "cim") ? ((refs[o.id] || {})[row.n] || {sdp:"",sae:"",res:""})
+                                    : {sdp:"",sae:"",res:""};
+        L.push([painel, o.id, o.nome, String(i+1), TIPO[row.t] || row.t, row.n,
+                r.sdp, r.sae, r.res, versaoPendente, cartaoPendente]);
+        versaoPendente = ""; cartaoPendente = "";
+      });
+    });
+  });
+  return L;
+}
+
+function linhasObs(){
+  const L = [COLS_OBS.slice()];
+  listaObs().forEach(function(o){ L.push([o.c, o.t]); });
+  return L;
+}
+
+async function exportarPlanilha(){
+  const abas = [{nome:"cortes", linhas:linhasCortes()},
+                {nome:ABA_OBS,  linhas:linhasObs()}];
+  const blob = gerarXLSX(abas);
+  const nome = "corte-brcast.xlsx";
+  const msg = "Planilha gerada: aba cortes com "+(abas[0].linhas.length-1)+" linhas e aba "+
+              ABA_OBS+" com "+(abas[1].linhas.length-1)+". Suba no Drive e abra com Planilhas.";
+
+  // Publicado como página web: o download passa pela confirmação do visualizador.
+  let dl = null;
+  try{ if(window.claude && window.claude.use) dl = await window.claude.use("downloads"); }catch(e){}
+  if(dl){
+    try{
+      const buf = await blob.arrayBuffer();
+      await dl.save({filename:nome, data:new Uint8Array(buf)});
+      toast(msg);
+    }catch(e){
+      if(e && e.code === "declined") return;
+      toast("Não consegui salvar aqui. Use os botões de CSV.");
+    }
+    return;
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  toast(msg);
 }
 
 async function exportarCSVObs(){

@@ -84,9 +84,13 @@ Valem só para a amostra atual, como os valores: *Nova amostra* e *Limpar tudo*
 zeram.
 
 **Para editar as observações**, elas vivem numa segunda aba da mesma planilha,
-chamada exatamente `observacoes`, com as colunas `codigo` e `texto`. Na tela
-*Fonte dos cortes* há o botão **Gerar CSV das observações** e o passo a passo.
-É opcional: sem a aba valem as que vieram no programa.
+chamada exatamente `observacoes`, com as colunas `codigo` e `texto`. É
+opcional: sem a aba valem as que vieram no programa.
+
+O jeito mais curto de montar tudo é **Gerar planilha** na tela *Fonte dos
+cortes*: sai um `corte-brcast.xlsx` com as duas abas já criadas e nomeadas —
+sobe no Drive, abre com Planilhas e pronto. Os botões de CSV continuam ali
+para quem já tem a planilha montada e quer só uma das partes.
 
 O `codigo` é o que amarra a observação à amostra. Mudando o código de uma
 observação já escolhida, ela aparece como não encontrada em vez de trocar de
