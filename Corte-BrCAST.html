@@ -46,6 +46,12 @@
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 26px -18px rgba(0,0,0,.85);
 }
 
+/* Sem isto o navegador desenha os controles nativos sempre no tema claro, e
+   no escuro o texto digitado some dentro do campo. */
+:root{color-scheme:light dark}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+
 *{box-sizing:border-box}
 body{
   margin:0; background:var(--ground); color:var(--ink);
@@ -103,7 +109,11 @@ button,input,select{font:inherit; color:inherit}
 .matseg button[aria-pressed="true"]{background:var(--accent); color:var(--btn-primary-ink); font-weight:600}
 .actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
 .btn{border:1px solid var(--rule-strong); background:var(--surface); border-radius:6px;
-     padding:7px 13px; font-size:13.5px; font-weight:500; cursor:pointer; white-space:nowrap}
+     padding:7px 13px; font-size:13.5px; font-weight:500; cursor:pointer; white-space:nowrap;
+     min-height:36px}
+/* Nos formulários o botão é alvo de toque de verdade, não item de barra. */
+.fonte-campo .btn, .fonte-saida .btn{min-height:44px}
+.fonte-campo input{min-height:44px}
 .btn:hover{border-color:var(--accent); color:var(--accent-ink)}
 .btn.primary{background:var(--accent); border-color:var(--accent); color:var(--btn-primary-ink)}
 .btn.primary:hover{filter:brightness(1.07); color:var(--btn-primary-ink)}
@@ -152,6 +162,10 @@ table.grid{border-collapse:collapse; width:100%; font-size:13.5px}
 table.grid th{text-align:left; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3);
               font-weight:700; padding:9px 14px; border-bottom:1px solid var(--rule); background:var(--surface-2); white-space:nowrap}
 table.grid td{padding:0; border-bottom:1px solid var(--rule); vertical-align:middle}
+/* padding:0 existe para a célula de digitar CIM no laudo. Fora dali o texto
+   encostava na moldura; nas tabelas de configuração ele volta a respirar. */
+.panel > .tablewrap table.grid td, .ajuda table.grid td{padding:8px 18px}
+#content .panel .tablewrap table.grid td:first-child{white-space:nowrap}
 table.grid tr:last-child td{border-bottom:0}
 .c-abx{padding:8px 14px; min-width:280px; line-height:1.3}
 .c-cim{width:120px; border-left:1px solid var(--rule); border-right:1px solid var(--rule)}
@@ -231,7 +245,7 @@ tr.omitida .abxnome{text-decoration:line-through}
 /* Desligar é a saída, não um passo: fica separado do que confirma, e explicado. */
 .fonte-saida{display:flex; align-items:center; gap:11px; flex-wrap:wrap; margin-top:12px;
              padding-top:12px; border-top:1px solid var(--rule)}
-.fonte-saida span{font-size:12.5px; color:var(--ink-3)}
+.fonte-saida span{font-size:12.5px; color:var(--ink-2)}
 .btn.ghost.perigo{color:var(--res-ink)}
 .btn.ghost.perigo:hover{background:var(--res); color:var(--res-ink); border-color:transparent}
 
@@ -318,10 +332,13 @@ tr.omitida .abxnome{text-decoration:line-through}
 .sumcell.sdp .v{color:var(--sdp-ink)} .sumcell.sae .v{color:var(--sae-ink)}
 .sumcell.res .v{color:var(--res-ink)} .sumcell.warn .v{color:var(--warn-ink)}
 
-.hint{font-size:12.5px; color:var(--ink-3); margin:13px 2px 0; max-width:76ch}
+/* --ink-3 a 12,5px dava 3,49:1 sobre o fundo, abaixo do mínimo de 4,5:1 do
+   WCAG AA. Texto pequeno e cinza não é discrição, é texto que parte das
+   pessoas não lê. */
+.hint{font-size:12.5px; color:var(--ink-2); margin:13px 2px 0; max-width:76ch}
 .dicas{display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
        gap:10px 22px; margin:16px 2px 0}
-.dicas > div{font-size:12.5px; line-height:1.5; color:var(--ink-3); max-width:52ch}
+.dicas > div{font-size:12.5px; line-height:1.5; color:var(--ink-2); max-width:52ch}
 .dicas b{display:block; color:var(--ink-2); font-weight:600; font-size:11px;
          text-transform:uppercase; letter-spacing:.06em; margin-bottom:2px}
 .dicas code{font-family:"IBM Plex Mono",monospace; background:var(--surface-2);
@@ -407,8 +424,25 @@ input.search:focus{outline:2px solid var(--accent); outline-offset:-1px}
   .selo.neu  {background:var(--surface-2);border-color:var(--rule);color:var(--ink-2)}
   .selo .dot2{margin-left:auto;display:flex;gap:8px;flex-shrink:0}
   .selo a{color:inherit;text-decoration:underline;white-space:nowrap}
-  .fonte-campo{display:flex;gap:8px;margin:10px 0 6px}
-  .fonte-campo input{flex:1;min-width:0}
+  /* Em tela estreita o campo ficava com 320px e mostrava um terço do link:
+   não dava para conferir o que se colou, que é o único motivo de olhar. */
+.fonte-campo{display:flex; gap:8px; margin:10px 0 6px; flex-wrap:wrap}
+.fonte-campo input{flex:1 1 260px}
+  .fonte-campo input{flex:1; min-width:0; background:var(--surface); color:var(--ink);
+                     border:1px solid var(--rule-strong); border-radius:7px; padding:9px 11px;
+                     font-size:13.5px}
+  .fonte-campo input::placeholder{color:var(--ink-3)}
+  /* O alarme de fonte quebrada no laudo: mesma linguagem do selo da tela de
+   configuração, com a saída para lá do lado. */
+.selo-laudo{margin-bottom:14px}
+.selo-laudo .btn{margin-left:auto; flex:none; padding:5px 11px; font-size:12.5px;
+                 background:transparent; border-color:currentColor; color:inherit}
+.sub.alerta{color:var(--res-ink); font-weight:600}
+
+.erro-campo{margin:9px 0 0; padding:9px 12px; font-size:12.5px; line-height:1.5;
+              color:var(--res-ink); background:var(--res); border-radius:7px}
+  .fonte-campo input:focus{outline:2px solid var(--accent); outline-offset:-1px;
+                           border-color:var(--accent)}
   .erros{margin:8px 0 0;padding-left:18px;font-size:12.5px;color:var(--res-ink)}
   .erros li{margin:2px 0}
   .passos{margin:0;padding:0 0 0 20px;font-size:13px;line-height:1.55;color:var(--ink-2)}
@@ -665,6 +699,7 @@ let omitidos = ler(K_OMIT, {});
    do caso em curso: "Nova amostra" e "Limpar tudo" zeram. Observação de um
    paciente colada no laudo de outro seria erro grave e silencioso. */
 let obsSel = ler(K_OBSSEL, {});
+let erroCampo = "";                    // erro do link, mostrado junto do campo
 let buscaObs = "";                     // só da sessão: some ao fechar
 
 function obsDaAmostra(){ return (obsSel[orgAtual.id] || []).slice(); }
@@ -743,7 +778,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.02.2";
+const VERSAO_APP = "2026.09.02.3";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -1655,7 +1690,7 @@ function renderLaudo(){
       '</span><button class="btn" id="btnConferirTodas">Conferir todas</button></div>'
     : "";
 
-  $("content").innerHTML = painelImportHTML() + avisoFora + aviso +
+  $("content").innerHTML = avisoFonteHTML() + painelImportHTML() + avisoFora + aviso +
     '<div class="summary">'+
       '<div class="sumcell sdp"><div class="k">Sensível, dose padrão</div><div class="v">'+c.sdp+'</div></div>'+
       '<div class="sumcell sae"><div class="k">Aumentando exposição</div><div class="v">'+c.sae+'</div></div>'+
@@ -1686,6 +1721,8 @@ function renderLaudo(){
         'Cortado, fica fora do que você copia — mas continua aqui na tela.</div>'+
     '</div>';
 
+  const bf = $("btnIrFonte");
+  if(bf) bf.addEventListener("click", function(){ vista = "fonte"; imp = null; render(); });
   $("btnCopiar").addEventListener("click", copiar);
   $("btnNova").addEventListener("click", novaAmostra);
   $("btnLimpar").addEventListener("click", limpar);
@@ -1923,6 +1960,24 @@ function seloHTML(extra){
   return '<div class="selo '+e.cls+'"><span>'+esc(e.txt)+'</span>'+(extra || "")+'</div>';
 }
 
+/* O estado "a planilha do laboratório falhou, estamos interpretando com os
+   cortes de fábrica" é desvio clínico, não atrito de interface. Ele vivia só
+   na tela de configuração, que se abre uma vez por computador — a bancada
+   laudava sem ver nada. Agora aparece onde o laudo é feito, e some sozinho
+   quando a sincronização volta. */
+function fonteRuim(){
+  if(!fonte) return null;
+  const e = fonteStat.estado;
+  return (e === "erro" || e === "erro-com-cache" || e === "offline") ? selo() : null;
+}
+
+function avisoFonteHTML(){
+  const e = fonteRuim();
+  if(!e) return "";
+  return '<div class="selo '+e.cls+' selo-laudo"><span>'+esc(e.txt)+'</span>'+
+    '<button class="btn" id="btnIrFonte">Ver a fonte dos cortes</button></div>';
+}
+
 /* Com planilha configurada os cortes são do laboratório: a tela mostra, não
    edita. Editar aqui recriaria a divergência entre máquinas que a planilha
    existe para eliminar. */
@@ -2129,8 +2184,15 @@ function renderSobre(){
    isso para ver uma data, e quem está configurando não sabe onde olhar
    primeiro. Fechados por padrão quando a planilha já funciona; abertos no
    primeiro uso, que é quando a instrução é o conteúdo principal. */
+/* Quais blocos estão abertos. render() reescreve o conteúdo inteiro, então
+   sem isto o laço natural — abrir "Se der errado", clicar em "Sincronizar
+   agora", ver se resolveu — fechava o bloco que se estava lendo e pulava a
+   página. Vive só na sessão: fechar o programa recomeça tudo fechado. */
+const ajudaAberta = {};
+
 function ajuda(titulo, corpo){
-  return '<details class="ajuda">'+
+  return '<details class="ajuda" data-ajuda="'+esc(titulo)+'"'+
+    (ajudaAberta[titulo] ? " open" : "")+'>'+
     '<summary>'+esc(titulo)+'</summary>'+
     '<div class="ajuda-corpo">'+corpo+'</div>'+
   '</details>';
@@ -2159,10 +2221,16 @@ function renderFonte(){
       '<strong>Qualquer pessoa com o link · Leitor</strong>.</p></div>'+
       '<div style="padding:0 14px 14px">'+
         '<div class="fonte-campo">'+
-          '<input id="fonteURL" spellcheck="false" placeholder="https://docs.google.com/spreadsheets/d/…/edit" '+
-            'value="'+(fonte ? esc(urlPlanilha(fonte)) : "")+'" aria-label="Link da planilha">'+
+          '<input id="fonteURL" type="url" spellcheck="false" autocomplete="off" '+
+            'placeholder="https://docs.google.com/spreadsheets/d/…/edit" '+
+            'value="'+(fonte ? esc(urlPlanilha(fonte)) : "")+'" aria-label="Link da planilha"'+
+            (erroCampo ? ' aria-invalid="true" aria-describedby="erroCampo"' : "")+'>'+
           '<button class="btn primary" id="btnSalvar">Salvar e testar</button>'+
         '</div>'+
+        /* O erro do link ia para um toast de dois segundos e meio, no rodapé de
+           uma página de duas mil e quatrocentas alturas. Ninguém terminava de
+           ler. Agora fica colado no campo que causou, e some ao digitar. */
+        (erroCampo ? '<p class="erro-campo" id="erroCampo" role="alert">'+esc(erroCampo)+'</p>' : "")+
         /* Desligar fica na mesma linha e do lado oposto do botão que confirma:
            é a saída, não um passo do caminho. Solta embaixo, sem forma de
            botão, parecia link quebrado — e é uma ação destrutiva. */
@@ -2266,13 +2334,13 @@ function renderFonte(){
       'própria fonte sincronizada:</p>'+
       '<div style="padding:2px 14px 14px">'+
         '<ol class="passos">'+
-          '<li>Clique em <strong>Gerar planilha</strong>, aqui em cima. Sai um '+
+          '<li>Clique em <strong>Gerar planilha</strong>, no alto desta tela. Sai um '+
             '<code>corte-brcast.xlsx</code> com os cortes que estão valendo agora e as observações, '+
             'cada um na sua aba.</li>'+
           '<li>Ele sobe o arquivo no <strong>Drive dele</strong> e abre com <strong>Google Planilhas</strong>. '+
             'Nada para formatar: o xlsx já leva os cortes como texto.</li>'+
           '<li>Compartilha como <strong>Qualquer pessoa com o link · Leitor</strong>, '+
-            'pelos 5 passos acima.</li>'+
+            'pelos passos de <strong>Como apontar para outra planilha</strong>.</li>'+
           '<li>Cola o link no campo desta tela e clica em <strong>Salvar e testar</strong>.</li>'+
         '</ol>'+
         '<div class="cuidado">A partir daí os dois laboratórios ficam <b>independentes</b>: '+
@@ -2280,21 +2348,41 @@ function renderFonte(){
       '</div>'+
       '');
 
+  $("content").querySelectorAll("details[data-ajuda]").forEach(function(d){
+    d.addEventListener("toggle", function(){ ajudaAberta[d.dataset.ajuda] = d.open; });
+  });
   const bx = $("btnXLSX");
   if(bx) bx.addEventListener("click", exportarPlanilha);
 
   const campo = $("fonteURL");
+  /* O link só vai para o disco depois de funcionar. Antes ele era gravado
+     assim que passava no formato: um endereço bem escrito mas apontando para
+     a planilha errada apagava o link bom, sem desfazer e sem mostrar qual
+     era. Agora, falhando, o anterior volta e a tela diz isso. */
   const salvar = function(){
     const r = lerLink(campo.value);
-    if(r.erro){ toast(r.erro); return; }
+    if(r.erro){ erroCampo = r.erro; render(); return; }
+    const anterior = fonte;
+    erroCampo = "";
     fonte = {id:r.id, gid:r.gid};
-    gravar(K_FONTE, fonte);
     sincronizar({aoMudar:function(){
-      render();
-      if(fonteStat.estado === "ok") toast("Sincronizado: "+fonteStat.linhas+" linhas.");
+      if(fonteStat.estado === "ok"){
+        gravar(K_FONTE, fonte);
+        render();
+        toast("Sincronizado: "+fonteStat.linhas+" linhas.");
+      }else if(fonteStat.estado !== "buscando"){
+        fonte = anterior;
+        if(anterior) erroCampo = "O link não funcionou. O anterior continua valendo.";
+        render();
+      }else{
+        render();
+      }
     }});
   };
   $("btnSalvar").addEventListener("click", salvar);
+  campo.addEventListener("input", function(){
+    if(erroCampo){ erroCampo = ""; const p = $("erroCampo"); if(p) p.remove(); }
+  });
   campo.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); salvar(); } });
   if($("btnSinc")) $("btnSinc").addEventListener("click", function(){
     sincronizar({aoMudar:function(){ render(); }});
@@ -2314,7 +2402,12 @@ function renderFonte(){
 
 function render(){
   renderRail();
-  $("marcaSub").textContent = "LEPAC" + (versaoCortes ? " · " + versaoCortes : "");
+  /* Com a planilha falhando, o rodapé da marca mostrava a versão embutida e
+     ficava idêntico a uma sincronização saudável. */
+  const ruim = fonteRuim();
+  $("marcaSub").textContent = "LEPAC" + (versaoCortes ? " · " + versaoCortes : "") +
+                              (ruim ? " · cortes de fábrica" : "");
+  $("marcaSub").className = "sub" + (ruim ? " alerta" : "");
   const p = orgAtual.painel;
   const geral = !!TELAS_GERAIS[vista];
   // com alternador visível o material já está ali — não repetir no supratítulo
@@ -2684,7 +2777,7 @@ function painelObsFonteHTML(){
     '<div style="padding:2px 18px 14px">'+
       '<p class="nota" style="margin:10px 0">'+linha+'</p>'+
       '<ol class="passos">'+
-        '<li>Clique em <strong>Gerar planilha</strong>, aqui em cima. Sai um '+
+        '<li>Clique em <strong>Gerar planilha</strong>, no alto desta tela. Sai um '+
           '<code>corte-brcast.xlsx</code> já com as duas abas prontas: '+
           '<code>cortes</code> e <code>'+ABA_OBS+'</code>.</li>'+
         '<li>Suba no Drive e abra com <strong>Google Planilhas</strong>. '+
