@@ -127,6 +127,25 @@
     <a class="btn" href="Corte-BrCAST.html" download>Baixar</a>
   </div>
 
+  <div id="ajudaIcone" hidden>
+    <div class="card">
+      <h3>Já está instalado neste computador</h3>
+      <p>Por isso o botão não aparece. Procure por <strong>Corte BrCAST</strong> no menu
+      Iniciar, no Launchpad ou na área de trabalho.</p>
+      <p><strong>Sumiu o ícone?</strong> O programa continua instalado — só o atalho
+      se perdeu. Para trazer de volta:</p>
+      <ol>
+        <li>Na barra de endereço do Chrome, escreva <code>chrome://apps</code> e aperte Enter</li>
+        <li>Clique com o <strong>botão direito</strong> em <strong>Corte BrCAST</strong></li>
+        <li>Escolha <strong>Criar atalhos…</strong></li>
+      </ol>
+      <p>Se não aparecer essa opção, ainda dá pelo caminho longo: nessa mesma tela,
+      botão direito ▸ <strong>Remover do Chrome</strong>, volte aqui e clique em
+      <strong>Instalar</strong>. Nada se perde — o programa não guarda nada que dependa
+      da instalação.</p>
+    </div>
+  </div>
+
   <div id="ajudaInstalar" hidden>
     <div class="card">
       <h3>O botão de instalar não apareceu</h3>
@@ -134,7 +153,8 @@
       <ul>
         <li><strong>Já está instalado</strong> neste computador. Procure por
             <strong>Corte BrCAST</strong> no menu Iniciar, no Launchpad ou na área
-            de trabalho.</li>
+            de trabalho — e se o ícone sumiu, dá para criar de novo por
+            <code>chrome://apps</code>.</li>
         <li><strong>É uma janela anônima.</strong> O Chrome não instala programas em
             janela anônima. Abra esta página numa janela normal.</li>
         <li><strong>É o Firefox.</strong> Ele não instala programas assim. Use o Chrome
@@ -223,12 +243,14 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
 var eventoInstalar = null;
 var btn = document.getElementById("btnInstalar");
 var ajuda = document.getElementById("ajudaInstalar");
+var ajudaIcone = document.getElementById("ajudaIcone");
 
 window.addEventListener("beforeinstallprompt", function(e){
   e.preventDefault();
   eventoInstalar = e;
   btn.hidden = false;
   ajuda.hidden = true;
+  ajudaIcone.hidden = true;
 });
 
 btn.addEventListener("click", function(){
@@ -238,22 +260,32 @@ btn.addEventListener("click", function(){
   btn.hidden = true;
 });
 
-window.addEventListener("appinstalled", function(){
+window.addEventListener("appinstalled", function(){ marcarInstalado(); });
+
+function marcarInstalado(){
   document.getElementById("txtInstalar").textContent =
-    "Pronto, está instalado. Procure por Corte BrCAST no menu Iniciar, no Launchpad " +
-    "ou na área de trabalho.";
+    "Já está no seu computador. Procure por Corte BrCAST no menu Iniciar, no " +
+    "Launchpad ou na área de trabalho.";
   document.getElementById("seloRec").hidden = true;
   btn.hidden = true;
   ajuda.hidden = true;
-});
+  ajudaIcone.hidden = false;
+}
 
-/* Sem o aviso do navegador em alguns segundos, ou já está instalado, ou este
-   navegador não instala. Daqui não dá para distinguir os dois casos — não há
-   API para perguntar se o app está instalado —, então o texto de reserva
-   responde aos dois em vez de adivinhar e errar com metade das pessoas. */
+/* O botão some por dois motivos opostos: ja instalado, ou este navegador nao
+   instala. O manifest declara o proprio app em related_applications so para
+   que esta pergunta seja possivel — sem isso a resposta vem sempre vazia e a
+   pagina teria de adivinhar. Quando nem assim der para saber, cai no texto que
+   responde a todos os casos. */
 setTimeout(function(){
   if(!btn.hidden) return;
-  ajuda.hidden = false;
+  var pergunta = navigator.getInstalledRelatedApps
+    ? navigator.getInstalledRelatedApps()
+    : Promise.reject();
+  pergunta.then(function(lista){
+    if(lista && lista.length) marcarInstalado();
+    else ajuda.hidden = false;
+  }, function(){ ajuda.hidden = false; });
 }, 2500);
 </script>
 </body>

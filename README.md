@@ -163,6 +163,11 @@ Testar em anônima dá um falso negativo — foi o primeiro engano ao verificar 
 Se nenhum caminho funcionar, o arquivo solto continua sendo a saída, e é
 exatamente para isso que ele existe.
 
+**Ícone apagado por engano** não desinstala nada: o programa continua na
+máquina, só o atalho se perdeu. Para trazer de volta, em `chrome://apps`,
+botão direito em Corte BrCAST ▸ **Criar atalhos…**. A página de entrada
+mostra esse caminho sozinha quando percebe que o app já está instalado.
+
 ### Atalho com ícone (para o arquivo solto)
 
 1. Deixe o `corte-brcast.ico` junto do programa
