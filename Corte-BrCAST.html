@@ -184,6 +184,23 @@ button.pend{width:11px; height:11px; padding:0; border:0; border-radius:50%; cur
 button.pend:hover{filter:brightness(1.25)}
 input.cim.pendente{color:var(--warn-ink); font-style:italic}
 .sumcell.pendente .v{color:var(--warn-ink)}
+/* Fora do laudo: a linha continua legível na tela, só sai do que é copiado.
+   Apagar de vez esconderia da própria pessoa aquilo que ela tirou. */
+tr.omitida .abxnome, tr.omitida .c-cim, tr.omitida .c-int{opacity:.4}
+tr.omitida .abxnome{text-decoration:line-through}
+.abxrow .omitir{margin-left:auto; flex:none; border:0; background:none; cursor:pointer;
+                color:var(--ink-3); font-size:11.5px; line-height:1; padding:3px 6px;
+                border-radius:5px; opacity:0; transition:opacity .12s; font-family:inherit}
+tr:hover .omitir, .omitir:focus-visible, .omitir.ativo{opacity:1}
+.abxrow .omitir:hover{background:var(--surface-2); color:var(--ink)}
+.abxrow .omitir.ativo{color:var(--warn-ink); background:var(--warn); font-weight:700;
+                      text-transform:uppercase; letter-spacing:.03em; font-size:9.5px}
+.avisofora{display:flex; align-items:center; gap:11px; flex-wrap:wrap; margin-bottom:14px;
+           border-left:3px solid var(--warn-ink); background:var(--surface-2);
+           padding:9px 13px; font-size:13px; color:var(--ink-2)}
+.avisofora .btn{background:transparent; border-color:var(--rule-strong);
+                padding:4px 10px; font-size:12.5px}
+.sumcell.fora .v{color:var(--warn-ink)}
 .avisopend{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;
   background:var(--warn); color:var(--warn-ink); border:1px solid var(--warn-ink);
   border-radius:8px; padding:9px 14px; font-size:13px; font-weight:500}
@@ -476,6 +493,7 @@ function interpretarTriagem(v){
 const K_REF = "brcast.refs.v2", K_VAL = "brcast.valores.v2";
 const K_PEND = "brcast.pendentes.v1", K_REC = "brcast.recentes.v1";
 const K_ALIAS = "brcast.apelidos.v1";
+const K_OMIT  = "brcast.omitidos.v1";
 const K_LINHAS = "brcast.linhas.v1";   // lista de antimicrobianos, quando o laboratório alterou
 const K_FONTE  = "brcast.fonte.v1";       // {id, gid} da planilha do laboratório
 const K_CACHE  = "brcast.fontecache.v1";  // última sincronização boa — faz funcionar sem internet
@@ -557,6 +575,23 @@ let valores   = ler(K_VAL, {});
 let pendentes = ler(K_PEND, {});   // {idDoRegistro: {antimicrobiano: true}}
 let recentes  = ler(K_REC, []);    // chaves da trilha, mais recente primeiro
 let apelidos  = ler(K_ALIAS, {});   // nome do outro sistema -> antimicrobiano daqui
+
+/* Antimicrobianos que esta amostra não deve mostrar no laudo. Vale só para a
+   amostra em curso: "Nova amostra" e "Limpar tudo" zeram. Guardar entre
+   pacientes seria pior que o problema — um antimicrobiano sumiria do laudo
+   para sempre porque alguém esqueceu de reativar, e ninguém repara na
+   ausência de uma linha. */
+let omitidos = ler(K_OMIT, {});
+
+function estaOmitido(orgId, nome){
+  return !!(omitidos[orgId] && omitidos[orgId][nome]);
+}
+function alternarOmitido(orgId, nome){
+  if(!omitidos[orgId]) omitidos[orgId] = {};
+  if(omitidos[orgId][nome]) delete omitidos[orgId][nome];
+  else omitidos[orgId][nome] = true;
+  gravar(K_OMIT, omitidos);
+}
 let linhasCustom = ler(K_LINHAS, {});  // sobrepõe a lista vinda da planilha
 /* Planilha do laboratório. O arquivo sai sem link: cada laboratório aponta
    para a própria planilha na tela Fonte dos cortes. Sem link configurado o
@@ -607,7 +642,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.08.31.14";
+const VERSAO_APP = "2026.08.31.15";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -910,9 +945,11 @@ function linhas(){
     const v = val(orgAtual.id, row.n);
     const pnd = !!v && pend(orgAtual.id, row.n);
     if(row.t === "triagem")
-      return {tipo:"triagem", n:row.n, v:v, op:row.op, cat:interpretarTriagem(v), pendente:pnd};
+      return {tipo:"triagem", n:row.n, v:v, op:row.op, cat:interpretarTriagem(v), pendente:pnd,
+              omitido:estaOmitido(orgAtual.id, row.n)};
     const ref = (refs[orgAtual.id] || {})[row.n] || {sdp:"",sae:"",res:""};
-    return {tipo:"cim", n:row.n, v:v, ref:ref, cat:interpretar(v, ref), src:row.src, pendente:pnd};
+    return {tipo:"cim", n:row.n, v:v, ref:ref, cat:interpretar(v, ref), src:row.src, pendente:pnd,
+            omitido:estaOmitido(orgAtual.id, row.n)};
   });
 }
 
@@ -1227,9 +1264,10 @@ function ligarImport(){
 function renderLaudo(){
   const L = linhas();
   const c = {sdp:0, sae:0, res:0, warn:0, vazio:0};
-  let nPend = 0;
+  let nPend = 0, nFora = 0;
   L.forEach(function(l){
     if(l.tipo === "tit") return;
+    if(l.omitido) nFora++;
     if(l.pendente) nPend++;
     if(!l.cat) c.vazio++;
     else if(l.cat.cls === "sdp") c.sdp++;
@@ -1272,13 +1310,34 @@ function renderLaudo(){
       if(String(l.ref.res).trim()) p.push("<span><b>R</b> "+esc(l.ref.res)+"</span>");
       corte = p.length ? p.join("") : '<span class="none">sem corte cadastrado</span>';
     }
-    return '<tr>'+
-      '<td class="c-abx"><div class="abxrow"><span class="pendslot">'+marca+'</span><span>'+esc(l.n)+'</span></div></td>'+
+    /* Tirar do laudo é decisão de quem lauda, não do programa: em alguns casos
+       o antimicrobiano não deve ser mostrado. A linha continua aqui, com o
+       valor e a interpretação à vista — some só do que é copiado. Esconder da
+       tela também deixaria a pessoa sem saber o que ela mesma tirou. */
+    const btnOmitir = '<button class="omitir'+(l.omitido?" ativo":"")+'" data-omitir="'+esc(l.n)+'" '+
+      'title="'+(l.omitido ? "Fora do laudo. Clique para incluir de novo."
+                           : "Não mostrar este antimicrobiano no laudo desta amostra.")+'" '+
+      'aria-pressed="'+(l.omitido?"true":"false")+'" '+
+      'aria-label="'+(l.omitido?"Incluir ":"Tirar do laudo ")+esc(l.n)+'">'+
+      (l.omitido ? "fora do laudo" : "✕")+'</button>';
+
+    return '<tr'+(l.omitido?' class="omitida"':'')+'>'+
+      '<td class="c-abx"><div class="abxrow"><span class="pendslot">'+marca+'</span>'+
+      '<span class="abxnome">'+esc(l.n)+'</span>'+btnOmitir+'</div></td>'+
       '<td class="c-cim">'+campo+'</td>'+
       '<td class="c-int">'+tag+'</td>'+
       '<td class="c-corte"><div class="corte mono">'+corte+'</div></td>'+
     '</tr>';
   }).join("");
+
+  /* Linha tirada do laudo é ausência: quem lê o laudo não tem como notar que
+     faltou. O aviso fica na tela enquanto durar, para não copiar sem lembrar. */
+  const avisoFora = nFora
+    ? '<div class="avisofora"><span>'+nFora+(nFora===1
+        ? ' antimicrobiano não vai no laudo desta amostra.'
+        : ' antimicrobianos não vão no laudo desta amostra.')+
+      '</span><button class="btn" id="btnVoltarTodos">Incluir todos de volta</button></div>'
+    : "";
 
   const aviso = nPend
     ? '<div class="avisopend"><span>'+nPend+(nPend===1
@@ -1287,7 +1346,7 @@ function renderLaudo(){
       '</span><button class="btn" id="btnConferirTodas">Conferir todas</button></div>'
     : "";
 
-  $("content").innerHTML = painelImportHTML() + aviso +
+  $("content").innerHTML = painelImportHTML() + avisoFora + aviso +
     '<div class="summary">'+
       '<div class="sumcell sdp"><div class="k">Sensível, dose padrão</div><div class="v">'+c.sdp+'</div></div>'+
       '<div class="sumcell sae"><div class="k">Aumentando exposição</div><div class="v">'+c.sae+'</div></div>'+
@@ -1295,6 +1354,7 @@ function renderLaudo(){
       '<div class="sumcell warn"><div class="k">Conferir resultado</div><div class="v">'+c.warn+'</div></div>'+
       '<div class="sumcell"><div class="k">Em branco</div><div class="v">'+c.vazio+'</div></div>'+
       (nPend ? '<div class="sumcell pendente"><div class="k">Não conferidas</div><div class="v">'+nPend+'</div></div>' : "")+
+      (nFora ? '<div class="sumcell fora"><div class="k">Fora do laudo</div><div class="v">'+nFora+'</div></div>' : "")+
     '</div>'+
     '<div class="panel"><div class="tablewrap"><table class="grid">'+
       '<thead><tr><th>Antimicrobiano</th><th style="text-align:center">CIM (mg/L)</th>'+
@@ -1304,7 +1364,9 @@ function renderLaudo(){
     'Digite <code>&lt;=</code> ou <code>&gt;=</code> e vira <code>≤</code> / <code>≥</code> sozinho. '+
     '<code>Enter</code> vai para o próximo campo, <code>Shift+Enter</code> volta. '+
     'Colar várias linhas num campo preenche a coluna para baixo. '+
-    '<strong>Corte aplicado</strong> mostra qual regra decidiu — essa coluna não vai no copiar.</p>';
+    '<strong>Corte aplicado</strong> mostra qual regra decidiu — essa coluna não vai no copiar. '+
+    'Para não mostrar um antimicrobiano no laudo, passe o mouse na linha dele e clique no '+
+    '<code>✕</code> do lado direito do nome — ele continua aqui, mas fica fora do que você copia.</p>';
 
   $("btnCopiar").addEventListener("click", copiar);
   $("btnNova").addEventListener("click", novaAmostra);
@@ -1320,6 +1382,20 @@ function renderLaudo(){
     gravar(K_PEND, pendentes);
     renderLaudo();
     toast("Todas as linhas conferidas.");
+  });
+
+  $("content").querySelectorAll("button[data-omitir]").forEach(function(b){
+    b.addEventListener("click", function(){
+      alternarOmitido(orgAtual.id, b.dataset.omitir);
+      renderLaudo();
+    });
+  });
+  const bv = $("btnVoltarTodos");
+  if(bv) bv.addEventListener("click", function(){
+    omitidos[orgAtual.id] = {};
+    gravar(K_OMIT, omitidos);
+    renderLaudo();
+    toast("Todos os antimicrobianos voltaram para o laudo.");
   });
 
   $("content").querySelectorAll("button.pend").forEach(function(b){
@@ -1972,6 +2048,7 @@ function tabelaHTML(){
       h += '<tr><td colspan="3" style="'+B+F+'font-weight:bold;">'+esc(l.n)+'</td></tr>';
       return;
     }
+    if(l.omitido) return;   // tirado do laudo desta amostra
     const bg = l.cat ? "background-color:"+l.cat.fill+";" : "";
     h += '<tr><td style="'+B+F+'">'+esc(l.n)+'</td>'+
          '<td style="'+B+F+'text-align:center;">'+esc(l.tipo === "triagem" ? "" : l.v)+'</td>'+
@@ -1984,6 +2061,7 @@ function tabelaTexto(){
           "ANTIMICROBIANOS\tCIM (mg/L)\tINTERPRETAÇÃO\n";
   linhas().forEach(function(l){
     if(l.tipo === "tit"){ t += l.n+"\t\t\n"; return; }
+    if(l.omitido) return;
     t += l.n+"\t"+(l.tipo === "triagem" ? "" : l.v)+"\t"+(l.cat ? l.cat.txt : "")+"\n";
   });
   return t;
@@ -1994,6 +2072,8 @@ async function copiar(){
         ? " linha ainda não foi conferida nesta amostra."
         : " linhas ainda não foram conferidas nesta amostra.")+
       "\n\nCopiar assim mesmo?")) return;
+  const nFora = linhas().filter(function(l){ return l.omitido; }).length;
+  const extra = nFora ? " · "+nFora+" fora do laudo" : "";
   const html = tabelaHTML(), texto = tabelaTexto();
   try{
     if(navigator.clipboard && window.ClipboardItem){
@@ -2001,7 +2081,7 @@ async function copiar(){
         "text/html":  new Blob([html],  {type:"text/html"}),
         "text/plain": new Blob([texto], {type:"text/plain"})
       })]);
-      toast("Tabela copiada com as cores.");
+      toast("Tabela copiada com as cores."+extra);
       return;
     }
   }catch(e){}
@@ -2043,6 +2123,8 @@ function novaAmostra(){
   Object.keys(v).forEach(function(k){ if(v[k]) marcas[k] = true; });
   pendentes[orgAtual.id] = marcas;
   gravar(K_PEND, pendentes);
+  omitidos[orgAtual.id] = {};          // decisão da amostra anterior, não desta
+  gravar(K_OMIT, omitidos);
   renderLaudo();
   const p = $("content").querySelector("input.cim, select.tri");
   if(p) p.focus();
@@ -2057,8 +2139,10 @@ function limpar(){
   if(tem && !confirm("Apagar todos os valores digitados de "+orgAtual.nome+"?")) return;
   valores[orgAtual.id] = {};
   pendentes[orgAtual.id] = {};
+  omitidos[orgAtual.id] = {};
   gravar(K_VAL, valores);
   gravar(K_PEND, pendentes);
+  gravar(K_OMIT, omitidos);
   renderLaudo();
   const p = $("content").querySelector("input.cim, select.tri");
   if(p) p.focus();

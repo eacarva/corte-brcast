@@ -47,6 +47,24 @@ casam sozinhas.
 
 Nada entra sem a prévia, e o que entra fica marcado como **não conferido**.
 
+### Tirar um antimicrobiano do laudo
+
+Em alguns casos o antimicrobiano não deve ser mostrado. Passando o mouse na
+linha aparece um **✕** à direita do nome; clicando, ela sai do que é copiado.
+
+A linha **continua na tela**, riscada e com o selo *fora do laudo* — o valor e
+a interpretação seguem à vista. Esconder da tela deixaria a própria pessoa sem
+saber o que tirou.
+
+Enquanto houver alguma fora, um aviso fica no topo com o botão **Incluir todos
+de volta**, e o resumo ganha a contagem. Ao copiar, a mensagem diz quantas
+ficaram de fora.
+
+A escolha vale **só para a amostra atual**: *Nova amostra* e *Limpar tudo*
+devolvem todas. Guardar entre pacientes seria pior que o problema — um
+antimicrobiano sumiria do laudo para sempre porque alguém esqueceu de
+reativar, e falta de linha ninguém percebe.
+
 ### Observações padrão
 
 68 textos de laudo (Bac 1 a Bac 71), com busca por código ou conteúdo. Clicar copia.
