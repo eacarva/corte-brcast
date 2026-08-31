@@ -2,7 +2,7 @@
 
 Interpretação de antibiograma segundo o BrCAST, para o LEPAC.
 
-Digite os valores de CIM e o sistema devolve a interpretação colorida — *Sensível, dose padrão* · *Sensível, aumentando exposição* · *Resistente* — pronta para copiar no laudo. 31 microrganismos, 408 antimicrobianos, 10 painéis.
+Digite os valores de CIM e o sistema devolve a interpretação colorida — *Sensível, dose padrão* · *Sensível, aumentando exposição* · *Resistente* — pronta para copiar no laudo. 27 microrganismos em 10 painéis, com tabelas separadas para urina e outros materiais — 420 linhas de antimicrobiano ao todo.
 
 **É um único arquivo HTML.** Sem servidor, sem instalação, sem banco de dados. Abre com duplo clique e funciona.
 
