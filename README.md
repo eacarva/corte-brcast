@@ -108,6 +108,12 @@ Ele **só pergunta**. Não baixa nada, não se reescreve e não muda nenhum
 corte: o que decide laudo é apenas o que está dentro do arquivo que você
 tem na mão.
 
+A tela **Sobre o programa**, na barra lateral, traz o endereço para baixar a
+versão nova, a autoria e o aviso de uso. Existe por causa do arquivo solto:
+ele viaja por pendrive e mensagem e chega em máquina onde ninguém sabe de onde
+veio. O pé da barra mostra o endereço o tempo todo; o resto fica nessa tela,
+fora do caminho de quem está laudando.
+
 A versão instalada fica no pé da barra lateral, em cinza claro. É por ali que
 se confere se a atualização entrou — sem ela, o aviso some ao ser clicado e
 ninguém sabe dizer se algo aconteceu.

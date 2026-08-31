@@ -10,15 +10,17 @@
 <style>
   :root{
     --ground:#f4f6f8; --surface:#ffffff; --ink:#101820; --ink-2:#48555f; --ink-3:#78858f;
-    --rule:#d3dae0; --accent:#0d6c72; --accent-ink:#ffffff;
+    --rule:#d3dae0; --accent:#0d6c72; --accent-ink:#ffffff; --realce:#dfeeee;
   }
   @media (prefers-color-scheme: dark){
     :root{
       --ground:#0c1116; --surface:#141c22; --ink:#e4ebf0; --ink-2:#9aa8b3; --ink-3:#6d7b86;
-      --rule:#26323b; --accent:#4fb9bd; --accent-ink:#07171a;
+      --rule:#26323b; --accent:#4fb9bd; --accent-ink:#07171a; --realce:#16303152;
     }
   }
   *{box-sizing:border-box}
+  /* o atributo hidden perde para o display das classes abaixo */
+  [hidden]{display:none !important}
   body{margin:0;background:var(--ground);color:var(--ink);
        font:15.5px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
        display:flex;justify-content:center;padding:40px 20px 60px}
@@ -27,22 +29,50 @@
   .marca{width:64px;height:64px;flex-shrink:0}
   h1{margin:0;font-size:27px;letter-spacing:-.01em}
   .sub{color:var(--ink-2);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
-  .lead{font-size:17px;line-height:1.55;margin:0 0 26px}
-  .acoes{display:flex;flex-wrap:wrap;gap:11px;margin-bottom:34px}
+  .lead{font-size:17px;line-height:1.55;margin:0 0 30px}
+
+  h2.secao{font-size:13px;text-transform:uppercase;letter-spacing:.07em;
+           color:var(--ink-3);margin:0 0 12px;font-weight:600}
+
+  /* Cada jeito de usar é um bloco só: o botão e a explicação do que ele faz
+     ficam juntos. Botões enfileirados sem legenda obrigam a pessoa a adivinhar
+     a diferença entre baixar, abrir e instalar. */
+  .escolha{display:flex;gap:14px;align-items:flex-start;background:var(--surface);
+           border:1px solid var(--rule);border-radius:12px;padding:16px 18px;margin-bottom:12px}
+  .escolha.destaque{border-color:var(--accent);background:var(--realce)}
+  .escolha .txt{flex:1;min-width:0}
+  .escolha b{display:block;font-size:16px;margin-bottom:3px}
+  .escolha p{margin:0;color:var(--ink-2);font-size:14.5px}
+  .escolha .btn{flex-shrink:0;margin-top:2px}
+  .selo{display:inline-block;background:var(--accent);color:var(--accent-ink);
+        font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+        padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:2px}
+
   .btn{display:inline-block;padding:11px 20px;border-radius:9px;text-decoration:none;
        font-weight:600;font-size:14.5px;border:1px solid var(--rule);color:var(--ink);
-       background:var(--surface)}
+       background:var(--surface);cursor:pointer;font-family:inherit;white-space:nowrap}
   .btn.primario{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+
   .card{background:var(--surface);border:1px solid var(--rule);border-radius:12px;
-        padding:18px 20px;margin-bottom:14px}
-  .card h2{margin:0 0 8px;font-size:15px;letter-spacing:.01em}
+        padding:18px 20px;margin-bottom:12px}
+  .card h3{margin:0 0 8px;font-size:15px;letter-spacing:.01em}
   .card p{margin:0;color:var(--ink-2);font-size:14.5px}
-  ol{margin:8px 0 0;padding-left:20px;color:var(--ink-2);font-size:14.5px}
-  ol li{margin:5px 0}
+  .card p + p{margin-top:9px}
+  ol,ul{margin:9px 0 0;padding-left:20px;color:var(--ink-2);font-size:14.5px}
+  li{margin:5px 0}
+  details{background:var(--surface);border:1px solid var(--rule);border-radius:12px;
+          padding:14px 20px;margin-bottom:12px;color:var(--ink-2);font-size:14.5px}
+  details summary{cursor:pointer;color:var(--ink);font-weight:600;font-size:15px}
+  details[open] summary{margin-bottom:10px}
   code{background:var(--ground);border:1px solid var(--rule);border-radius:4px;
        padding:1px 5px;font-size:12.5px}
-  footer{margin-top:30px;color:var(--ink-3);font-size:13px;line-height:1.55}
+  hr{border:0;border-top:1px solid var(--rule);margin:34px 0 26px}
+  footer{color:var(--ink-3);font-size:13px;line-height:1.6}
   a{color:var(--accent)}
+  @media (max-width:520px){
+    .escolha{flex-direction:column;align-items:stretch}
+    .escolha .btn{text-align:center}
+  }
 </style>
 </head>
 <body>
@@ -64,71 +94,102 @@
     </div>
   </header>
 
-  <p class="lead">Interpretação de antibiograma segundo o BrCAST. Digite os valores de CIM
-  e saia com a interpretação colorida, pronta para copiar no laudo.
-  <strong>31 microrganismos, 408 antimicrobianos, um arquivo só.</strong></p>
+  <p class="lead">Você digita os valores de CIM do antibiograma. O programa devolve
+  a interpretação colorida — sensível, aumentando exposição ou resistente — pronta
+  para copiar no laudo. Segue o BrCAST.</p>
 
-  <div class="acoes">
-    <a class="btn primario" href="Corte-BrCAST.html" download>Baixar o programa</a>
-    <a class="btn" href="Corte-BrCAST.html">Abrir agora</a>
-    <a class="btn" href="https://github.com/eacarva/corte-brcast#readme">Como usar</a>
+  <h2 class="secao">Como você quer usar</h2>
+
+  <div class="escolha">
+    <div class="txt">
+      <b>Só experimentar</b>
+      <p>Abre agora, aqui mesmo. Não coloca nada no seu computador.</p>
+    </div>
+    <a class="btn" href="Corte-BrCAST.html">Abrir</a>
+  </div>
+
+  <div class="escolha destaque" id="blocoInstalar">
+    <div class="txt">
+      <b>Deixar no computador<span class="selo" id="seloRec">Recomendado</span></b>
+      <p id="txtInstalar">Cria um ícone na área de trabalho, como qualquer outro programa.
+      Depois abre mesmo sem internet, e quando sai uma versão nova ele se atualiza
+      sozinho — ninguém precisa baixar de novo.</p>
+    </div>
+    <button class="btn primario" id="btnInstalar" hidden>Instalar</button>
+  </div>
+
+  <div class="escolha">
+    <div class="txt">
+      <b>Levar num pendrive</b>
+      <p>Guarda um arquivo só. Serve para copiar em outro computador, mandar por
+      mensagem, ou usar em máquina que não tem internet nenhuma.</p>
+    </div>
+    <a class="btn" href="Corte-BrCAST.html" download>Baixar</a>
+  </div>
+
+  <div id="ajudaInstalar" hidden>
+    <div class="card">
+      <h3>Para deixar no computador</h3>
+      <p>Seu navegador não mostrou o botão de instalar. Dá para fazer pelo menu:</p>
+      <ol>
+        <li>No Chrome, clique nos <strong>três pontinhos</strong> no canto superior direito</li>
+        <li><strong>Transmitir, salvar e compartilhar</strong></li>
+        <li><strong>Instalar página como app</strong></li>
+      </ol>
+      <p>Se essa opção estiver apagada, o navegador desse computador não permite
+      instalar. Sem problema: use o <strong>Baixar</strong> acima — o arquivo faz
+      a mesma coisa.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2 class="secao">O que é bom saber</h2>
+
+  <div class="card">
+    <h3>Nada do paciente sai daqui</h3>
+    <p>Os valores que você digita ficam no seu computador. O programa não manda
+    resultado para lugar nenhum.</p>
   </div>
 
   <div class="card">
-    <h2>Sem instalação</h2>
-    <p>É um arquivo HTML. Baixa, dá duplo clique e funciona — sem servidor, sem banco de dados,
-    sem internet obrigatória. Copiar para outro computador é a instalação inteira.</p>
+    <h3>Todo mundo interpreta igual</h3>
+    <p>Os valores de corte vêm de uma planilha que o laboratório mantém. Assim os
+    computadores não divergem entre si — a mesma bactéria, o mesmo antibiótico e
+    o mesmo resultado, em qualquer máquina.</p>
+    <p>Abrindo por esta página, o programa já vem com os cortes de fábrica
+    (<code>BrCAST 2024</code>) e sem planilha ligada. Dá para experimentar à vontade.</p>
   </div>
 
-  <div class="card" id="cardInstalar">
-    <h2>Ou instale como programa</h2>
-    <p>Nas máquinas que ficam paradas no laboratório, vale mais instalar: vira ícone
-    na área de trabalho, abre em janela própria, funciona sem internet igual ao
-    arquivo — e <strong>troca de versão sozinho</strong>, sem ninguém baixar nada de novo.
-    O ícone já vem certo; não é preciso criar atalho nem escolher figura.</p>
+  <div class="card">
+    <h3>A conferência continua sendo sua</h3>
+    <p>É uma ferramenta de apoio. Quem confere e quem responde pelo resultado
+    liberado é o profissional responsável.</p>
+  </div>
+
+  <details>
+    <summary>Para quem cuida da planilha de cortes</summary>
     <ol>
-      <li>Nesta página, clique no ícone de instalar na barra de endereço do Chrome
-          (ou <strong>menu ⋮ ▸ Transmitir, salvar e compartilhar ▸ Instalar página como app</strong>)</li>
-      <li>Confirme em <strong>Instalar</strong></li>
-    </ol>
-    <p style="margin-top:10px">Precisa de internet uma vez, só para instalar. Se o botão não
-    aparecer, o navegador da máquina não permite instalar — o arquivo continua ali,
-    e é para isso que ele existe.</p>
-  </div>
-
-  <div class="card">
-    <h2>Nenhum dado de paciente sai da máquina</h2>
-    <p>Os CIM digitados ficam no navegador de quem digitou. O programa não envia resultado
-    para lugar nenhum.</p>
-  </div>
-
-  <div class="card">
-    <h2>Os cortes ficam iguais em todos os computadores</h2>
-    <p>Os valores de corte vêm de uma planilha do Google que o laboratório mantém.
-    Sem isso, cada máquina teria a própria cópia e elas divergiriam em silêncio —
-    a mesma cepa interpretada de dois jeitos, sem ninguém perceber.</p>
-    <ol>
-      <li>Na tela <strong>Fonte dos cortes</strong>, clique em <strong>Gerar CSV para o Drive</strong></li>
-      <li>Suba no Drive e abra com Google Planilhas</li>
+      <li>No programa, abra <strong>Fonte dos cortes</strong> e clique em
+          <strong>Gerar CSV para o Drive</strong></li>
+      <li>Suba o arquivo no Google Drive e abra com Planilhas</li>
       <li>Formate as colunas de corte como <strong>Texto simples</strong></li>
       <li>Compartilhe como <strong>Qualquer pessoa com o link · Leitor</strong></li>
-      <li>Cole o endereço na tela <strong>Fonte dos cortes</strong></li>
+      <li>Cole o endereço de volta na tela <strong>Fonte dos cortes</strong></li>
     </ol>
-  </div>
+    <p style="margin-top:10px">O passo a passo completo, com o que fazer quando algo
+    não bate, está em
+    <a href="https://github.com/eacarva/corte-brcast#readme">github.com/eacarva/corte-brcast</a>.</p>
+  </details>
 
   <footer>
-    Ao abrir por este endereço, o programa vem com os cortes de fábrica
-    (<code>BrCAST 2024</code>) e sem planilha configurada — dá para experimentar à vontade.
-    O que você digitar aqui fica só no seu navegador.<br><br>
     Feito para a <strong>Dra. Andressa Sulamita Siqueira Menezes de Brito</strong>,
     biomédica no LEPAC — que faz esse trabalho todo dia, e cuja rotina ensinou
     o que este sistema precisava ser.<br><br>
     Concepção e direção de <strong>Elisson Andrade de Carvalho</strong>.
     Implementação em par com Claude. Licença MIT.<br><br>
     Código, ícone e documentação em
-    <a href="https://github.com/eacarva/corte-brcast">github.com/eacarva/corte-brcast</a>.<br><br>
-    Ferramenta de apoio à interpretação; a conferência e a responsabilidade pelo
-    resultado liberado são do profissional responsável.
+    <a href="https://github.com/eacarva/corte-brcast">github.com/eacarva/corte-brcast</a>.
   </footer>
 
 </div>
@@ -143,11 +204,57 @@ if(matchMedia("(display-mode: standalone)").matches ||
   location.replace("Corte-BrCAST.html");
 }
 
-/* Registrado aqui também para que o Chrome ofereça a instalação já nesta
-   página — quem chega para baixar vê o botão sem precisar abrir o programa. */
 if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
   navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).catch(function(){});
 }
+
+/* Instalar de verdade, no clique. Mandar alguém procurar um ícone na barra de
+   endereço é pedir que ela conheça o navegador — foi onde a primeira pessoa a
+   testar isto travou. O navegador avisa quando a instalação é possível; até lá
+   o botão nem aparece, e no lugar dele fica o caminho pelo menu. */
+var eventoInstalar = null;
+var btn = document.getElementById("btnInstalar");
+var ajuda = document.getElementById("ajudaInstalar");
+
+window.addEventListener("beforeinstallprompt", function(e){
+  e.preventDefault();
+  eventoInstalar = e;
+  btn.hidden = false;
+  ajuda.hidden = true;
+});
+
+btn.addEventListener("click", function(){
+  if(!eventoInstalar) return;
+  eventoInstalar.prompt();
+  eventoInstalar = null;
+  btn.hidden = true;
+});
+
+window.addEventListener("appinstalled", function(){
+  jaInstalado();
+});
+
+function jaInstalado(){
+  document.getElementById("txtInstalar").textContent =
+    "Já está instalado neste computador. Procure por Corte BrCAST no menu iniciar, " +
+    "no Launchpad ou na área de trabalho.";
+  document.getElementById("seloRec").hidden = true;
+  btn.hidden = true;
+  ajuda.hidden = true;
+}
+
+/* Sem o aviso do navegador em alguns segundos, ou não dá para instalar aqui, ou
+   já está instalado. Nos dois casos o botão seria uma promessa falsa. */
+setTimeout(function(){
+  if(eventoInstalar || !btn.hidden) return;
+  if(navigator.getInstalledRelatedApps){
+    navigator.getInstalledRelatedApps().then(function(l){
+      if(l && l.length) jaInstalado(); else ajuda.hidden = false;
+    }).catch(function(){ ajuda.hidden = false; });
+  }else{
+    ajuda.hidden = false;
+  }
+}, 2500);
 </script>
 </body>
 </html>

@@ -128,8 +128,21 @@ button,input,select{font:inherit; color:inherit}
 .avisonova:hover b{color:var(--warn-ink)}
 /* Versao do programa. Some no canto ate alguem precisar dela -- e quem precisa
    esta conferindo se a atualizacao entrou. */
-.versaoapp{padding:7px 11px 1px; font-size:11px; color:var(--ink-3);
+.versaoapp{padding:7px 11px 0; font-size:11px; color:var(--ink-3);
            font-variant-numeric:tabular-nums; letter-spacing:.02em}
+/* O endereco de origem, no pe da barra. Quem recebeu o arquivo por mensagem nao
+   tem outro jeito de descobrir de onde ele veio. */
+.origem{padding:1px 11px 2px; font-size:11px; line-height:1.35}
+.origem a{color:var(--ink-3); text-decoration:none}
+.origem a:hover{color:var(--accent-ink); text-decoration:underline}
+.sobre-corpo{padding:14px 18px}
+.sobre-corpo p{margin:0 0 10px; font-size:13.5px; color:var(--ink-2); max-width:76ch}
+.sobre-corpo p:last-child{margin-bottom:0}
+.sobre-corpo strong{color:var(--ink)}
+.sobre-url{font-size:15px !important}
+.sobre-url a{color:var(--accent-ink); font-weight:600}
+.sobre-versao{font-size:12.5px !important; color:var(--ink-3) !important; max-width:none;
+              border-top:1px solid var(--rule); padding-top:10px; margin-top:13px !important}
 
 .content{padding:20px 28px 90px; max-width:1220px}
 .panel{background:var(--surface); border:1px solid var(--rule); border-radius:9px; box-shadow:var(--shadow); overflow:hidden}
@@ -349,7 +362,9 @@ input.search:focus{outline:2px solid var(--accent); outline-offset:-1px}
       <button class="btn ghost" id="navRef">Valores de referência</button>
       <button class="btn ghost" id="navObs">Observações padrão</button>
       <button class="btn ghost" id="navFonte">Fonte dos cortes</button>
+      <button class="btn ghost" id="navSobre">Sobre o programa</button>
       <div class="versaoapp" id="versaoApp"></div>
+      <div class="origem"><a id="linkOrigem" target="_blank" rel="noopener"></a></div>
     </div>
   </nav>
   <main class="main">
@@ -559,7 +574,7 @@ let orgAtual = navAtual.m[0].org;
 let vista = "laudo";
 /* Telas de escopo geral: valem para todo o sistema, não para o microrganismo
    selecionado. O cabeçalho e a navegação precisam refletir isso. */
-const TELAS_GERAIS = {obs:1, fonte:1};
+const TELAS_GERAIS = {obs:1, fonte:1, sobre:1};
 let busca = "";      // busca das observações
 let buscaOrg = "";   // busca da trilha
 
@@ -592,8 +607,9 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.08.31.5";
+const VERSAO_APP = "2026.08.31.6";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
+const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
 /* Aceita o link de edição, o de compartilhar ou um já colado antes. */
 function lerLink(txt){
@@ -1569,6 +1585,47 @@ function renderRef(){
   });
 }
 
+/* Sobre. Existe por causa do arquivo solto: ele viaja por pendrive e mensagem,
+   chega em computador que ninguém sabe de onde veio, e sem isto não haveria como
+   descobrir onde baixar a versão nova nem de quem é o trabalho. O rodapé da barra
+   mostra só o endereço; o resto mora aqui, fora do caminho de quem está laudando. */
+function renderSobre(){
+  $("actions").innerHTML = "";
+  $("content").innerHTML =
+    '<div class="panel">'+
+      '<div class="refhead"><strong>Onde baixar a versão mais nova</strong>'+
+      '<p>Este arquivo pode ter sido copiado de outro computador. O endereço abaixo '+
+      'tem sempre a versão atual, e é de onde o programa avisa quando a sua envelhece.</p></div>'+
+      '<div class="sobre-corpo">'+
+        '<p class="sobre-url"><a href="'+esc(URL_SITE)+'" target="_blank" rel="noopener">'+
+        esc(URL_SITE.replace("https://","").replace(/\/$/,""))+'</a></p>'+
+        '<p>Nesse endereço dá para abrir o programa direto, baixar o arquivo, ou '+
+        'deixá-lo instalado no computador — instalado, ele passa a se atualizar sozinho.</p>'+
+        '<p class="sobre-versao">Versão deste arquivo: <strong>'+esc(VERSAO_APP)+'</strong>'+
+        (versaoCortes ? ' &nbsp;·&nbsp; Cortes: <strong>'+esc(versaoCortes)+'</strong>' : '')+'</p>'+
+      '</div>'+
+    '</div>'+
+
+    '<div class="panel" style="margin-top:14px">'+
+      '<div class="refhead"><strong>Para quem foi feito</strong></div>'+
+      '<div class="sobre-corpo">'+
+        '<p>Feito para a <strong>Dra. Andressa Sulamita Siqueira Menezes de Brito</strong>, '+
+        'biomédica no LEPAC — que faz esse trabalho todo dia, e cuja rotina ensinou o que '+
+        'este sistema precisava ser.</p>'+
+        '<p>Concepção e direção de <strong>Elisson Andrade de Carvalho</strong>. '+
+        'Implementação em par com Claude. Licença MIT.</p>'+
+      '</div>'+
+    '</div>'+
+
+    '<div class="panel" style="margin-top:14px">'+
+      '<div class="refhead"><strong>Aviso</strong></div>'+
+      '<div class="sobre-corpo">'+
+        '<p>Ferramenta de apoio à interpretação. A conferência e a responsabilidade '+
+        'pelo resultado liberado são do profissional responsável.</p>'+
+      '</div>'+
+    '</div>';
+}
+
 function renderFonte(){
   $("actions").innerHTML =
     (fonte ? '<button class="btn" id="btnSinc">Sincronizar agora</button>' : "")+
@@ -1791,6 +1848,8 @@ function render(){
   if(geral){
     const cab = vista === "fonte"
       ? ["Configuração", "vale para todos os microrganismos", "Fonte dos cortes"]
+      : vista === "sobre"
+      ? ["Sobre", "versão " + VERSAO_APP, "Sobre o programa"]
       : ["Texto de laudo", OBS.length+" observações", "Observações padrão"];
     $("eyebrow").innerHTML = esc(cab[0])+'<span class="dot">·</span>'+esc(cab[1]);
     $("titulo").textContent = cab[2];
@@ -1822,9 +1881,11 @@ function render(){
   $("navRef").setAttribute("aria-current", vista === "ref");
   $("navObs").setAttribute("aria-current", vista === "obs");
   $("navFonte").setAttribute("aria-current", vista === "fonte");
+  $("navSobre").setAttribute("aria-current", vista === "sobre");
   if(vista === "laudo") renderLaudo();
   else if(vista === "ref") renderRef();
   else if(vista === "fonte") renderFonte();
+  else if(vista === "sobre") renderSobre();
   else renderObs();
 }
 
@@ -2120,6 +2181,7 @@ document.addEventListener("keydown", function(e){
 });
 $("navLaudo").addEventListener("click", function(){ vista = "laudo"; render(); });
 $("navFonte").addEventListener("click", function(){ vista = "fonte"; imp = null; render(); });
+$("navSobre").addEventListener("click", function(){ vista = "sobre"; imp = null; render(); });
 $("navRef").addEventListener("click",   function(){ vista = "ref";   imp = null; render(); });
 $("navObs").addEventListener("click",   function(){ vista = "obs";   imp = null; render(); });
 
@@ -2141,6 +2203,8 @@ campoBusca.focus();
    nem tenta: não existe service worker sem https, e o arquivo solto continua
    funcionando exatamente como sempre funcionou. */
 $("versaoApp").textContent = "v" + VERSAO_APP;
+$("linkOrigem").href = URL_SITE;
+$("linkOrigem").textContent = URL_SITE.replace("https://","").replace(/\/$/,"");
 
 if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
   // updateViaCache "none": o navegador nunca serve este script do próprio
