@@ -743,7 +743,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.02";
+const VERSAO_APP = "2026.09.02.2";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -2129,8 +2129,8 @@ function renderSobre(){
    isso para ver uma data, e quem está configurando não sabe onde olhar
    primeiro. Fechados por padrão quando a planilha já funciona; abertos no
    primeiro uso, que é quando a instrução é o conteúdo principal. */
-function ajuda(titulo, corpo, aberto){
-  return '<details class="ajuda"'+(aberto ? " open" : "")+'>'+
+function ajuda(titulo, corpo){
+  return '<details class="ajuda">'+
     '<summary>'+esc(titulo)+'</summary>'+
     '<div class="ajuda-corpo">'+corpo+'</div>'+
   '</details>';
@@ -2214,7 +2214,7 @@ function renderFonte(){
           'Dado de paciente, não: se houver qualquer aba com resultado de amostra, '+
           'faça uma planilha separada só com os cortes.</div>'+
       '</div>'+
-      '', !fonte)+
+      '')+
     ajuda('O que a planilha precisa ter',
       '<p class="ajuda-sub">A primeira linha tem que ser exatamente este cabeçalho, nesta '+
       'grafia. Uma linha por antimicrobiano.</p>'+
@@ -2234,7 +2234,7 @@ function renderFonte(){
           '<strong>Basta preencher uma célula</strong>, em qualquer linha da coluna; o programa procura a '+
           'primeira que estiver preenchida. Quando sair uma revisão nova do BrCAST, é esse único campo que muda.</td></tr>'+
       '</tbody></table></div>'+
-      '', !fonte)+
+      '')+
     ajuda('Se der errado',
       '<div class="tablewrap"><table class="grid"><tbody>'+
         '<tr><td>"Não consegui abrir a planilha"</td>'+
@@ -2256,7 +2256,7 @@ function renderFonte(){
         '<tr><td>Sem internet</td>'+
           '<td>Continua funcionando com a última cópia boa, e a barra no topo mostra de quando ela é.</td></tr>'+
       '</tbody></table></div>'+
-      '', !fonte)+
+      '')+
     '<p class="hint">Cada computador precisa ter o arquivo e o link colado uma vez. '+
     'Feito isso, ele sincroniza sozinho toda vez que abrir.</p>'+
     painelObsFonteHTML()+
@@ -2278,7 +2278,7 @@ function renderFonte(){
         '<div class="cuidado">A partir daí os dois laboratórios ficam <b>independentes</b>: '+
         'cada um com a sua planilha, e mudança de um não mexe no outro.</div>'+
       '</div>'+
-      '', !fonte);
+      '');
 
   const bx = $("btnXLSX");
   if(bx) bx.addEventListener("click", exportarPlanilha);
@@ -2695,7 +2695,7 @@ function painelObsFonteHTML(){
       '<div class="cuidado">O <b>código</b> é o que amarra a observação ao laudo. '+
       'Mudando o código de uma observação já escolhida numa amostra, ela aparece como '+
       'não encontrada em vez de trocar de texto em silêncio.</div>'+
-    '</div>', !fonte);
+    '</div>');
 }
 
 /* As mesmas linhas que vão para o CSV, sem virar texto: o xlsx recebe os
