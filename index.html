@@ -7,83 +7,183 @@
 <link rel="icon" href="corte-brcast.svg">
 <meta name="theme-color" content="#0d6c72">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@1,400;1,500&display=swap">
 <style>
+  /* As cores são as mesmas do programa, e não são enfeite: verde, azul e
+     vermelho carregam sensível, aumentando exposição e resistente. A página
+     usa a linguagem do laudo porque é disso que ela fala. */
   :root{
-    --ground:#f4f6f8; --surface:#ffffff; --ink:#101820; --ink-2:#48555f; --ink-3:#78858f;
-    --rule:#d3dae0; --accent:#0d6c72; --accent-ink:#ffffff; --realce:#dfeeee;
+    --ground:#f4f6f8; --surface:#ffffff; --surface-2:#eaeef1;
+    --ink:#101820; --ink-2:#48555f; --ink-3:#78858f;
+    --rule:#d3dae0; --rule-strong:#aab4bd;
+    --accent:#0d6c72; --accent-ink:#0b5c61; --accent-soft:#dfeeee;
+    --sdp:#B7E1CD; --sae:#CFE2F3; --res:#F4CCCC;
+    --sdp-ink:#1a5637; --sae-ink:#1b466c; --res-ink:#8a2320;
+    --btn-ink:#ffffff;
+    --shadow:0 1px 2px rgba(16,24,32,.05), 0 12px 30px -20px rgba(16,24,32,.35);
   }
   @media (prefers-color-scheme: dark){
     :root{
-      --ground:#0c1116; --surface:#141c22; --ink:#e4ebf0; --ink-2:#9aa8b3; --ink-3:#6d7b86;
-      --rule:#26323b; --accent:#4fb9bd; --accent-ink:#07171a; --realce:#16303152;
+      --ground:#0c1116; --surface:#141c22; --surface-2:#1c252c;
+      --ink:#e4ebf0; --ink-2:#9aa8b3; --ink-3:#6d7b86;
+      --rule:#26323b; --rule-strong:#3c4c58;
+      --accent:#4fb9bd; --accent-ink:#7fd6d9; --accent-soft:#123238;
+      --sdp:#1d4b36; --sae:#1a3b59; --res:#57231f;
+      --sdp-ink:#a3ddbe; --sae-ink:#a9cdec; --res-ink:#f0b4b1;
+      --btn-ink:#07171a;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 30px -20px rgba(0,0,0,.9);
     }
   }
+  :root{color-scheme:light dark}
+
   *{box-sizing:border-box}
-  /* o atributo hidden perde para o display das classes abaixo */
   [hidden]{display:none !important}
-  body{margin:0;background:var(--ground);color:var(--ink);
-       font:15.5px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
-       display:flex;justify-content:center;padding:40px 20px 60px}
-  .col{width:100%;max-width:640px}
-  header{display:flex;align-items:center;gap:16px;margin-bottom:26px}
-  .marca{width:64px;height:64px;flex-shrink:0}
-  h1{margin:0;font-size:27px;letter-spacing:-.01em}
-  .sub{color:var(--ink-2);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
-  .lead{font-size:17px;line-height:1.55;margin:0 0 30px}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+    font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  /* O que o navegador desenha sozinho também é o produto. */
+  ::selection{background:var(--accent-soft); color:var(--accent-ink)}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+  i{font-family:"IBM Plex Serif",Georgia,serif; font-style:italic}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace; font-variant-numeric:tabular-nums}
 
-  h2.secao{font-size:13px;text-transform:uppercase;letter-spacing:.07em;
-           color:var(--ink-3);margin:0 0 12px;font-weight:600}
+  /* A marca esticada: três faixas separadas por duas fendas escuras. As fendas
+     são os dois pontos de corte — S/I e I/R — que é a decisão inteira que o
+     programa toma. */
+  .fita{height:5px; display:flex}
+  .fita i{flex:1; font-style:normal}
+  .fita .a{background:#6FC49B} .fita .b{background:#8FBEE6} .fita .c{background:#E58880}
+  .fita .corte{flex:0 0 3px; background:#0F171D}
 
-  /* Cada jeito de usar é um bloco só: o botão e a explicação do que ele faz
-     ficam juntos. Botões enfileirados sem legenda obrigam a pessoa a adivinhar
-     a diferença entre baixar, abrir e instalar. */
-  .escolha{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;background:var(--surface);
-           border:1px solid var(--rule);border-radius:12px;padding:16px 18px;margin-bottom:12px}
-  .escolha > .dobra{flex-basis:100%}
-  .escolha.destaque{border-color:var(--accent);background:var(--realce)}
-  .escolha .txt{flex:1;min-width:0}
-  .escolha b{display:block;font-size:16px;margin-bottom:3px}
-  .escolha p{margin:0;color:var(--ink-2);font-size:14.5px}
-  .escolha .btn{flex-shrink:0;margin-top:2px}
-  .selo{display:inline-block;background:var(--accent);color:var(--accent-ink);
-        font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
-        padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:2px}
+  .col{width:100%; max-width:940px; margin:0 auto; padding:0 24px}
+
+  header{display:flex; align-items:center; gap:15px; padding:38px 0 0}
+  .marca{width:52px; height:52px; flex:none; border-radius:12px}
+  h1{margin:0; font-size:26px; letter-spacing:-.02em; font-weight:600}
+  .lepac{color:var(--ink-2); font-size:12px; text-transform:uppercase; letter-spacing:.11em; font-weight:600}
+
+  .hero{padding:44px 0 8px}
+  .hero h2{
+    margin:0 0 18px; font-size:clamp(28px, 4.6vw, 42px); line-height:1.15;
+    letter-spacing:-.035em; font-weight:600; max-width:19ch; text-wrap:balance;
+  }
+  .hero p{margin:0; font-size:17px; line-height:1.6; color:var(--ink-2); max-width:62ch}
+  .hero strong{color:var(--ink); font-weight:600}
+
+  /* Em vez de descrever o que o programa faz, a página mostra: é a mesma
+     tabela que sai no laudo, com os mesmos valores e as mesmas cores. */
+  .amostra{
+    margin:34px 0 0; background:var(--surface); border:1px solid var(--rule);
+    border-radius:14px; box-shadow:var(--shadow); overflow:hidden;
+  }
+  .amostra-topo{
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    padding:15px 20px; border-bottom:1px solid var(--rule); background:var(--surface-2);
+  }
+  .amostra-topo b{font-size:17px; font-weight:500}
+  .amostra-topo span{font-size:12px; color:var(--ink-2); letter-spacing:.02em}
+  table{width:100%; border-collapse:collapse; font-size:14px}
+  th{
+    text-align:left; font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+    color:var(--ink-2); font-weight:600; padding:11px 20px; border-bottom:1px solid var(--rule);
+  }
+  th.n, td.n{text-align:right; white-space:nowrap}
+  td{padding:9px 20px; border-bottom:1px solid var(--rule)}
+  tr:last-child td{border-bottom:0}
+  .tag{
+    display:inline-block; padding:3px 10px; border-radius:20px;
+    font-size:12.5px; font-weight:500; white-space:nowrap;
+  }
+  .tag.s{background:var(--sdp); color:var(--sdp-ink)}
+  .tag.i{background:var(--sae); color:var(--sae-ink)}
+  .tag.r{background:var(--res); color:var(--res-ink)}
+  /* Precisa do seletor mais específico: ".hero p" limita a 62ch e venceria,
+     deixando a faixa parando no meio do cartão. */
+  .hero p.amostra-pe{padding:12px 20px; font-size:12.5px; color:var(--ink-2);
+                     background:var(--surface-2); max-width:none;
+                     border-top:1px solid var(--rule)}
+
+  h3.secao{
+    font-size:12px; text-transform:uppercase; letter-spacing:.11em;
+    color:var(--ink-2); margin:52px 0 14px; font-weight:600;
+  }
+
+  .escolha{
+    display:flex; gap:18px; align-items:center; flex-wrap:wrap;
+    background:var(--surface); border:1px solid var(--rule); border-radius:13px;
+    padding:19px 21px; margin-bottom:11px;
+  }
+  .escolha.destaque{border-color:var(--accent); background:var(--accent-soft)}
+  .escolha .txt{flex:1 1 300px; min-width:0}
+  .escolha b{display:block; font-size:16.5px; font-weight:600; margin-bottom:3px}
+  .escolha p{margin:0; color:var(--ink-2); font-size:14.5px; line-height:1.5; max-width:58ch}
+  .selo{
+    display:inline-block; background:var(--accent); color:var(--btn-ink);
+    font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+    padding:3px 9px; border-radius:20px; margin-left:9px; vertical-align:2px;
+  }
   .selo.ok::before{content:"\2713\00a0"}
 
-  .btn{display:inline-block;padding:11px 20px;border-radius:9px;text-decoration:none;
-       font-weight:600;font-size:14.5px;border:1px solid var(--rule);color:var(--ink);
-       background:var(--surface);cursor:pointer;font-family:inherit;white-space:nowrap}
-  .btn.primario{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+  .btn{
+    display:inline-block; padding:12px 22px; border-radius:9px; text-decoration:none;
+    font-weight:600; font-size:15px; border:1px solid var(--rule-strong); color:var(--ink);
+    background:var(--surface); cursor:pointer; font-family:inherit; white-space:nowrap;
+    min-height:46px; line-height:1.5; transition:border-color .13s, background .13s, color .13s;
+  }
+  .btn:hover{border-color:var(--accent); color:var(--accent-ink)}
+  .btn.primario{background:var(--accent); color:var(--btn-ink); border-color:transparent}
+  .btn.primario:hover{filter:brightness(1.08); color:var(--btn-ink)}
 
-  .card{background:var(--surface);border:1px solid var(--rule);border-radius:12px;
-        padding:18px 20px;margin-bottom:12px}
-  .card h3{margin:0 0 8px;font-size:15px;letter-spacing:.01em}
-  .card p{margin:0;color:var(--ink-2);font-size:14.5px}
-  .card p + p{margin-top:9px}
-  ol,ul{margin:9px 0 0;padding-left:20px;color:var(--ink-2);font-size:14.5px}
-  li{margin:5px 0}
-  details{background:var(--surface);border:1px solid var(--rule);border-radius:12px;
-          padding:14px 20px;margin-bottom:12px;color:var(--ink-2);font-size:14.5px}
-  details summary{cursor:pointer;color:var(--ink);font-weight:600;font-size:15px}
-  details[open] summary{margin-bottom:10px}
-  .escolha .dobra{background:none;border:0;border-top:1px solid var(--rule);
-                  border-radius:0;padding:10px 0 0;margin:12px 0 0;font-size:14px}
-  .escolha .dobra summary{font-size:14px}
-  .escolha .dobra p{margin:0 0 8px}
-  .escolha .dobra p:last-child{margin-bottom:0}
-  .escolha .dobra ol{margin:0 0 9px}
-  code{background:var(--ground);border:1px solid var(--rule);border-radius:4px;
-       padding:1px 5px;font-size:12.5px}
-  hr{border:0;border-top:1px solid var(--rule);margin:34px 0 26px}
-  footer{color:var(--ink-3);font-size:13px;line-height:1.6}
-  a{color:var(--accent)}
-  @media (max-width:520px){
-    .escolha{flex-direction:column;align-items:stretch}
-    .escolha .btn{text-align:center}
+  .saber{display:grid; grid-template-columns:repeat(auto-fit, minmax(270px,1fr)); gap:12px}
+  .saber > div{background:var(--surface); border:1px solid var(--rule); border-radius:13px; padding:19px 21px}
+  .saber h4{margin:0 0 7px; font-size:15.5px; font-weight:600}
+  .saber p{margin:0; color:var(--ink-2); font-size:14.5px; line-height:1.55}
+  .saber p + p{margin-top:9px}
+
+  details{
+    background:var(--surface); border:1px solid var(--rule); border-radius:13px;
+    padding:16px 21px; margin-top:12px; color:var(--ink-2); font-size:14.5px;
+  }
+  details summary{cursor:pointer; color:var(--ink); font-weight:600; font-size:15px}
+  details[open] summary{margin-bottom:11px}
+  ol, ul{margin:10px 0 0; padding-left:21px; color:var(--ink-2); font-size:14.5px; line-height:1.6}
+  li{margin:6px 0}
+  code{
+    font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace; font-size:12.5px;
+    background:var(--surface-2); border:1px solid var(--rule); border-radius:4px; padding:1px 5px;
+  }
+  hr{border:0; border-top:1px solid var(--rule); margin:50px 0 0}
+
+  footer{padding:34px 0 60px; color:var(--ink-2); font-size:13.5px; line-height:1.65}
+  footer p{margin:0 0 14px; max-width:66ch}
+  footer strong{color:var(--ink); font-weight:600}
+  a{color:var(--accent-ink)}
+
+  @media (max-width:600px){
+    .escolha .btn{width:100%; text-align:center}
+    .hero{padding-top:32px}
+    /* No celular a tarja não cabe numa linha e era cortada na borda. Quebrar
+       em duas linhas mantém a palavra inteira, que é o que importa ler. */
+    td, th{padding:9px 14px; font-size:13px}
+    th{font-size:9.5px; letter-spacing:.08em}
+    .tag{white-space:normal; font-size:11.5px; padding:3px 8px; line-height:1.35}
+    .amostra-topo{padding:13px 14px}
+    .hero p.amostra-pe{padding:11px 14px}
+    .col{padding:0 18px}
   }
 </style>
 </head>
 <body>
+
+<div class="fita" aria-hidden="true">
+  <i class="a"></i><i class="corte"></i><i class="b"></i><i class="corte"></i><i class="c"></i>
+</div>
+
 <div class="col">
 
   <header>
@@ -98,16 +198,38 @@
     </svg>
     <div>
       <h1>Corte BrCAST</h1>
-      <div class="sub">LEPAC</div>
+      <div class="lepac">LEPAC</div>
     </div>
   </header>
 
-  <p class="lead">Você digita os valores de CIM do antibiograma. O programa devolve
-  a interpretação colorida — sensível, aumentando exposição ou resistente — pronta
-  para copiar no laudo. Segue o BrCAST, com <strong>27 microrganismos</strong> e
-  tabelas separadas para urina e outros materiais.</p>
+  <section class="hero">
+    <h2>Do CIM ao laudo, sem consultar tabela.</h2>
+    <p>Você digita os valores de CIM do antibiograma. O programa aplica os pontos de corte do
+    BrCAST e devolve a interpretação pronta para copiar — <strong>27 microrganismos</strong>,
+    com tabelas separadas para urina e outros materiais.</p>
 
-  <h2 class="secao">Como você quer usar</h2>
+    <div class="amostra">
+      <div class="amostra-topo">
+        <b><i>Escherichia coli</i></b>
+        <span>urina · BrCAST 2024</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Antimicrobiano</th><th class="n">CIM</th><th>Interpretação</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Amicacina</td><td class="n mono">≤4</td><td><span class="tag s">Sensível, dose padrão</span></td></tr>
+          <tr><td>Cefuroxima</td><td class="n mono">4</td><td><span class="tag i">Aumentando exposição</span></td></tr>
+          <tr><td>Ciprofloxacino</td><td class="n mono">&gt;1</td><td><span class="tag r">Resistente</span></td></tr>
+          <tr><td>Meropenem</td><td class="n mono">≤0,25</td><td><span class="tag s">Sensível, dose padrão</span></td></tr>
+        </tbody>
+      </table>
+      <p class="amostra-pe">É esta tabela que sai no <strong>Copiar</strong>, com as cores,
+      pronta para colar no laudo.</p>
+    </div>
+  </section>
+
+  <h3 class="secao">Como você quer usar</h3>
 
   <div class="escolha">
     <div class="txt">
@@ -120,101 +242,96 @@
   <div class="escolha destaque" id="blocoInstalar">
     <div class="txt">
       <b><span id="tituloInstalar">Deixar no computador</span><span class="selo" id="seloRec">Recomendado</span></b>
-      <p id="txtInstalar">Cria um ícone na área de trabalho, como qualquer outro programa.
-      Depois abre mesmo sem internet, e quando sai uma versão nova ele se atualiza
-      sozinho — ninguém precisa baixar de novo.</p>
+      <p id="txtInstalar">Cria um ícone na área de trabalho, como qualquer outro programa. Depois
+      abre mesmo sem internet, e quando sai uma versão nova ele se atualiza sozinho — ninguém
+      precisa baixar de novo.</p>
     </div>
     <button class="btn primario" id="btnInstalar" hidden>Instalar</button>
-
-  <!-- Fica dentro do proprio bloco de instalar: e a resposta a mesma pergunta.
-       Nao ha como saber se o botao sumiu por ja estar instalado ou por este
-       navegador nao instalar -- getInstalledRelatedApps responde vazio mesmo
-       com o app instalado, testado. Entao o texto cobre todos os casos em vez
-       de escolher um e errar. -->
-  <details id="ajudaInstalar" class="dobra" hidden>
-    <summary>O botão de instalar não apareceu</summary>
-    <p>Ele só aparece quando dá para instalar de verdade. Os motivos mais comuns:</p>
-    <ul>
-      <li><strong>Já está instalado.</strong> Procure por <strong>Corte BrCAST</strong>
-          no menu Iniciar, no Launchpad ou na área de trabalho.</li>
-      <li><strong>É uma janela anônima.</strong> O Chrome não instala programas ali.
-          Abra esta página numa janela normal.</li>
-      <li><strong>É o Firefox.</strong> Ele não instala programas assim — use o Chrome
-          ou o Edge. No Safari do Mac, o caminho é
-          <strong>Compartilhar ▸ Adicionar à Dock</strong>.</li>
-    </ul>
-    <p>No Chrome dá para instalar pelo menu, sem o botão: <strong>três pontinhos</strong>
-    no canto superior direito ▸ <strong>Transmitir, salvar e compartilhar</strong> ▸
-    <strong>Instalar página como app</strong>.</p>
-    <p><strong>Está instalado mas o ícone sumiu?</strong> O programa continua na máquina
-    — só o atalho se perdeu. Na barra de endereço, escreva <code>chrome://apps</code>,
-    clique com o <strong>botão direito</strong> em <strong>Corte BrCAST</strong> e
-    escolha <strong>Criar atalhos…</strong></p>
-    <p>Se nada disso funcionar, use o <strong>Baixar</strong> abaixo. O arquivo faz
-    exatamente a mesma coisa — só não se atualiza sozinho.</p>
-  </details>
   </div>
 
   <div class="escolha">
     <div class="txt">
       <b>Levar num pendrive</b>
-      <p>Guarda um arquivo só. Serve para copiar em outro computador, mandar por
-      mensagem, ou usar em máquina que não tem internet nenhuma.</p>
+      <p>Guarda um arquivo só. Serve para copiar em outro computador, mandar por mensagem, ou
+      usar em máquina que não tem internet nenhuma.</p>
     </div>
     <a class="btn" href="Corte-BrCAST.html" download>Baixar</a>
   </div>
 
-  <hr>
+  <details id="ajudaInstalar" hidden>
+    <summary>O botão de instalar não apareceu</summary>
+    <p>Ele só aparece quando dá para instalar de verdade. Os motivos mais comuns:</p>
+    <ul>
+      <li><strong>Já está instalado.</strong> Procure por <strong>Corte BrCAST</strong> no menu
+          Iniciar, no Launchpad ou na área de trabalho — e se o ícone sumiu, dá para criar de
+          novo por <code>chrome://apps</code>.</li>
+      <li><strong>É uma janela anônima.</strong> O Chrome não instala programas ali. Abra esta
+          página numa janela normal.</li>
+      <li><strong>É o Firefox.</strong> Ele não instala programas assim — use o Chrome ou o Edge.
+          No Safari do Mac, o caminho é <strong>Compartilhar ▸ Adicionar à Dock</strong>.</li>
+    </ul>
+    <p>No Chrome dá para instalar pelo menu, sem o botão: <strong>três pontinhos</strong> no canto
+    superior direito ▸ <strong>Transmitir, salvar e compartilhar</strong> ▸
+    <strong>Instalar página como app</strong>.</p>
+    <p>Se nada disso funcionar, use o <strong>Baixar</strong> acima. O arquivo faz exatamente a
+    mesma coisa — só não se atualiza sozinho.</p>
+  </details>
 
-  <h2 class="secao">O que é bom saber</h2>
+  <h3 class="secao">O que é bom saber</h3>
 
-  <div class="card">
-    <h3>Nada do paciente sai daqui</h3>
-    <p>Os valores que você digita ficam no seu computador. O programa não manda
-    resultado para lugar nenhum.</p>
-  </div>
-
-  <div class="card">
-    <h3>Todo mundo interpreta igual</h3>
-    <p>Os valores de corte vêm de uma planilha que o laboratório mantém. Assim os
-    computadores não divergem entre si — a mesma bactéria, o mesmo antibiótico e
-    o mesmo resultado, em qualquer máquina.</p>
-    <p>Abrindo por esta página, o programa já vem com os cortes de fábrica
-    (<code>BrCAST 2024</code>) e sem planilha ligada. Dá para experimentar à vontade.</p>
-  </div>
-
-  <div class="card">
-    <h3>A conferência continua sendo sua</h3>
-    <p>É uma ferramenta de apoio. Quem confere e quem responde pelo resultado
-    liberado é o profissional responsável.</p>
+  <div class="saber">
+    <div>
+      <h4>Nada do paciente sai daqui</h4>
+      <p>Os valores que você digita ficam no seu computador. O programa não manda resultado para
+      lugar nenhum.</p>
+    </div>
+    <div>
+      <h4>Todo mundo interpreta igual</h4>
+      <p>Os valores de corte vêm de uma planilha que o laboratório mantém — a mesma bactéria, o
+      mesmo antibiótico e o mesmo resultado, em qualquer máquina.</p>
+      <p>Abrindo por esta página, o programa já vem com os cortes de fábrica
+      (<code>BrCAST 2024</code>). Dá para experimentar à vontade.</p>
+    </div>
+    <div>
+      <h4>A conferência continua sendo sua</h4>
+      <p>É uma ferramenta de apoio. Quem confere e quem responde pelo resultado liberado é o
+      profissional responsável.</p>
+    </div>
+    <div>
+      <h4>Funciona sem internet</h4>
+      <p>Instalado ou baixado, abre e trabalha offline. A internet só é usada para buscar os
+      cortes atualizados na planilha do laboratório.</p>
+    </div>
   </div>
 
   <details>
     <summary>Para quem cuida da planilha de cortes</summary>
     <ol>
       <li>No programa, abra <strong>Fonte dos cortes</strong> e clique em
-          <strong>Gerar CSV para o Drive</strong></li>
-      <li>Suba o arquivo no Google Drive e abra com Planilhas</li>
-      <li>Formate as colunas de corte como <strong>Texto simples</strong></li>
-      <li>Compartilhe como <strong>Qualquer pessoa com o link · Leitor</strong></li>
-      <li>Cole o endereço de volta na tela <strong>Fonte dos cortes</strong></li>
+          <strong>Gerar planilha</strong> — sai um <code>corte-brcast.xlsx</code> com os cortes e
+          as observações, cada um na sua aba.</li>
+      <li>Suba no Google Drive e abra com <strong>Google Planilhas</strong>.</li>
+      <li>Compartilhe como <strong>Qualquer pessoa com o link · Leitor</strong>.</li>
+      <li>Cole o endereço de volta na tela <strong>Fonte dos cortes</strong>.</li>
     </ol>
-    <p style="margin-top:10px">O passo a passo completo, com o que fazer quando algo
-    não bate, está em
-    <a href="https://github.com/eacarva/corte-brcast#readme">github.com/eacarva/corte-brcast</a>.</p>
+    <p style="margin-top:12px">O passo a passo completo, com o que fazer quando algo não bate, está
+    em <a href="https://github.com/eacarva/corte-brcast#readme">github.com/eacarva/corte-brcast</a>.</p>
   </details>
 
+  <hr>
+
   <footer>
-    Feito para a <strong>Dra. Andressa Sulamita Siqueira Menezes de Brito</strong>,
-    biomédica no LEPAC — que faz esse trabalho todo dia, e cuja rotina ensinou
-    o que este sistema precisava ser.<br><br>
-    Concepção e direção de <strong>Elisson Andrade de Carvalho</strong>.
-    Implementação em par com Claude. Licença MIT.<br><br>
-    Código, ícone e documentação em
-    <a href="https://github.com/eacarva/corte-brcast">github.com/eacarva/corte-brcast</a>.
+    <p>Feito para a <strong>Dra. Andressa Sulamita Siqueira Menezes de Brito</strong>, biomédica
+    no LEPAC — que faz esse trabalho todo dia, e cuja rotina ensinou o que este sistema precisava
+    ser.</p>
+    <p>Concepção e direção de <strong>Elisson Andrade de Carvalho</strong>. Implementação em par
+    com Claude. Licença MIT.</p>
+    <p>Código, ícone e documentação em
+    <a href="https://github.com/eacarva/corte-brcast">github.com/eacarva/corte-brcast</a>.</p>
   </footer>
 
 </div>
+
 <script>
 /* Esta página é a porta de entrada, não o destino. Quando ela abre dentro da
    janela do programa instalado — o que o Chrome faz logo depois de instalar,
@@ -230,10 +347,8 @@ if(ehJanelaDoPrograma()){
   location.replace("Corte-BrCAST.html");
 }else{
   /* Ao instalar, o Chrome não recarrega nada: ele transforma a aba aberta na
-     janela do programa. O teste acima já rodou lá atrás, com a aba ainda
-     sendo aba, e nunca mais roda — por isso a pessoa terminava a instalação
-     olhando a página de download dentro do próprio programa. Aqui a mudança
-     é ouvida no momento em que acontece. */
+     janela do programa. O teste acima já rodou lá atrás, com a aba ainda sendo
+     aba, e nunca mais roda. */
   try{
     matchMedia("(display-mode: standalone)").addEventListener("change", function(ev){
       if(ev.matches) location.replace("Corte-BrCAST.html");
@@ -243,11 +358,8 @@ if(ehJanelaDoPrograma()){
 
 if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
   /* O register sozinho deveria mandar o navegador conferir se o sw.js mudou,
-     mas na pratica ele espaca essas conferencias e a maquina fica parada em
-     uma versao antiga por tempo indefinido -- reproduzido aqui: tres visitas
-     seguidas, versao nova publicada, e nenhum pedido ao servidor. O update()
-     explicito pergunta toda vez. Custa um pedido condicional de poucos bytes,
-     quase sempre respondido com 304. */
+     mas na prática ele espaça essas conferências e a máquina fica parada numa
+     versão antiga por tempo indefinido. O update() explícito pergunta toda vez. */
   navigator.serviceWorker.register("sw.js", {updateViaCache:"none"})
     .then(function(reg){ return reg.update(); })
     .catch(function(){});
@@ -277,15 +389,10 @@ btn.addEventListener("click", function(){
 
 window.addEventListener("appinstalled", function(){ marcarInstalado(); });
 
-/* Depois de instalar aqui, o bloco passa a dizer o que aconteceu. So vale
-   quando a instalacao acontece nesta aba: em qualquer outra abertura nao ha
-   como saber se ja esta instalado, e por isso o dobravel abaixo responde a
-   todos os casos de uma vez. */
 function marcarInstalado(){
-  document.getElementById("txtInstalar").innerHTML =
-    "Procure por <strong>Corte BrCAST</strong> no menu Iniciar, no Launchpad ou " +
-    "na área de trabalho.";
-  document.getElementById("tituloInstalar").textContent = "Já está no seu computador";
+  document.getElementById("txtInstalar").textContent =
+    "Já está no seu computador. Procure por Corte BrCAST no menu Iniciar, no Launchpad " +
+    "ou na área de trabalho.";
   var selo = document.getElementById("seloRec");
   selo.textContent = "Instalado";
   selo.className = "selo ok";
@@ -293,15 +400,10 @@ function marcarInstalado(){
   ajuda.hidden = true;
 }
 
-/* O botão some por dois motivos opostos: ja instalado, ou este navegador nao
-   instala. O manifest declara o proprio app em related_applications so para
-   que esta pergunta seja possivel — sem isso a resposta vem sempre vazia e a
-   pagina teria de adivinhar. Quando nem assim der para saber, cai no texto que
-   responde a todos os casos. */
-/* Sem o aviso do navegador em alguns segundos, o botao nao vem: ou ja esta
-   instalado, ou este navegador nao instala. getInstalledRelatedApps parecia
-   resolver a duvida, mas responde vazio mesmo com o app instalado -- testado
-   nesta maquina. Entao abre-se o dobravel, que responde aos dois. */
+/* O botão some por dois motivos opostos: já instalado, ou este navegador não
+   instala. Não há API confiável para distinguir — getInstalledRelatedApps
+   responde vazio mesmo com o app instalado, testado nesta máquina. Então o
+   texto de reserva responde aos dois. */
 setTimeout(function(){
   if(btn.hidden) ajuda.hidden = false;
 }, 2500);
