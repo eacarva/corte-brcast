@@ -785,7 +785,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.02.4";
+const VERSAO_APP = "2026.09.02.5";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -1332,11 +1332,98 @@ function acharLinha(nomeFonte, livres){
   return pre.length === 1 ? pre[0] : null;
 }
 
+/* CSV de verdade: campos entre aspas, com vírgula e quebra de linha dentro.
+   O split por tabulação não dá conta — e o relatório do equipamento vem assim. */
+function partirCSV(texto){
+  const linhas = [];
+  let campo = "", linha = [], aspas = false;
+  const t = String(texto);
+  for(let i = 0; i < t.length; i++){
+    const c = t[i];
+    if(aspas){
+      if(c === '"'){ if(t[i+1] === '"'){ campo += '"'; i++; } else aspas = false; }
+      else campo += c;
+    }else if(c === '"'){ aspas = true; }
+    else if(c === ","){ linha.push(campo); campo = ""; }
+    else if(c === "\r"){ /* ignora */ }
+    else if(c === "\n"){ linha.push(campo); linhas.push(linha); linha = []; campo = ""; }
+    else campo += c;
+  }
+  if(campo !== "" || linha.length){ linha.push(campo); linhas.push(linha); }
+  return linhas;
+}
+
+/* Vale a pena tratar como CSV? Só quando há vírgula separando campos de
+   verdade em várias linhas — senão um texto qualquer com vírgulas viraria uma
+   tabela de uma coluna e o caminho normal funcionaria melhor. */
+function pareceCSV(texto){
+  if(String(texto).indexOf(",") < 0) return false;
+  const l = partirCSV(texto).filter(function(r){ return r.some(function(c){ return c.trim(); }); });
+  if(l.length < 2) return false;
+  const largas = l.filter(function(r){ return r.length >= 4; }).length;
+  return largas >= Math.max(2, Math.floor(l.length * 0.6));
+}
+
+/* Uma linha do relatório do equipamento traz dezenas de campos: número da
+   diluição, preço, marcadores de conflito, texto de assinatura. O nome do
+   antimicrobiano aparece repetido e o CIM vem alguns campos depois dele.
+
+   Procurar o nome primeiro e só então o valor é o que evita pegar lixo: o
+   campo "1,00" perto do começo da linha tem cara de CIM e passaria em qualquer
+   varredura que só procurasse o primeiro número. */
+function lerLinhaCSV(campos, livres){
+  const valorApos = function(i){
+    for(let j = i + 1; j < campos.length; j++){
+      const v = String(campos[j]).trim();
+      if(!v) continue;
+      if(ehValor(v)) return v.replace(/\s+/g, "");
+      // categoria da máquina (S/I/R/X) não interrompe: o CIM pode vir depois
+      if(/^[SIRX]$/i.test(v)) continue;
+    }
+    return "";
+  };
+  for(let i = 0; i < campos.length; i++){
+    const nome = String(campos[i]).trim();
+    if(!nome || ehValor(nome)) continue;
+    const alvo = acharLinha(nome, livres);
+    if(alvo) return {alvo:alvo, valor:valorApos(i), nome:nome};
+    /* Nome conhecido mas empatado — Amoxicilina-clavulanato serve às três
+       vias — tem que ir para a prévia e não sumir. acharLinha devolve null
+       tanto para empate quanto para nome estranho; a chave separa os dois. */
+    const k = chaveNome(nome);
+    if(k && livres.some(function(l){ return chaveNome(l.n) === k; }))
+      return {alvo:null, valor:valorApos(i), nome:nome};
+  }
+  return null;
+}
+
 function analisar(texto){
   const brutas = String(texto).split(/\r\n|\r|\n/)
     .map(function(x){ return x.trim(); }).filter(function(x){ return x !== ""; });
   const alvos = linhas().filter(function(l){ return l.tipo === "cim"; });
   if(!brutas.length) return {modo:"vazio", pares:[], sobras:[], alvos:alvos};
+
+  /* Caminho do CSV do equipamento, antes do caminho linha-a-linha: as duas
+     leituras dariam resultados diferentes para o mesmo texto, e a do CSV é a
+     que entende as colunas. */
+  if(pareceCSV(texto)){
+    const linhasCSV = partirCSV(texto).filter(function(r){
+      return r.some(function(c){ return String(c).trim(); });
+    });
+    const livresCSV = alvos.slice(), paresCSV = [], sobrasCSV = [];
+    linhasCSV.forEach(function(campos){
+      const r = lerLinhaCSV(campos, livresCSV);
+      if(!r || !r.valor) return;
+      if(r.alvo){
+        livresCSV.splice(livresCSV.indexOf(r.alvo), 1);
+        paresCSV.push({linha:r.alvo, valor:r.valor, fonte:r.nome+" · "+r.valor});
+      }else{
+        sobrasCSV.push({nome:r.nome, valor:r.valor, fonte:r.nome+" · "+r.valor});
+      }
+    });
+    if(paresCSV.length || sobrasCSV.length)
+      return {modo:"nome", pares:paresCSV, sobras:sobrasCSV, alvos:alvos, livres:livresCSV};
+  }
 
   const lidas = brutas.map(partirLinha).filter(Boolean);
   const semNome = lidas.filter(function(p){ return !p.nome; }).length;
@@ -1411,8 +1498,10 @@ function painelImportHTML(){
       '<button class="btn ghost" id="impFechar">Fechar</button></header>'+
       '<div class="corpo">'+
         '<p class="nota">Cole o resultado do outro sistema — dá para abrir o PDF do equipamento, '+
-        'selecionar tudo e colar aqui — ou escolha um arquivo de texto '+
-        '(<strong>.txt</strong>, <strong>.csv</strong>, <strong>.tsv</strong>). Se as linhas tiverem o nome do '+
+        'selecionar tudo e colar aqui — ou escolha o arquivo direto '+
+        '(<strong>.csv</strong> do equipamento, <strong>.txt</strong>, <strong>.tsv</strong>). '+
+        'O CSV do equipamento entra como está, com todas as colunas de conflito e assinatura: '+
+        'o programa acha o antimicrobiano e o CIM no meio delas. Se as linhas tiverem o nome do '+
         'antimicrobiano, ele casa pelo nome — a ordem não importa. Se for só uma coluna de valores, '+
         'aplica na ordem da tabela. A interpretação que vier junto é descartada: quem interpreta '+
         'é o corte daqui. Nada entra sem você ver a prévia.</p>'+

@@ -31,6 +31,13 @@ O botão **Colar / importar** aceita o relatório do equipamento colado direto:
 abrir o PDF, selecionar tudo, copiar, colar. Não é preciso limpar cabeçalho
 nem recortar a tabela.
 
+Aceita também o **CSV que o equipamento exporta**, escolhido como arquivo. Ele
+vem com mais de cinquenta colunas por linha — número da diluição, preço,
+marcadores de conflito, texto de assinatura — e o nome do antimicrobiano
+repetido. O programa procura o nome primeiro e só então o CIM que vem depois
+dele; é isso que impede o campo `1,00` do começo da linha, que tem cara de CIM,
+de entrar como resultado.
+
 A **interpretação que vem no relatório é descartada** — quem interpreta é o
 corte do laboratório. Só o valor de CIM é aproveitado.
 
