@@ -189,15 +189,18 @@ input.cim.pendente{color:var(--warn-ink); font-style:italic}
    depois "incluir". Rótulo de estado num botão faz a pessoa achar que não há
    como desfazer. E nada de âmbar aqui: no resto do programa âmbar quer dizer
    "confira isto", e não é disso que se trata. */
-.c-fim{width:1%; padding:6px 24px 6px 18px; text-align:right; white-space:nowrap}
-.omitir{border:1px solid var(--rule); background:var(--surface); cursor:pointer;
-        color:var(--ink-2); font-size:12px; line-height:1; padding:6px 11px; border-radius:6px;
-        opacity:0; transition:opacity .12s, background .12s, color .12s, border-color .12s;
-        font-family:inherit; white-space:nowrap}
-tr:hover .omitir, .omitir:focus-visible{opacity:1}
-.omitir:hover{border-color:var(--accent); color:var(--accent-ink)}
+.c-fim{width:1%; padding:4px 20px 4px 16px; text-align:right; white-space:nowrap}
+/* Fica apagado o tempo todo em vez de sumir: sumindo, ninguém descobre que
+   existe; aceso o tempo todo, disputa atenção com o resultado. */
+.omitir{border:1px solid transparent; background:none; cursor:pointer; color:var(--ink-3);
+        padding:6px; border-radius:7px; opacity:.28; display:inline-flex;
+        transition:opacity .12s, background .12s, color .12s, border-color .12s}
+.omitir svg{width:17px; height:17px; display:block}
+tr:hover .omitir{opacity:.75}
+.omitir:hover, .omitir:focus-visible{opacity:1; color:var(--accent-ink);
+                                     background:var(--surface-2); border-color:var(--rule)}
 .omitir.ativo{opacity:1; color:var(--accent-ink); border-color:var(--accent);
-              background:var(--accent-soft); font-weight:600}
+              background:var(--accent-soft)}
 .omitir.ativo:hover{background:var(--accent); border-color:var(--accent); color:var(--btn-primary-ink)}
 tr.omitida{background:var(--surface-2)}
 tr.omitida .abxnome, tr.omitida .c-cim, tr.omitida .c-int, tr.omitida .c-corte{opacity:.42}
@@ -649,7 +652,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.08.31.17";
+const VERSAO_APP = "2026.08.31.18";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -983,6 +986,21 @@ function normNome(t){
   return semAcento(String(t)).toLowerCase()
     .replace(/[^a-z0-9/ ]/g, " ").replace(/\s+/g, " ").trim();
 }
+
+/* Olho aberto: vai no laudo. Olho cortado: fica de fora. O ícone diz estado e
+   ação ao mesmo tempo, sem texto competindo com o nome do antimicrobiano — e
+   sem cor de alerta, que aqui significaria a coisa errada. */
+const OLHO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" '+
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
+  '<path d="M1.6 12S5.4 5.4 12 5.4 22.4 12 22.4 12 18.6 18.6 12 18.6 1.6 12 1.6 12Z"/>'+
+  '<circle cx="12" cy="12" r="3.1"/></svg>';
+
+const OLHO_CORTADO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" '+
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
+  '<path d="M9.9 5.6A9.6 9.6 0 0 1 12 5.4c6.6 0 10.4 6.6 10.4 6.6a19 19 0 0 1-2.7 3.7"/>'+
+  '<path d="M6.3 6.8A18.9 18.9 0 0 0 1.6 12S5.4 18.6 12 18.6a9.9 9.9 0 0 0 4-.8"/>'+
+  '<path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>'+
+  '<line x1="3" y1="3" x2="21" y2="21"/></svg>';
 
 /* Uma linha do texto colado -> {nome, valor}. Aceita tabulação, ";", "|",
    dois ou mais espaços, ou "Nome ≤4" numa coluna só. */
@@ -1322,11 +1340,11 @@ function renderLaudo(){
        valor e a interpretação à vista — some só do que é copiado. Esconder da
        tela também deixaria a pessoa sem saber o que ela mesma tirou. */
     const btnOmitir = '<button class="omitir'+(l.omitido?" ativo":"")+'" data-omitir="'+esc(l.n)+'" '+
-      'title="'+(l.omitido ? "Está fora do laudo. Clique para incluir de novo."
-                           : "Não mostrar este antimicrobiano no laudo desta amostra.")+'" '+
+      'title="'+(l.omitido ? "Fora do laudo. Clique para mostrar de novo."
+                           : "Clique para não mostrar este antimicrobiano no laudo desta amostra.")+'" '+
       'aria-pressed="'+(l.omitido?"true":"false")+'" '+
-      'aria-label="'+(l.omitido?"Incluir ":"Tirar do laudo ")+esc(l.n)+'">'+
-      (l.omitido ? "incluir de volta" : "tirar do laudo")+'</button>';
+      'aria-label="'+(l.omitido?"Mostrar ":"Não mostrar ")+esc(l.n)+' no laudo">'+
+      (l.omitido ? OLHO_CORTADO : OLHO)+'</button>';
 
     return '<tr'+(l.omitido?' class="omitida"':'')+'>'+
       '<td class="c-abx"><div class="abxrow"><span class="pendslot">'+marca+'</span>'+
@@ -1373,9 +1391,8 @@ function renderLaudo(){
     '<code>Enter</code> vai para o próximo campo, <code>Shift+Enter</code> volta. '+
     'Colar várias linhas num campo preenche a coluna para baixo. '+
     '<strong>Corte aplicado</strong> mostra qual regra decidiu — essa coluna não vai no copiar. '+
-    'Para não mostrar um antimicrobiano no laudo, passe o mouse na linha dele e clique no '+
-    'botão <strong>tirar do laudo</strong> no fim da linha — ele continua aqui, mas fica fora '+
-    'do que você copia.</p>';
+    'O <strong>olho</strong> no fim de cada linha decide se aquele antimicrobiano sai no laudo. '+
+    'Olho cortado = fica de fora do que você copia, mas continua aqui na tela.</p>';
 
   $("btnCopiar").addEventListener("click", copiar);
   $("btnNova").addEventListener("click", novaAmostra);

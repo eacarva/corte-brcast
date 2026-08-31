@@ -49,10 +49,13 @@ Nada entra sem a prévia, e o que entra fica marcado como **não conferido**.
 
 ### Tirar um antimicrobiano do laudo
 
-Em alguns casos o antimicrobiano não deve ser mostrado. Passando o mouse na
-linha aparece o botão **tirar do laudo** no fim dela; clicando, ela sai do que
-é copiado. Depois o mesmo botão passa a oferecer **incluir de volta** — o botão
-diz sempre a ação, nunca o estado, senão parece que não há como desfazer.
+Em alguns casos o antimicrobiano não deve ser mostrado. No fim de cada linha
+há um **olho**: aberto, o antimicrobiano sai no laudo; cortado, fica de fora do
+que é copiado. Um clique alterna.
+
+O olho fica apagado até o mouse passar pela linha. Sumindo de vez, ninguém
+descobriria que existe; aceso o tempo todo, disputaria atenção com o
+resultado. Já o olho cortado fica sempre nítido.
 
 A linha **continua na tela**, riscada e apagada, mas com o valor e a
 interpretação à vista. Esconder da tela deixaria a própria pessoa sem saber o
