@@ -108,6 +108,10 @@ Ele **só pergunta**. Não baixa nada, não se reescreve e não muda nenhum
 corte: o que decide laudo é apenas o que está dentro do arquivo que você
 tem na mão.
 
+A versão instalada fica no pé da barra lateral, em cinza claro. É por ali que
+se confere se a atualização entrou — sem ela, o aviso some ao ser clicado e
+ninguém sabe dizer se algo aconteceu.
+
 **Ao publicar uma versão nova**, subir o mesmo número nos três lugares:
 
 | | |

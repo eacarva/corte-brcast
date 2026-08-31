@@ -113,10 +113,23 @@ button,input,select{font:inherit; color:inherit}
 /* Aviso de versao nova. Vem depois de .btn de proposito: mesma
    especificidade, entao quem manda e a ordem. Nasce escondido: o estado normal e nao ter aviso.
    So a rede o acende, e so quando ha mesmo versao diferente publicada. */
-.avisonova{display:none; text-decoration:none; margin-bottom:5px; font-weight:600;
-           background:var(--warn); border-color:var(--warn); color:var(--warn-ink)}
+/* Aviso de versao nova. Vem depois de .btn de proposito: mesma especificidade,
+   entao quem manda e a ordem. Nasce escondido -- o estado normal e nao ter
+   aviso. Nada de bloco ambar cheio: e um recado, nao um botao de acao, e
+   competir com a navegacao ao lado so atrapalha. O texto quebra em duas
+   linhas porque a barra e estreita e "atualizar" nao pode ficar cortado. */
+.avisonova{display:none; text-decoration:none; margin:2px 0 7px; padding:7px 10px;
+           border:0; border-left:3px solid var(--warn-ink); border-radius:0 5px 5px 0;
+           background:var(--surface-2); color:var(--ink-2);
+           font-size:12px; font-weight:500; line-height:1.4; white-space:normal}
 .avisonova.mostra{display:block}
-.avisonova:hover{color:var(--warn-ink); filter:brightness(.96)}
+.avisonova b{display:block; color:var(--ink); font-weight:600}
+.avisonova:hover{background:var(--warn); color:var(--warn-ink)}
+.avisonova:hover b{color:var(--warn-ink)}
+/* Versao do programa. Some no canto ate alguem precisar dela -- e quem precisa
+   esta conferindo se a atualizacao entrou. */
+.versaoapp{padding:7px 11px 1px; font-size:11px; color:var(--ink-3);
+           font-variant-numeric:tabular-nums; letter-spacing:.02em}
 
 .content{padding:20px 28px 90px; max-width:1220px}
 .panel{background:var(--surface); border:1px solid var(--rule); border-radius:9px; box-shadow:var(--shadow); overflow:hidden}
@@ -336,6 +349,7 @@ input.search:focus{outline:2px solid var(--accent); outline-offset:-1px}
       <button class="btn ghost" id="navRef">Valores de referência</button>
       <button class="btn ghost" id="navObs">Observações padrão</button>
       <button class="btn ghost" id="navFonte">Fonte dos cortes</button>
+      <div class="versaoapp" id="versaoApp"></div>
     </div>
   </nav>
   <main class="main">
@@ -578,7 +592,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.08.31.4";
+const VERSAO_APP = "2026.08.31.5";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 
 /* Aceita o link de edição, o de compartilhar ou um já colado antes. */
@@ -2126,6 +2140,8 @@ campoBusca.focus();
 /* Instala o programa na máquina quando ele vem do site. Do disco (file://)
    nem tenta: não existe service worker sem https, e o arquivo solto continua
    funcionando exatamente como sempre funcionou. */
+$("versaoApp").textContent = "v" + VERSAO_APP;
+
 if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
   // updateViaCache "none": o navegador nunca serve este script do próprio
   // cache HTTP. Sem isso ele pode adiar a checagem e a máquina ficaria numa
@@ -2142,7 +2158,8 @@ fetch(URL_VERSAO, {cache:"no-store"})
        Solto em file://, daqui não há como trocar o arquivo da pessoa: o
        melhor que se faz é levá-la à página de download. */
     const instalado = "serviceWorker" in navigator && !!navigator.serviceWorker.controller;
-    a.textContent = "Versão nova: " + v.versao + (instalado ? " — atualizar" : "");
+    a.innerHTML = "<b>Versão nova: " + esc(v.versao) + "</b>" +
+                  (instalado ? "clique para atualizar" : "clique para baixar");
     a.title = (v.notas ? v.notas + " — " : "") +
               (instalado ? "recarrega já na versão nova" : "abre a página para baixar");
     if(instalado){
