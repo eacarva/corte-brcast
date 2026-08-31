@@ -129,14 +129,17 @@
 
   <div id="ajudaInstalar" hidden>
     <div class="card">
-      <h3>Para deixar no computador</h3>
-      <p>Seu navegador não mostrou o botão de instalar. Dá para fazer pelo menu:</p>
+      <h3>O botão de instalar não apareceu</h3>
+      <p><strong>Se você já instalou:</strong> está tudo certo, o botão some depois.
+      Procure por <strong>Corte BrCAST</strong> no menu Iniciar, no Launchpad ou na
+      área de trabalho.</p>
+      <p><strong>Se ainda não instalou</strong>, dá para fazer pelo menu do Chrome:</p>
       <ol>
-        <li>No Chrome, clique nos <strong>três pontinhos</strong> no canto superior direito</li>
+        <li>Clique nos <strong>três pontinhos</strong> no canto superior direito</li>
         <li><strong>Transmitir, salvar e compartilhar</strong></li>
         <li><strong>Instalar página como app</strong></li>
       </ol>
-      <p>Se essa opção estiver apagada, o navegador desse computador não permite
+      <p>Se essa opção estiver apagada, o navegador desse computador não deixa
       instalar. Sem problema: use o <strong>Baixar</strong> acima — o arquivo faz
       a mesma coisa.</p>
     </div>
@@ -231,29 +234,21 @@ btn.addEventListener("click", function(){
 });
 
 window.addEventListener("appinstalled", function(){
-  jaInstalado();
-});
-
-function jaInstalado(){
   document.getElementById("txtInstalar").textContent =
-    "Já está instalado neste computador. Procure por Corte BrCAST no menu iniciar, " +
-    "no Launchpad ou na área de trabalho.";
+    "Pronto, está instalado. Procure por Corte BrCAST no menu Iniciar, no Launchpad " +
+    "ou na área de trabalho.";
   document.getElementById("seloRec").hidden = true;
   btn.hidden = true;
   ajuda.hidden = true;
-}
+});
 
-/* Sem o aviso do navegador em alguns segundos, ou não dá para instalar aqui, ou
-   já está instalado. Nos dois casos o botão seria uma promessa falsa. */
+/* Sem o aviso do navegador em alguns segundos, ou já está instalado, ou este
+   navegador não instala. Daqui não dá para distinguir os dois casos — não há
+   API para perguntar se o app está instalado —, então o texto de reserva
+   responde aos dois em vez de adivinhar e errar com metade das pessoas. */
 setTimeout(function(){
-  if(eventoInstalar || !btn.hidden) return;
-  if(navigator.getInstalledRelatedApps){
-    navigator.getInstalledRelatedApps().then(function(l){
-      if(l && l.length) jaInstalado(); else ajuda.hidden = false;
-    }).catch(function(){ ajuda.hidden = false; });
-  }else{
-    ajuda.hidden = false;
-  }
+  if(!btn.hidden) return;
+  ajuda.hidden = false;
 }, 2500);
 </script>
 </body>
