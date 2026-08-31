@@ -445,6 +445,27 @@ input.search:focus{outline:2px solid var(--accent); outline-offset:-1px}
                  background:transparent; border-color:currentColor; color:inherit}
 .sub.alerta{color:var(--res-ink); font-weight:600}
 
+/* Primeira configuração: a pergunta e os dois caminhos. */
+.comeco .refhead{position:relative}
+.comeco-corpo{padding:16px 18px}
+.comeco-pergunta{margin:0 0 12px; font-size:14px; font-weight:600; color:var(--ink)}
+.comeco-opcoes{display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px}
+.opcao{display:block; text-align:left; background:var(--surface); cursor:pointer;
+       border:1px solid var(--rule-strong); border-radius:10px; padding:15px 16px;
+       font-family:inherit; transition:border-color .12s, background .12s}
+.opcao:hover, .opcao:focus-visible{border-color:var(--accent); background:var(--accent-soft)}
+.opcao b{display:block; font-size:15px; color:var(--ink); margin-bottom:4px}
+.opcao span{display:block; font-size:12.5px; line-height:1.5; color:var(--ink-2)}
+.voltar{display:block; background:none; border:0; padding:0 0 7px; cursor:pointer;
+        font-family:inherit; font-size:12.5px; color:var(--accent-ink)}
+.voltar:hover{text-decoration:underline}
+.passos-grandes{margin:0; padding-left:22px; font-size:13.5px; line-height:1.6; color:var(--ink-2)}
+.passos-grandes > li{margin:0 0 16px}
+.passos-grandes > li:last-child{margin-bottom:0}
+.passos-grandes b{color:var(--ink)}
+.passos-grandes .btn{margin:7px 0 3px}
+.passo-nota{display:block; margin-top:4px; font-size:12.5px; color:var(--ink-2)}
+
 .erro-campo{margin:9px 0 0; padding:9px 12px; font-size:12.5px; line-height:1.5;
               color:var(--res-ink); background:var(--res); border-radius:7px}
   .fonte-campo input:focus{outline:2px solid var(--accent); outline-offset:-1px;
@@ -785,7 +806,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.02.5";
+const VERSAO_APP = "2026.09.02.6";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -2318,6 +2339,82 @@ function ajuda(titulo, corpo){
   '</details>';
 }
 
+/* Onde a pessoa está na primeira configuração. Vazio = ainda não escolheu o
+   caminho. Só da sessão: fechar o programa recomeça pela pergunta. */
+let passoFonte = "";
+
+/* Primeira configuração. Aqui existem dois caminhos que não se parecem: quem
+   já tem o link da planilha do laboratório precisa de um passo, e quem vai
+   montar a planilha precisa de quatro. A tela cobrava o pedágio dos dois de
+   todo mundo — o campo aparecia primeiro e a instrução que o torna possível
+   vinha depois, colapsada.
+
+   Perguntar qual é o caso custa um clique e devolve a tela certa. Os blocos de
+   referência continuam abaixo para quem quiser ler tudo assim mesmo. */
+function primeiraVezHTML(){
+  const campo =
+    '<div class="fonte-campo">'+
+      '<input id="fonteURL" type="url" spellcheck="false" autocomplete="off" '+
+        'placeholder="https://docs.google.com/spreadsheets/d/…/edit" '+
+        'aria-label="Link da planilha"'+
+        (erroCampo ? ' aria-invalid="true" aria-describedby="erroCampo"' : "")+'>'+
+      '<button class="btn primary" id="btnSalvar">Salvar e testar</button>'+
+    '</div>'+
+    (erroCampo ? '<p class="erro-campo" id="erroCampo" role="alert">'+esc(erroCampo)+'</p>' : "");
+
+  if(passoFonte === "tenho"){
+    return '<div class="panel comeco">'+
+      '<div class="refhead">'+
+        '<button class="voltar" id="fonteVoltar">← escolher outro caminho</button>'+
+        '<strong>Cole o link da planilha</strong>'+
+        '<p>Todos os computadores que usarem o mesmo link passam a interpretar igual.</p></div>'+
+      '<div class="comeco-corpo">'+campo+
+        '<div class="cuidado" style="margin-top:12px">A planilha precisa estar compartilhada como '+
+        '<b>Qualquer pessoa com o link · Leitor</b>. Não serve <i>Qualquer pessoa da organização</i>: '+
+        'este programa lê sem fazer login, igual a um visitante anônimo.</div>'+
+      '</div></div>';
+  }
+
+  if(passoFonte === "montar"){
+    return '<div class="panel comeco">'+
+      '<div class="refhead">'+
+        '<button class="voltar" id="fonteVoltar">← escolher outro caminho</button>'+
+        '<strong>Montar a planilha do laboratório</strong>'+
+        '<p>Uma vez só. Depois, nos outros computadores, basta colar o link.</p></div>'+
+      '<div class="comeco-corpo">'+
+        '<ol class="passos-grandes">'+
+          '<li><b>Gere o arquivo</b><br>'+
+            '<button class="btn primary" id="btnXLSX2">Gerar planilha</button>'+
+            '<span class="passo-nota">Sai um <code>corte-brcast.xlsx</code> com os cortes e as '+
+            'observações, cada um na sua aba. Nada para formatar.</span></li>'+
+          '<li><b>Suba no Google Drive</b> e abra com <b>Google Planilhas</b>.</li>'+
+          '<li><b>Compartilhe</b> em <b>Qualquer pessoa com o link · Leitor</b>.<br>'+
+            '<span class="passo-nota">Confira antes se não há aba com resultado de paciente: '+
+            'isso libera a planilha inteira.</span></li>'+
+          '<li><b>Cole o endereço aqui</b><br>'+campo+'</li>'+
+        '</ol>'+
+      '</div></div>';
+  }
+
+  return '<div class="panel comeco">'+
+    '<div class="refhead"><strong>Este computador ainda usa os cortes que vieram no programa</strong>'+
+    '<p>Eles funcionam, mas cada máquina fica com a sua cópia. Ligando à planilha do '+
+    'laboratório, todas passam a interpretar igual.</p></div>'+
+    '<div class="comeco-corpo">'+
+      '<p class="comeco-pergunta">Por onde você começa?</p>'+
+      '<div class="comeco-opcoes">'+
+        '<button class="opcao" id="fonteTenho">'+
+          '<b>Já tenho o link da planilha</b>'+
+          '<span>Alguém do laboratório já montou. É só colar — um passo.</span>'+
+        '</button>'+
+        '<button class="opcao" id="fonteMontar">'+
+          '<b>Ainda não existe planilha</b>'+
+          '<span>O programa gera o arquivo pronto e você sobe no Drive.</span>'+
+        '</button>'+
+      '</div>'+
+    '</div></div>';
+}
+
 function renderFonte(){
   /* Com planilha ligada, a ação do dia a dia é sincronizar — ela leva o peso.
      Sem planilha, ainda não há o que sincronizar e o começo é gerar o arquivo. */
@@ -2331,9 +2428,15 @@ function renderFonte(){
     ? '<ul class="erros">'+st.erro.map(function(e){ return '<li>'+esc(e)+'</li>'; }).join("")+'</ul>'
     : "";
 
+  /* Sem planilha configurada a tela é a primeira configuração; com planilha,
+     é o painel de status e manutenção. São duas telas, não uma com estados. */
+  const inicio = !fonte;
+
   $("content").innerHTML =
     seloHTML(fonte ? '<span class="dot2"><a href="'+esc(urlPlanilha(fonte))+'" target="_blank" rel="noopener">abrir planilha</a></span>' : "")+
     erros+
+    (inicio ? primeiraVezHTML() : "")+
+    (inicio ? "" :
     '<div class="panel">'+
       '<div class="refhead"><strong>Planilha do laboratório</strong>'+
       '<p>Cole o link da planilha do Google Sheets com os cortes. Todos os computadores que usarem o mesmo link '+
@@ -2359,7 +2462,8 @@ function renderFonte(){
                    '<span>Volta aos cortes que vieram no arquivo.</span>'+
                  '</div>' : "")+
       '</div>'+
-    '</div>'+
+    '</div>')+
+    (inicio ? "" :
     '<div class="panel" style="margin-top:12px">'+
       '<div class="refhead"><strong>Situação</strong></div>'+
       '<div class="tablewrap"><table class="grid"><tbody>'+
@@ -2376,7 +2480,7 @@ function renderFonte(){
       '</tbody></table></div>'+
     '</div>'+
     '<p class="hint">O programa lê a planilha toda vez que abre. Sem internet, usa a última cópia boa e avisa a data. '+
-    'Os cortes de fábrica só entram se nunca houve uma sincronização bem-sucedida neste computador.</p>'+
+    'Os cortes de fábrica só entram se nunca houve uma sincronização bem-sucedida neste computador.</p>')+
     ajuda('Como apontar para outra planilha',
       '<p class="ajuda-sub">O arquivo sai sem planilha configurada. Faça isto uma vez em cada '+
       'computador, colando o link da planilha do laboratório.</p>'+
@@ -2473,8 +2577,23 @@ function renderFonte(){
   });
   const bx = $("btnXLSX");
   if(bx) bx.addEventListener("click", exportarPlanilha);
+  const bx2 = $("btnXLSX2");
+  if(bx2) bx2.addEventListener("click", exportarPlanilha);
+
+  const irPara = function(passo){
+    passoFonte = passo;
+    erroCampo = "";
+    render();
+    const c = $("fonteURL");
+    if(c) c.focus();
+  };
+  if($("fonteTenho"))  $("fonteTenho").addEventListener("click",  function(){ irPara("tenho"); });
+  if($("fonteMontar")) $("fonteMontar").addEventListener("click", function(){ irPara("montar"); });
+  if($("fonteVoltar")) $("fonteVoltar").addEventListener("click", function(){ irPara(""); });
 
   const campo = $("fonteURL");
+  if(!campo) return;                  // na pergunta inicial ainda não há campo
+
   /* O link só vai para o disco depois de funcionar. Antes ele era gravado
      assim que passava no formato: um endereço bem escrito mas apontando para
      a planilha errada apagava o link bom, sem desfazer e sem mostrar qual

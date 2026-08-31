@@ -116,7 +116,14 @@ Os valores de corte vêm de **uma planilha do Google**, para que todos os comput
 
 ### Montar a planilha
 
-1. Na tela **Fonte dos cortes**, clique em **Gerar planilha**
+Num computador ainda sem planilha, a tela **Fonte dos cortes** pergunta por
+onde começar, porque os dois caminhos não se parecem: quem **já tem o link**
+precisa de um passo, quem vai **montar a planilha** precisa de quatro. Antes a
+tela cobrava o manual inteiro dos dois.
+
+Para montar do zero:
+
+1. Na tela **Fonte dos cortes**, escolha *Ainda não existe planilha* e clique em **Gerar planilha**
 2. Suba o `corte-brcast.xlsx` no Drive e abra com **Google Planilhas**
 3. **Compartilhar ▸ Acesso geral ▸ Qualquer pessoa com o link ▸ Leitor**
 4. Copie o endereço da barra do navegador e cole na tela **Fonte dos cortes**
