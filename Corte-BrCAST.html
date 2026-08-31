@@ -607,7 +607,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.08.31.13";
+const VERSAO_APP = "2026.08.31.14";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -923,7 +923,18 @@ function linhas(){
    ========================================================================== */
 const RE_CIM = /^[<>≤≥=]{0,2}\s*\d+(?:[.,]\d+)?(?:\s*\/\s*\d+(?:[.,]\d+)?)?$/;
 
-function ehValor(t){ return RE_CIM.test(String(t).replace(/\s+/g, "")); }
+/* Painel de CIM não chega perto disso: o maior corte de todo o programa é 64.
+   Colando um relatório inteiro, porém, número de acesso, CEP e número de rua
+   têm o mesmo formato de um CIM — "Av Colombo, 5790" virava um resultado
+   aplicável, e um clique errado na prévia colocava 5790 num antibiótico. */
+const CIM_MAX = 1024;
+
+function ehValor(t){
+  const s = String(t).replace(/\s+/g, "");
+  if(!RE_CIM.test(s)) return false;
+  const nums = s.match(/\d+(?:[.,]\d+)?/g) || [];
+  return nums.every(function(n){ return parseFloat(n.replace(",", ".")) <= CIM_MAX; });
+}
 function normNome(t){
   return semAcento(String(t)).toLowerCase()
     .replace(/[^a-z0-9/ ]/g, " ").replace(/\s+/g, " ").trim();
@@ -937,7 +948,16 @@ function partirLinha(linha){
   let cels = l.split(/\t|;|\||\s{2,}/).map(function(x){ return x.trim(); })
               .filter(function(x){ return x !== ""; });
   if(cels.length === 1 && !ehValor(cels[0])){
-    const m = l.match(/^(.*?)\s+([<>≤≥=]{0,2}\s*\d+(?:[.,]\d+)?(?:\s*\/\s*\d+(?:[.,]\d+)?)?)$/);
+    /* Coluna única: o separador pode ser um espaço simples. É assim que sai o
+       PDF do equipamento quando alguém copia — "Amicacina <=4 S", com a
+       interpretação dele no fim da linha. O valor é procurado no meio, não só
+       no fim: exigindo fim de linha, "Amicacina <=4 S" virava um nome enorme
+       com valor vazio, e ainda casava por prefixo com Amicacina — dizia que
+       reconheceu e não trazia número nenhum.
+
+       O que vem depois do CIM é a categoria da máquina, e é ignorado de
+       propósito: quem interpreta aqui é o corte do laboratório. */
+    const m = l.match(/^(.*?)\s+([<>≤≥=]{0,2}\s*\d+(?:[.,]\d+)?(?:\s*\/\s*\d+(?:[.,]\d+)?)?)(?:\s|$)/);
     if(m) cels = [m[1].trim(), m[2].trim()];
   }
   if(cels.length === 1) return ehValor(cels[0]) ? {nome:"", valor:cels[0].replace(/\s+/g,"")}
@@ -947,6 +967,38 @@ function partirLinha(linha){
     if(ehValor(cels[i])){ valor = cels[i].replace(/\s+/g, ""); break; }
   }
   return {nome:cels[0], valor:valor};
+}
+
+/* O mesmo antimicrobiano sai escrito de jeitos diferentes em cada sistema:
+   separador da combinação (piperacilina-tazobactam / Piperacilina/Tazobactam),
+   ordem dos componentes (sulfametoxazol-trimetoprima / Trimetoprima/
+   Sulfametoxazol), terminação -a ou -o (ciprofloxacina / ciprofloxacino) e
+   sinônimo do componente (clavulanato / ácido clavulânico). Tudo isso é a
+   mesma droga e pode casar sozinho.
+
+   A via NÃO entra na chave, de propósito. Oral e intravenoso têm cortes
+   diferentes, e o equipamento manda "Cefuroxima" sem dizer qual. Tirando a via
+   da chave, as duas linhas viram candidatas empatadas — e empate aqui devolve
+   null, que joga a decisão para a pessoa na prévia. Escolher sozinho seria
+   escolher um corte clínico no escuro. */
+const SINONIMOS = {
+  "acido clavulanico":"clavulanico", "clavulanato":"clavulanico",
+  "ac clavulanico":"clavulanico", "clavulanico":"clavulanico",
+  "smx":"sulfametoxazol", "tmp":"trimetoprima", "sxt":"sulfametoxazol"
+};
+
+function chaveNome(t){
+  let s = semAcento(String(t)).toLowerCase();
+  s = s.replace(/\([^)]*\)/g, " ");                              // "(f)", "(Infecção…)"
+  s = s.replace(/\b(oral|intravenoso|intravenosa|endovenoso|iv|ev)\b/g, " ");
+  s = s.replace(/[\/+\-]/g, "|");                                 // combinação
+  s = s.replace(/[^a-z0-9| ]/g, " ");
+  const partes = s.split("|").map(function(x){
+    x = x.replace(/\s+/g, " ").trim();
+    x = SINONIMOS[x] || x;
+    return x.replace(/[ao]$/, "");                               // -ina / -ino
+  }).filter(Boolean).sort();
+  return partes.join("|");
 }
 
 /* Casa um nome vindo de fora com uma das linhas ainda livres. Ambíguo devolve
@@ -961,6 +1013,14 @@ function acharLinha(nomeFonte, livres){
   const exatos = livres.filter(function(l){ return normNome(l.n) === q; });
   if(exatos.length === 1) return exatos[0];
   if(exatos.length > 1) return null;
+
+  const k = chaveNome(nomeFonte);
+  if(k){
+    const porChave = livres.filter(function(l){ return chaveNome(l.n) === k; });
+    if(porChave.length === 1) return porChave[0];
+    if(porChave.length > 1) return null;   // empate: a via é decisão de quem lauda
+  }
+
   const pre = livres.filter(function(l){
     const a = normNome(l.n);
     return a.indexOf(q) === 0 || q.indexOf(a) === 0;
@@ -994,9 +1054,12 @@ function analisar(texto){
     if(alvo){
       livres.splice(livres.indexOf(alvo), 1);
       pares.push({linha:alvo, valor:p.valor, fonte:brutas[i]});
-    }else{
+    }else if(String(p.valor || "").trim()){
       sobras.push({nome:p.nome, valor:p.valor, fonte:brutas[i]});
     }
+    /* Linha sem valor não tem o que aplicar. São os cabeçalhos que vêm junto
+       na cópia — "Fármaco", "CIM/Conc SIR", o nome do microrganismo. Listá-las
+       como não reconhecidas enche a prévia de ruído e faz o placar mentir. */
   });
   return {modo:"nome", pares:pares, sobras:sobras, alvos:alvos, livres:livres};
 }
@@ -1043,10 +1106,12 @@ function painelImportHTML(){
     return '<div class="imp"><header><h3>Colar ou importar resultado</h3>'+
       '<button class="btn ghost" id="impFechar">Fechar</button></header>'+
       '<div class="corpo">'+
-        '<p class="nota">Cole o resultado do outro sistema, ou escolha um arquivo de texto '+
+        '<p class="nota">Cole o resultado do outro sistema — dá para abrir o PDF do equipamento, '+
+        'selecionar tudo e colar aqui — ou escolha um arquivo de texto '+
         '(<strong>.txt</strong>, <strong>.csv</strong>, <strong>.tsv</strong>). Se as linhas tiverem o nome do '+
         'antimicrobiano, ele casa pelo nome — a ordem não importa. Se for só uma coluna de valores, '+
-        'aplica na ordem da tabela. Nada entra sem você ver a prévia.</p>'+
+        'aplica na ordem da tabela. A interpretação que vier junto é descartada: quem interpreta '+
+        'é o corte daqui. Nada entra sem você ver a prévia.</p>'+
         '<textarea id="impTexto" spellcheck="false" placeholder="Amicacina&#9;&#8804;4&#10;Ampicilina&#9;&gt;8&#10;Cefepima&#9;&#8804;1"></textarea>'+
         '<div class="linhabtn">'+
           '<button class="btn primary" id="impLer">Ler</button>'+
@@ -1097,7 +1162,8 @@ function painelImportHTML(){
         : "")+
       '<div class="cx"><table>'+corpo+sobras+'</table></div>'+
       (r.sobras.length
-        ? '<p class="nota">Escolha a que linha cada não reconhecida corresponde — a associação fica gravada e da próxima vez ele já reconhece sozinho.</p>'
+        ? '<p class="nota">Escolha a que linha cada não reconhecida corresponde — a associação fica gravada e da próxima vez ele já reconhece sozinho. '+
+          'Colando um relatório inteiro, cabeçalho e endereço podem cair aqui: deixe em <strong>ignorar</strong>.</p>'
         : "")+
       '<div class="linhabtn">'+
         '<button class="btn primary" id="impAplicar">Aplicar '+usados+' valor(es)</button>'+

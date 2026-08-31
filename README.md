@@ -25,6 +25,28 @@ A coluna **Corte aplicado** mostra qual regra decidiu cada linha — ela não va
 
 **Colar / importar** preenche vários resultados de uma vez, colados do outro sistema.
 
+### Colar o resultado do equipamento
+
+O botão **Colar / importar** aceita o relatório do equipamento colado direto:
+abrir o PDF, selecionar tudo, copiar, colar. Não é preciso limpar cabeçalho
+nem recortar a tabela.
+
+A **interpretação que vem no relatório é descartada** — quem interpreta é o
+corte do laboratório. Só o valor de CIM é aproveitado.
+
+O nome do antimicrobiano casa mesmo escrito diferente: separador da combinação
+(`piperacilina-tazobactam` = `Piperacilina/Tazobactam`), ordem dos componentes
+(`sulfametoxazol-trimetoprima` = `Trimetoprima/Sulfametoxazol`), terminação
+`-a`/`-o` (`ciprofloxacina` = `ciprofloxacino`) e sinônimos (`clavulanato` =
+`ácido clavulânico`).
+
+O que **não** casa sozinho é a via: o equipamento manda `Cefuroxima` sem dizer
+se é oral ou intravenosa, e os cortes são diferentes. Essas linhas caem na
+prévia para escolha, e a escolha fica gravada — na importação seguinte já
+casam sozinhas.
+
+Nada entra sem a prévia, e o que entra fica marcado como **não conferido**.
+
 ### Observações padrão
 
 68 textos de laudo (Bac 1 a Bac 71), com busca por código ou conteúdo. Clicar copia.
