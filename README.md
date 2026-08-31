@@ -50,11 +50,13 @@ Nada entra sem a prévia, e o que entra fica marcado como **não conferido**.
 ### Tirar um antimicrobiano do laudo
 
 Em alguns casos o antimicrobiano não deve ser mostrado. Passando o mouse na
-linha aparece um **✕** no fim dela; clicando, ela sai do que é copiado.
+linha aparece o botão **tirar do laudo** no fim dela; clicando, ela sai do que
+é copiado. Depois o mesmo botão passa a oferecer **incluir de volta** — o botão
+diz sempre a ação, nunca o estado, senão parece que não há como desfazer.
 
-A linha **continua na tela**, riscada e com o selo *fora do laudo* — o valor e
-a interpretação seguem à vista. Esconder da tela deixaria a própria pessoa sem
-saber o que tirou.
+A linha **continua na tela**, riscada e apagada, mas com o valor e a
+interpretação à vista. Esconder da tela deixaria a própria pessoa sem saber o
+que tirou.
 
 Enquanto houver alguma fora, um aviso fica no topo com o botão **Incluir todos
 de volta**, e o resumo ganha a contagem. Ao copiar, a mensagem diz quantas

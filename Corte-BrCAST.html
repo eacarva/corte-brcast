@@ -184,18 +184,24 @@ button.pend{width:11px; height:11px; padding:0; border:0; border-radius:50%; cur
 button.pend:hover{filter:brightness(1.25)}
 input.cim.pendente{color:var(--warn-ink); font-style:italic}
 .sumcell.pendente .v{color:var(--warn-ink)}
-/* Fora do laudo: a linha continua legível na tela, só sai do que é copiado.
-   Apagar de vez esconderia da própria pessoa aquilo que ela tirou. */
-tr.omitida .abxnome, tr.omitida .c-cim, tr.omitida .c-int{opacity:.4}
+/* Fora do laudo. O estado quem diz é a própria linha — riscada, apagada, com
+   fundo. O botão diz sempre a AÇÃO, nunca o estado: antes "tirar do laudo",
+   depois "incluir". Rótulo de estado num botão faz a pessoa achar que não há
+   como desfazer. E nada de âmbar aqui: no resto do programa âmbar quer dizer
+   "confira isto", e não é disso que se trata. */
+.c-fim{width:1%; padding:6px 24px 6px 18px; text-align:right; white-space:nowrap}
+.omitir{border:1px solid var(--rule); background:var(--surface); cursor:pointer;
+        color:var(--ink-2); font-size:12px; line-height:1; padding:6px 11px; border-radius:6px;
+        opacity:0; transition:opacity .12s, background .12s, color .12s, border-color .12s;
+        font-family:inherit; white-space:nowrap}
+tr:hover .omitir, .omitir:focus-visible{opacity:1}
+.omitir:hover{border-color:var(--accent); color:var(--accent-ink)}
+.omitir.ativo{opacity:1; color:var(--accent-ink); border-color:var(--accent);
+              background:var(--accent-soft); font-weight:600}
+.omitir.ativo:hover{background:var(--accent); border-color:var(--accent); color:var(--btn-primary-ink)}
+tr.omitida{background:var(--surface-2)}
+tr.omitida .abxnome, tr.omitida .c-cim, tr.omitida .c-int, tr.omitida .c-corte{opacity:.42}
 tr.omitida .abxnome{text-decoration:line-through}
-.c-fim{width:1%; padding:0 12px 0 4px; text-align:right; white-space:nowrap}
-.omitir{border:0; background:none; cursor:pointer; color:var(--ink-3); font-size:11.5px;
-        line-height:1; padding:4px 7px; border-radius:5px; opacity:0;
-        transition:opacity .12s; font-family:inherit}
-tr:hover .omitir, .omitir:focus-visible, .omitir.ativo{opacity:1}
-.omitir:hover{background:var(--surface-2); color:var(--ink)}
-.omitir.ativo{color:var(--warn-ink); background:var(--warn); font-weight:700;
-              text-transform:uppercase; letter-spacing:.03em; font-size:9.5px}
 .avisofora{display:flex; align-items:center; gap:11px; flex-wrap:wrap; margin-bottom:14px;
            border-left:3px solid var(--warn-ink); background:var(--surface-2);
            padding:9px 13px; font-size:13px; color:var(--ink-2)}
@@ -643,7 +649,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.08.31.16";
+const VERSAO_APP = "2026.08.31.17";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -1316,11 +1322,11 @@ function renderLaudo(){
        valor e a interpretação à vista — some só do que é copiado. Esconder da
        tela também deixaria a pessoa sem saber o que ela mesma tirou. */
     const btnOmitir = '<button class="omitir'+(l.omitido?" ativo":"")+'" data-omitir="'+esc(l.n)+'" '+
-      'title="'+(l.omitido ? "Fora do laudo. Clique para incluir de novo."
+      'title="'+(l.omitido ? "Está fora do laudo. Clique para incluir de novo."
                            : "Não mostrar este antimicrobiano no laudo desta amostra.")+'" '+
       'aria-pressed="'+(l.omitido?"true":"false")+'" '+
       'aria-label="'+(l.omitido?"Incluir ":"Tirar do laudo ")+esc(l.n)+'">'+
-      (l.omitido ? "fora do laudo" : "✕")+'</button>';
+      (l.omitido ? "incluir de volta" : "tirar do laudo")+'</button>';
 
     return '<tr'+(l.omitido?' class="omitida"':'')+'>'+
       '<td class="c-abx"><div class="abxrow"><span class="pendslot">'+marca+'</span>'+
@@ -1368,7 +1374,8 @@ function renderLaudo(){
     'Colar várias linhas num campo preenche a coluna para baixo. '+
     '<strong>Corte aplicado</strong> mostra qual regra decidiu — essa coluna não vai no copiar. '+
     'Para não mostrar um antimicrobiano no laudo, passe o mouse na linha dele e clique no '+
-    '<code>✕</code> no fim da linha — ele continua aqui, mas fica fora do que você copia.</p>';
+    'botão <strong>tirar do laudo</strong> no fim da linha — ele continua aqui, mas fica fora '+
+    'do que você copia.</p>';
 
   $("btnCopiar").addEventListener("click", copiar);
   $("btnNova").addEventListener("click", novaAmostra);
