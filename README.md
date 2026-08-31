@@ -70,9 +70,24 @@ devolvem todas. Guardar entre pacientes seria pior que o problema — um
 antimicrobiano sumiria do laudo para sempre porque alguém esqueceu de
 reativar, e falta de linha ninguém percebe.
 
-### Observações padrão
+### Observações do laudo
 
-68 textos de laudo (Bac 1 a Bac 71), com busca por código ou conteúdo. Clicar copia.
+Ficam **abaixo do quadro**, na própria tela do laudo: escolhe as que valem para
+aquela amostra e elas saem coladas junto quando se clica em *Copiar tabela*.
+Antes era preciso copiar o quadro, colar, voltar ao programa, achar a
+observação, copiar de novo e colar embaixo — a cada observação.
+
+Valem só para a amostra atual, como os valores: *Nova amostra* e *Limpar tudo*
+zeram.
+
+**Para editar as observações**, elas vivem numa segunda aba da mesma planilha,
+chamada exatamente `observacoes`, com as colunas `codigo` e `texto`. Na tela
+*Fonte dos cortes* há o botão **Gerar CSV das observações** e o passo a passo.
+É opcional: sem a aba valem as que vieram no programa.
+
+O `codigo` é o que amarra a observação à amostra. Mudando o código de uma
+observação já escolhida, ela aparece como não encontrada em vez de trocar de
+texto em silêncio.
 
 ### O que fica no seu computador
 
@@ -111,6 +126,10 @@ Os valores de corte vêm de **uma planilha do Google**, para que todos os comput
 | `resistente` | Corte R. Ex.: `>8` |
 | `painel` · `organismo` | Só para leitura humana |
 | `versao` *(opcional)* | Edição do BrCAST — ex.: `BrCAST 2024`. Basta **uma célula** preenchida, em qualquer linha. Aparece na barra lateral |
+| `cartao` *(opcional)* | Cartão do equipamento — ex.: `NMIC ID 471`. Uma célula por painel, em qualquer linha dele. Aparece no supratítulo |
+
+Além dessas, a planilha pode ter uma **segunda aba** chamada `observacoes`, com
+as colunas `codigo` e `texto` — veja *Observações do laudo*.
 
 ### Depois de configurado
 
