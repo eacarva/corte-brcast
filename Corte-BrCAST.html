@@ -189,7 +189,14 @@ input.cim.pendente{color:var(--warn-ink); font-style:italic}
    depois "incluir". Rótulo de estado num botão faz a pessoa achar que não há
    como desfazer. E nada de âmbar aqui: no resto do programa âmbar quer dizer
    "confira isto", e não é disso que se trata. */
-.c-fim{width:1%; padding:4px 20px 4px 16px; text-align:right; white-space:nowrap}
+/* Precisa de table.grid na frente: "table.grid td{padding:0}" tem mais
+   especificidade e engolia o espaçamento — o ícone ficava colado na borda. */
+/* Precisa de table.grid na frente: "table.grid td{padding:0}" tem mais
+   especificidade e engolia o espaçamento — o ícone ficava colado na borda.
+   11px aqui porque o botão tem 6px próprios e o ícone 1px de traço: o desenho
+   do olho acaba a 18px da borda, o mesmo respiro que o nome do antimicrobiano
+   tem do outro lado. A conta é essa, não o olho. */
+table.grid td.c-fim{width:1%; padding:4px 11px 4px 16px; text-align:right; white-space:nowrap}
 /* Fica apagado o tempo todo em vez de sumir: sumindo, ninguém descobre que
    existe; aceso o tempo todo, disputa atenção com o resultado. */
 .omitir{border:1px solid transparent; background:none; cursor:pointer; color:var(--ink-3);
@@ -652,7 +659,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.08.31.18";
+const VERSAO_APP = "2026.08.31.19";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
