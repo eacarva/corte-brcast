@@ -607,7 +607,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.08.31.11";
+const VERSAO_APP = "2026.08.31.12";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -2210,7 +2210,15 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
   // updateViaCache "none": o navegador nunca serve este script do próprio
   // cache HTTP. Sem isso ele pode adiar a checagem e a máquina ficaria numa
   // versão velha sem motivo aparente.
-  navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).catch(function(){});
+  /* O register sozinho deveria mandar o navegador conferir se o sw.js mudou,
+     mas na pratica ele espaca essas conferencias e a maquina fica parada em
+     uma versao antiga por tempo indefinido -- reproduzido aqui: tres visitas
+     seguidas, versao nova publicada, e nenhum pedido ao servidor. O update()
+     explicito pergunta toda vez. Custa um pedido condicional de poucos bytes,
+     quase sempre respondido com 304. */
+  navigator.serviceWorker.register("sw.js", {updateViaCache:"none"})
+    .then(function(reg){ return reg.update(); })
+    .catch(function(){});
 }
 
 fetch(URL_VERSAO, {cache:"no-store"})

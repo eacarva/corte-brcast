@@ -232,14 +232,37 @@
    janela do programa instalado — o que o Chrome faz logo depois de instalar,
    abrindo onde a pessoa estava — quem instalou vê a tela de download e conclui
    que deu errado. Aqui ela sai da frente e entrega o programa. */
-if(matchMedia("(display-mode: standalone)").matches ||
-   matchMedia("(display-mode: window-controls-overlay)").matches ||
-   navigator.standalone === true){
+function ehJanelaDoPrograma(){
+  return matchMedia("(display-mode: standalone)").matches ||
+         matchMedia("(display-mode: window-controls-overlay)").matches ||
+         navigator.standalone === true;
+}
+
+if(ehJanelaDoPrograma()){
   location.replace("Corte-BrCAST.html");
+}else{
+  /* Ao instalar, o Chrome não recarrega nada: ele transforma a aba aberta na
+     janela do programa. O teste acima já rodou lá atrás, com a aba ainda
+     sendo aba, e nunca mais roda — por isso a pessoa terminava a instalação
+     olhando a página de download dentro do próprio programa. Aqui a mudança
+     é ouvida no momento em que acontece. */
+  try{
+    matchMedia("(display-mode: standalone)").addEventListener("change", function(ev){
+      if(ev.matches) location.replace("Corte-BrCAST.html");
+    });
+  }catch(err){}
 }
 
 if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
-  navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).catch(function(){});
+  /* O register sozinho deveria mandar o navegador conferir se o sw.js mudou,
+     mas na pratica ele espaca essas conferencias e a maquina fica parada em
+     uma versao antiga por tempo indefinido -- reproduzido aqui: tres visitas
+     seguidas, versao nova publicada, e nenhum pedido ao servidor. O update()
+     explicito pergunta toda vez. Custa um pedido condicional de poucos bytes,
+     quase sempre respondido com 304. */
+  navigator.serviceWorker.register("sw.js", {updateViaCache:"none"})
+    .then(function(reg){ return reg.update(); })
+    .catch(function(){});
 }
 
 /* Instalar de verdade, no clique. Mandar alguém procurar um ícone na barra de
