@@ -155,9 +155,13 @@ Se o Chrome do laboratório for gerenciado pela TI, o administrador consegue
 instalar em todas as máquinas de uma vez por política, sem ninguém clicar em
 nada — vale perguntar.
 
-O botão pode não aparecer: navegador antigo, Safari, ou política que proíbe
-instalar. Nesse caso o arquivo solto continua sendo o caminho, e é exatamente
-para isso que ele existe.
+O botão de instalar só aparece quando a instalação é mesmo possível. Ele **não**
+aparece em janela anônima (o Chrome não instala nada ali), no Firefox do
+computador (não instala programas assim), nem quando o app já está instalado.
+Testar em anônima dá um falso negativo — foi o primeiro engano ao verificar isto.
+
+Se nenhum caminho funcionar, o arquivo solto continua sendo a saída, e é
+exatamente para isso que ele existe.
 
 ### Atalho com ícone (para o arquivo solto)
 
