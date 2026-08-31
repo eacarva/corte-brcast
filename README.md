@@ -117,7 +117,8 @@ Os valores de corte vêm de **uma planilha do Google**, para que todos os comput
 O arquivo já vem com as duas abas prontas — `cortes` e `observacoes` — e com os
 cortes marcados como texto. Não há nada para criar, nomear ou formatar.
 
-> **Sobre a coluna do meio.** Antes o programa gerava CSV, e havia um passo que
+> **Sobre a coluna do meio.** Confirmado na prática: com o `.xlsx` não é preciso
+> formatar nada. Antes o programa gerava CSV, e havia um passo que
 > **não podia ser pulado**:
 > formatar as colunas de corte como texto. A coluna do meio mistura números
 > (`4`, `0,5`) com texto (`≤8`, `2 a 4`), e o Google decidia que a coluna era

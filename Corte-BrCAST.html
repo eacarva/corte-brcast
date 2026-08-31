@@ -212,6 +212,29 @@ tr:hover .omitir{opacity:.75}
 tr.omitida{background:var(--surface-2)}
 tr.omitida .abxnome, tr.omitida .c-cim, tr.omitida .c-int, tr.omitida .c-corte{opacity:.42}
 tr.omitida .abxnome{text-decoration:line-through}
+/* Ajuda que abre e fecha. Mesma forma para todos os blocos: a pessoa aprende
+   uma vez onde clicar e vale para a tela inteira. */
+.ajuda{background:var(--surface); border:1px solid var(--rule); border-radius:9px;
+       box-shadow:var(--shadow); margin-top:10px; overflow:hidden}
+.ajuda > summary{cursor:pointer; padding:13px 18px; font-weight:600; font-size:14px;
+                 color:var(--ink); list-style:none; display:flex; align-items:center; gap:9px;
+                 background:var(--surface-2); border-bottom:1px solid transparent}
+.ajuda > summary::-webkit-details-marker{display:none}
+.ajuda > summary::before{content:"▸"; color:var(--ink-3); font-size:11px; transition:transform .12s}
+.ajuda[open] > summary{border-bottom-color:var(--rule)}
+.ajuda[open] > summary::before{transform:rotate(90deg)}
+.ajuda > summary:hover{color:var(--accent-ink)}
+.ajuda-corpo{padding-bottom:2px}
+.ajuda-sub{margin:13px 18px 0; font-size:12.5px; color:var(--ink-2); max-width:76ch}
+.ajuda .tablewrap{margin-top:4px}
+
+/* Desligar é a saída, não um passo: fica separado do que confirma, e explicado. */
+.fonte-saida{display:flex; align-items:center; gap:11px; flex-wrap:wrap; margin-top:12px;
+             padding-top:12px; border-top:1px solid var(--rule)}
+.fonte-saida span{font-size:12.5px; color:var(--ink-3)}
+.btn.ghost.perigo{color:var(--res-ink)}
+.btn.ghost.perigo:hover{background:var(--res); color:var(--res-ink); border-color:transparent}
+
 .obsbox{margin-top:16px}
 .obscorpo{padding:14px 18px}
 .obsvazio{margin:0 0 12px; font-size:13px; color:var(--ink-3)}
@@ -720,7 +743,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.01.8";
+const VERSAO_APP = "2026.09.02";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -2101,10 +2124,26 @@ function renderSobre(){
     '</div>';
 }
 
+/* Ajuda em bloco que abre e fecha, todos iguais. A tela tinha oito painéis
+   abertos e quase três telas de rolagem: quem já configurou passa por tudo
+   isso para ver uma data, e quem está configurando não sabe onde olhar
+   primeiro. Fechados por padrão quando a planilha já funciona; abertos no
+   primeiro uso, que é quando a instrução é o conteúdo principal. */
+function ajuda(titulo, corpo, aberto){
+  return '<details class="ajuda"'+(aberto ? " open" : "")+'>'+
+    '<summary>'+esc(titulo)+'</summary>'+
+    '<div class="ajuda-corpo">'+corpo+'</div>'+
+  '</details>';
+}
+
 function renderFonte(){
+  /* Com planilha ligada, a ação do dia a dia é sincronizar — ela leva o peso.
+     Sem planilha, ainda não há o que sincronizar e o começo é gerar o arquivo. */
   $("actions").innerHTML =
-    (fonte ? '<button class="btn" id="btnSinc">Sincronizar agora</button>' : "")+
-    '<button class="btn" id="btnXLSX">Gerar planilha</button>';
+    (fonte
+      ? '<button class="btn ghost" id="btnXLSX">Gerar planilha</button>'+
+        '<button class="btn primary" id="btnSinc">Sincronizar agora</button>'
+      : '<button class="btn primary" id="btnXLSX">Gerar planilha</button>');
   const st = fonteStat;
   const erros = (st.erro && st.erro.length)
     ? '<ul class="erros">'+st.erro.map(function(e){ return '<li>'+esc(e)+'</li>'; }).join("")+'</ul>'
@@ -2122,9 +2161,15 @@ function renderFonte(){
         '<div class="fonte-campo">'+
           '<input id="fonteURL" spellcheck="false" placeholder="https://docs.google.com/spreadsheets/d/…/edit" '+
             'value="'+(fonte ? esc(urlPlanilha(fonte)) : "")+'" aria-label="Link da planilha">'+
-          '<button class="btn" id="btnSalvar">Salvar e testar</button>'+
+          '<button class="btn primary" id="btnSalvar">Salvar e testar</button>'+
         '</div>'+
-        (fonte ? '<button class="btn ghost" id="btnDesligar">Desligar sincronização</button>' : "")+
+        /* Desligar fica na mesma linha e do lado oposto do botão que confirma:
+           é a saída, não um passo do caminho. Solta embaixo, sem forma de
+           botão, parecia link quebrado — e é uma ação destrutiva. */
+        (fonte ? '<div class="fonte-saida">'+
+                   '<button class="btn ghost perigo" id="btnDesligar">Desligar sincronização</button>'+
+                   '<span>Volta aos cortes que vieram no arquivo.</span>'+
+                 '</div>' : "")+
       '</div>'+
     '</div>'+
     '<div class="panel" style="margin-top:12px">'+
@@ -2144,10 +2189,9 @@ function renderFonte(){
     '</div>'+
     '<p class="hint">O programa lê a planilha toda vez que abre. Sem internet, usa a última cópia boa e avisa a data. '+
     'Os cortes de fábrica só entram se nunca houve uma sincronização bem-sucedida neste computador.</p>'+
-    '<div class="panel" style="margin-top:12px">'+
-      '<div class="refhead"><strong>Como apontar para outra planilha</strong>'+
-      '<p>O arquivo sai sem planilha configurada. Faça isto uma vez em cada computador, '+
-      'colando o link da planilha do laboratório.</p></div>'+
+    ajuda('Como apontar para outra planilha',
+      '<p class="ajuda-sub">O arquivo sai sem planilha configurada. Faça isto uma vez em cada '+
+      'computador, colando o link da planilha do laboratório.</p>'+
       '<div style="padding:2px 14px 14px">'+
         '<ol class="passos">'+
           '<li><strong>Abra a planilha</strong> no Google Sheets e <strong>clique na aba dos cortes</strong>. '+
@@ -2159,20 +2203,9 @@ function renderFonte(){
             'igual a um visitante anônimo.</li>'+
           '<li><strong>Copie o endereço da barra do navegador</strong> — o que contém '+
             '<code>/d/</code> e termina em <code>/edit</code>. Serve também o link do botão Copiar link.</li>'+
-          '<li><strong>Formate as três colunas de corte como texto — este passo não pode ser pulado.</strong> '+
-            'Selecione as colunas <code>sensivel_dose_padrao</code>, <code>aumentando_exposicao</code> e '+
-            '<code>resistente</code> inteiras e use <strong>Formatar ▸ Número ▸ Texto simples</strong>. '+
-            'Faça isso <em>antes</em> de colar os valores ou importar o CSV.'+
-            '<div class="cuidado" style="margin-top:8px"><b>Por quê.</b> '+
-            'A coluna do meio mistura números (<code>4</code>, <code>0,5</code>) com texto '+
-            '(<code>≤8</code>, <code>2 a 4</code>). Se ela não estiver marcada como texto, o Google decide '+
-            'sozinho que a coluna é numérica e <b>deixa de enviar todo valor escrito com texto</b> — na nossa '+
-            'tabela são 94 cortes que não chegariam, sem nenhuma mensagem de erro. '+
-            'Os valores continuam na planilha; o problema é só no envio. Por isso <b>basta formatar a coluna '+
-            'como texto para eles voltarem</b>, sem precisar importar nada de novo. '+
-            'Vale também para quem for <b>editar ou acrescentar</b> um antimicrobiano depois: com a coluna '+
-            'já como texto, digitar <code>4</code> ou <code>2 a 4</code> funciona nos dois casos. '+
-            'O programa confere isso a cada sincronização e recusa em vez de perder corte calado.</div></li>'+
+          '<li>Se a planilha veio do botão <strong>Gerar planilha</strong>, não há nada para formatar: as colunas de corte já saem como texto.'+
+            '<div class="cuidado" style="margin-top:8px"><b>Planilha montada à mão?</b> Selecione <code>sensivel_dose_padrao</code>, <code>aumentando_exposicao</code> e <code>resistente</code> e use <strong>Formatar ▸ Número ▸ Texto simples</strong>. '+
+            'A coluna do meio mistura número (<code>4</code>) com texto (<code>2 a 4</code>); sem isso o Google trata a coluna como numérica e deixa de enviar o que está escrito com texto. O programa recusa a sincronização nesse caso, em vez de perder corte calado.</div></li>'+
           '<li><strong>Cole no campo acima</strong> e clique em <strong>Salvar e testar</strong>.</li>'+
         '</ol>'+
         '<div class="cuidado"><b>Antes de compartilhar, confira as abas.</b> '+
@@ -2181,11 +2214,10 @@ function renderFonte(){
           'Dado de paciente, não: se houver qualquer aba com resultado de amostra, '+
           'faça uma planilha separada só com os cortes.</div>'+
       '</div>'+
-    '</div>'+
-    '<div class="panel" style="margin-top:12px">'+
-      '<div class="refhead"><strong>O que a planilha precisa ter</strong>'+
-      '<p>A primeira linha tem que ser exatamente este cabeçalho, nesta grafia. '+
-      'Uma linha por antimicrobiano.</p></div>'+
+      '', !fonte)+
+    ajuda('O que a planilha precisa ter',
+      '<p class="ajuda-sub">A primeira linha tem que ser exatamente este cabeçalho, nesta '+
+      'grafia. Uma linha por antimicrobiano.</p>'+
       '<div class="tablewrap"><table class="grid"><tbody>'+
         '<tr><td><code>organismo_id</code></td><td>Chave que liga a linha ao microrganismo. '+
           '<strong>Nunca alterar.</strong> Vale proteger a coluna no Sheets.</td></tr>'+
@@ -2202,9 +2234,8 @@ function renderFonte(){
           '<strong>Basta preencher uma célula</strong>, em qualquer linha da coluna; o programa procura a '+
           'primeira que estiver preenchida. Quando sair uma revisão nova do BrCAST, é esse único campo que muda.</td></tr>'+
       '</tbody></table></div>'+
-    '</div>'+
-    '<div class="panel" style="margin-top:12px">'+
-      '<div class="refhead"><strong>Se der errado</strong></div>'+
+      '', !fonte)+
+    ajuda('Se der errado',
       '<div class="tablewrap"><table class="grid"><tbody>'+
         '<tr><td>"Não consegui abrir a planilha"</td>'+
           '<td>O compartilhamento não está em <strong>Qualquer pessoa com o link</strong>. '+
@@ -2212,7 +2243,8 @@ function renderFonte(){
         '<tr><td>"Faltam colunas na planilha"</td>'+
           '<td>O link aponta para a aba errada, ou a primeira linha não é o cabeçalho.</td></tr>'+
         '<tr><td>"a coluna … está como número"</td>'+
-          '<td>Selecione a coluna inteira na planilha e use <strong>Formatar ▸ Número ▸ Texto simples</strong>, '+
+          '<td>Só acontece com planilha montada à mão. Selecione a coluna e use '+
+          '<strong>Formatar ▸ Número ▸ Texto simples</strong>, '+
           'depois <strong>Sincronizar agora</strong>. Não precisa reimportar: os valores estão na planilha, '+
           'só não estavam sendo enviados. O programa recusa nesse caso em vez de perder cortes em silêncio.</td></tr>'+
         '<tr><td>"microrganismo desconhecido"</td>'+
@@ -2224,15 +2256,14 @@ function renderFonte(){
         '<tr><td>Sem internet</td>'+
           '<td>Continua funcionando com a última cópia boa, e a barra no topo mostra de quando ela é.</td></tr>'+
       '</tbody></table></div>'+
-    '</div>'+
+      '', !fonte)+
     '<p class="hint">Cada computador precisa ter o arquivo e o link colado uma vez. '+
     'Feito isso, ele sincroniza sozinho toda vez que abrir.</p>'+
     painelObsFonteHTML()+
-    '<div class="panel" style="margin-top:12px">'+
-      '<div class="refhead"><strong>Dar o sistema para outro laboratório</strong>'+
-      '<p>O arquivo já vai com todos os cortes dentro, então funciona assim que é aberto, '+
-      'mesmo antes de qualquer link ser colado. Para o outro laboratório ter a própria fonte '+
-      'sincronizada:</p></div>'+
+    ajuda('Dar o sistema para outro laboratório',
+      '<p class="ajuda-sub">O arquivo já vai com todos os cortes dentro, então funciona assim '+
+      'que é aberto, mesmo antes de qualquer link ser colado. Para o outro laboratório ter a '+
+      'própria fonte sincronizada:</p>'+
       '<div style="padding:2px 14px 14px">'+
         '<ol class="passos">'+
           '<li>Clique em <strong>Gerar planilha</strong>, aqui em cima. Sai um '+
@@ -2247,7 +2278,7 @@ function renderFonte(){
         '<div class="cuidado">A partir daí os dois laboratórios ficam <b>independentes</b>: '+
         'cada um com a sua planilha, e mudança de um não mexe no outro.</div>'+
       '</div>'+
-    '</div>';
+      '', !fonte);
 
   const bx = $("btnXLSX");
   if(bx) bx.addEventListener("click", exportarPlanilha);
@@ -2647,12 +2678,11 @@ function painelObsFonteHTML(){
     linha = '<span class="dot2">Usando as '+listaObs().length+' observações que vieram no programa. '+
             'Nenhuma aba <code>'+ABA_OBS+'</code> encontrada na planilha.</span>';
 
-  return '<div class="panel" style="margin-top:12px">'+
-    '<div class="refhead"><strong>Observações do laudo</strong>'+
-    '<p>Ficam numa segunda aba da mesma planilha, para poderem mudar sem mexer no programa. '+
-    'É opcional: sem ela valem as que vieram de fábrica.</p></div>'+
-    '<div style="padding:2px 14px 14px">'+
-      '<p class="nota" style="margin:0 0 10px">'+linha+'</p>'+
+  return ajuda('Observações do laudo',
+    '<p class="ajuda-sub">Ficam numa segunda aba da mesma planilha, para poderem mudar sem '+
+    'mexer no programa. É opcional: sem ela valem as que vieram de fábrica.</p>'+
+    '<div style="padding:2px 18px 14px">'+
+      '<p class="nota" style="margin:10px 0">'+linha+'</p>'+
       '<ol class="passos">'+
         '<li>Clique em <strong>Gerar planilha</strong>, aqui em cima. Sai um '+
           '<code>corte-brcast.xlsx</code> já com as duas abas prontas: '+
@@ -2665,8 +2695,7 @@ function painelObsFonteHTML(){
       '<div class="cuidado">O <b>código</b> é o que amarra a observação ao laudo. '+
       'Mudando o código de uma observação já escolhida numa amostra, ela aparece como '+
       'não encontrada em vez de trocar de texto em silêncio.</div>'+
-    '</div>'+
-  '</div>';
+    '</div>', !fonte);
 }
 
 /* As mesmas linhas que vão para o CSV, sem virar texto: o xlsx recebe os
