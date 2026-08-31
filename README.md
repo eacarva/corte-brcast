@@ -117,13 +117,20 @@ Os valores de corte vêm de **uma planilha do Google**, para que todos os comput
 O arquivo já vem com as duas abas prontas — `cortes` e `observacoes` — e com os
 cortes marcados como texto. Não há nada para criar, nomear ou formatar.
 
-> Antes o programa gerava CSV, e havia um passo que **não podia ser pulado**:
+> **Sobre a coluna do meio.** Antes o programa gerava CSV, e havia um passo que
+> **não podia ser pulado**:
 > formatar as colunas de corte como texto. A coluna do meio mistura números
 > (`4`, `0,5`) com texto (`≤8`, `2 a 4`), e o Google decidia que a coluna era
 > numérica e **deixava de enviar todo valor escrito com texto** — 94 cortes que
 > não chegariam. O programa detecta e recusa a sincronização nesse caso, então
 > nunca se perdeu corte calado; mas era um passo fácil de esquecer. O `.xlsx`
-> já marca cada célula como texto, e o problema deixou de existir.
+> declara cada célula **e cada coluna** com formato Texto, então o passo manual
+> não é mais necessário — inclusive para o corte que você digitar depois, numa
+> célula hoje vazia.
+>
+> A rede de segurança continua no lugar de qualquer forma: se a coluna chegar
+> como número, o programa **recusa a sincronização** e diz o que fazer, em vez
+> de aceitar meia tabela.
 
 > **"Qualquer pessoa com o link" libera a planilha inteira**, não só a aba dos cortes. Valores de corte e nomes de antimicrobiano são informação técnica pública do BrCAST e podem ficar assim. Dado de paciente, não — se houver qualquer aba com resultado de amostra, faça uma planilha separada.
 

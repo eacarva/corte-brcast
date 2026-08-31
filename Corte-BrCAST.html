@@ -720,7 +720,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.01.6";
+const VERSAO_APP = "2026.09.01.7";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -2536,13 +2536,24 @@ function abaXML(linhas){
   const rows = linhas.map(function(l, y){
     const cels = l.map(function(v, x){
       if(v == null || v === "") return "";
-      return '<c r="'+colunaLetra(x)+(y+1)+'" t="inlineStr"><is><t xml:space="preserve">'+
+      /* s="1" é o estilo com formato "@", ou seja Texto simples. Marcar só o
+         tipo da célula não basta: o Google pode reformatar a coluna ao
+         importar, e aí "4" e "0,5" na coluna do meio virariam número enquanto
+         "2 a 4" ficaria texto — o mesmo estrago que o CSV fazia. Com o formato
+         declarado, a coluna chega na planilha já como Texto simples. */
+      return '<c r="'+colunaLetra(x)+(y+1)+'" s="1" t="inlineStr"><is><t xml:space="preserve">'+
              xmlEsc(v)+'</t></is></c>';
     }).join("");
     return '<row r="'+(y+1)+'">'+cels+'</row>';
   }).join("");
+  /* Formata a coluna inteira como Texto, não só as células que já têm valor.
+     É o que protege o que ainda vai ser digitado: sem isso, um corte novo
+     escrito numa célula vazia — "4" na coluna do meio — entraria como número e
+     o problema voltaria pela edição, que é justamente onde a planilha vive. */
+  const largura = Math.max(1, (linhas[0] || [""]).length);
   return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
     '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
+    '<cols><col min="1" max="'+largura+'" width="20" customWidth="1" style="1"/></cols>'+
     '<sheetData>'+rows+'</sheetData></worksheet>';
 }
 
@@ -2554,6 +2565,7 @@ function gerarXLSX(abas){
       '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
       '<Default Extension="xml" ContentType="application/xml"/>'+
       '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+
+      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'+
       abas.map(function(a, i){
         return '<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>';
       }).join("")+'</Types>'},
@@ -2569,8 +2581,26 @@ function gerarXLSX(abas){
       '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
       abas.map(function(a, i){
         return '<Relationship Id="rId'+(i+1)+'" Type="'+REL+'/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>';
-      }).join("")+'</Relationships>'}
+      }).join("")+
+      '<Relationship Id="rId'+(abas.length+1)+'" Type="'+REL+'/styles" Target="styles.xml"/>'+
+      '</Relationships>'}
   ];
+  /* Um estilo só, e é o que interessa: formato "@" = Texto simples. */
+  arquivos.push({nome:"xl/styles.xml", txt:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
+    '<numFmts count="1"><numFmt numFmtId="164" formatCode="@"/></numFmts>'+
+    '<fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts>'+
+    '<fills count="2"><fill><patternFill patternType="none"/></fill>'+
+    '<fill><patternFill patternType="gray125"/></fill></fills>'+
+    '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'+
+    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'+
+    '<cellXfs count="2">'+
+      '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'+
+      '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'+
+    '</cellXfs>'+
+    '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'+
+    '</styleSheet>'});
+
   abas.forEach(function(a, i){
     arquivos.push({nome:"xl/worksheets/sheet"+(i+1)+".xml", txt:abaXML(a.linhas)});
   });
