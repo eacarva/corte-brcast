@@ -1,0 +1,8 @@
+# Configuração de ferramenta de quem desenvolve, não do programa.
+# O repositório é o que o laboratório recebe: o arquivo, o site e a documentação.
+.codex/
+.agents/
+.claude/settings.local.json
+
+# macOS
+.DS_Store
