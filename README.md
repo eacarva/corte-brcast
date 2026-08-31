@@ -77,6 +77,9 @@ aquela amostra e elas saem coladas junto quando se clica em *Copiar tabela*.
 Antes era preciso copiar o quadro, colar, voltar ao programa, achar a
 observação, copiar de novo e colar embaixo — a cada observação.
 
+Saem como texto corrido logo abaixo do quadro, sem moldura — observação é
+texto de laudo, não mais uma tabela para quem lê o resultado.
+
 Valem só para a amostra atual, como os valores: *Nova amostra* e *Limpar tudo*
 zeram.
 

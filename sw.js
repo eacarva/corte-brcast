@@ -12,7 +12,7 @@
    silêncio, sem erro nenhum na tela. Por isso todo pedido para fora passa
    direto, sem tocar no cache. */
 
-const VERSAO = "2026.09.01";
+const VERSAO = "2026.09.01.2";
 const CACHE  = "corte-brcast-" + VERSAO;
 
 /* O que a máquina precisa ter no disco para abrir sem rede. */

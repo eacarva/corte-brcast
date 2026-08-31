@@ -701,7 +701,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.01";
+const VERSAO_APP = "2026.09.01.2";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -2217,7 +2217,7 @@ function tabelaHTML(){
   const B = "border:1px solid #000000;padding:1px 4px;";
   const F = "font-family:Arial,Helvetica,sans-serif;font-size:9pt;color:#000000;";
   let h = '<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;'+F+'">'+
-    '<tr><td width="380" style="'+B+F+'">Microrganismo:&nbsp; '+esc(orgAtual.nome)+'</td>'+
+    '<tr><td width="380" style="'+B+F+'">Microrganismo:&nbsp; '+nomeHTML(orgAtual.nome)+'</td>'+
     '<td width="70" style="'+B+F+'"></td><td width="185" style="'+B+F+'"></td></tr>'+
     '<tr><td style="'+B+F+'font-weight:bold;">ANTIMICROBIANOS</td>'+
     '<td style="'+B+F+'font-weight:bold;text-align:center;">CIM (mg/L)</td>'+
@@ -2240,14 +2240,13 @@ function tabelaHTML(){
      novo e colar embaixo — quatro passos por observação, num laudo por vez. */
   const obs = obsDaAmostra();
   if(obs.length){
-    h += '<br><table cellspacing="0" cellpadding="0" style="border-collapse:collapse;'+F+'">';
+    // Texto corrido embaixo do quadro, sem moldura: observação é texto de
+    // laudo, não mais uma tabela para quem lê o resultado.
     obs.forEach(function(cod){
       const o = acharObs(cod);
       if(!o) return;
-      h += '<tr><td width="635" style="'+B+F+'">'+
-           esc(o.t).replace(/\n/g, "<br>")+'</td></tr>';
+      h += '<p style="'+F+'margin:10px 0 0;">'+esc(o.t).replace(/\n/g, "<br>")+'</p>';
     });
-    h += "</table>";
   }
   return h;
 }
