@@ -792,8 +792,13 @@ let buscaOrg = "";   // busca da trilha
    do disco é bloqueado, <script> passa. Por isso o arquivo continua
    funcionando com duplo clique, sem precisar de servidor.
    ========================================================================== */
-const COLUNAS = ["painel","organismo_id","organismo","ordem","tipo",
-                 "antimicrobiano","sensivel_dose_padrao","aumentando_exposicao","resistente"];
+/* A planilha se identifica por nome legível. Antes trazia organismo_id
+   ("entero_urina__escherichia_coli") e painel ("Enterobactérias · Urina") —
+   a mesma informação duas vezes, uma em código que ninguém digita sem errar e
+   outra com dois campos grudados numa célula. Agora são três colunas, cada
+   uma com uma coisa, todas preenchíveis por quem lauda. */
+const COLUNAS = ["familia","material","organismo","ordem","tipo","antimicrobiano",
+                 "sensivel_dose_padrao","aumentando_exposicao","resistente"];
 const TIPOS = {cim:"cim", triagem:"triagem", titulo:"tit"};
 const CORTES = ["sensivel_dose_padrao","aumentando_exposicao","resistente"];
 /* Edição do BrCAST. Vive na planilha, junto dos cortes que ela descreve — no
@@ -819,7 +824,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.02.8";
+const VERSAO_APP = "2026.09.03";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -966,7 +971,7 @@ function buscarPlanilha(f, ok, falha){
       const faltam = COLUNAS.filter(function(n){ return cols.indexOf(n) < 0; });
       if(faltam.length)
         return falha("Faltam colunas na planilha: "+faltam.join(", ")+
-                     ". A primeira linha tem que ser exatamente o cabeçalho do CSV original.");
+                     ". A primeira linha tem que ser o cabeçalho gerado pelo botão Gerar planilha.");
       const idx = {};
       COLUNAS.forEach(function(n){ idx[n] = cols.indexOf(n); });
 
@@ -994,7 +999,7 @@ function buscarPlanilha(f, ok, falha){
         COLUNAS.forEach(function(n){ o[n] = celula((r.c || [])[idx[n]]); });
         if(ic >= 0) o.cartao = celula((r.c || [])[ic]);
         return o;
-      }).filter(function(o){ return o.organismo_id || o.antimicrobiano; });
+      }).filter(function(o){ return o.organismo || o.antimicrobiano; });
 
       // primeira célula preenchida, em qualquer linha: sobrevive a reordenação
       const iv = cols.indexOf(COL_VERSAO);
@@ -1020,14 +1025,104 @@ function buscarPlanilha(f, ok, falha){
 /* Monta cortes e listas a partir das linhas. Recusa tudo se qualquer linha
    estiver ruim: aplicar metade deixaria microrganismo sem antibiótico, e um
    antibiótico que some da tela é mais perigoso que uma sincronização falha. */
+/* Identificar o microrganismo por nome legível, e não pela chave técnica.
+
+   O organismo_id existe por um bom motivo: ele é o que amarra o corte à
+   bactéria, e já foi posicional — "entero_urina__0" — o que fazia os cortes
+   grudarem no microrganismo errado quando os dados eram regerados noutra
+   ordem, sem erro nenhum. Trocar para nome resolveu o perigo e criou o
+   atrito: quem acrescenta uma linha na planilha precisa digitar
+   "entero_urina__escherichia_coli" sem errar um sublinhado.
+
+   Agora família, material e organismo — que já são colunas legíveis — bastam.
+   A chave continua existindo por dentro; ninguém precisa vê-la.
+
+   A normalização é deliberadamente conservadora: acento, caixa e espaço não
+   importam, e nada além disso. "E. coli" NÃO casa com "Escherichia coli", e
+   empate nunca é resolvido no palpite — recusa. Casar errado aqui é o único
+   erro que este programa não pode cometer em silêncio. */
+function chaveTexto(t){
+  return semAcento(String(t == null ? "" : t)).toLowerCase()
+    .replace(/\s+/g, " ").trim();
+}
+
+let INDICE_ORGS = null;
+function indiceOrgs(){
+  if(INDICE_ORGS) return INDICE_ORGS;
+  INDICE_ORGS = [];
+  PANELS.forEach(function(p){
+    p.orgs.forEach(function(o){
+      INDICE_ORGS.push({id:o.id, nome:o.nome, fam:p.fam, mat:p.mat,
+                        k:chaveTexto(p.fam)+"|"+chaveTexto(p.mat)+"|"+chaveTexto(o.nome)});
+    });
+  });
+  return INDICE_ORGS;
+}
+
+/* Distância de edição, limitada ao que é plausível como erro de digitação.
+   Nada disso escolhe nada: serve só para a mensagem sugerir um nome. */
+function distancia(a, b){
+  const m = a.length, n = b.length;
+  if(Math.abs(m - n) > 3) return 99;
+  let ant = [], atual = [];
+  for(let j = 0; j <= n; j++) ant[j] = j;
+  for(let i = 1; i <= m; i++){
+    atual = [i];
+    for(let j = 1; j <= n; j++){
+      atual[j] = Math.min(ant[j] + 1, atual[j-1] + 1,
+                          ant[j-1] + (a.charAt(i-1) === b.charAt(j-1) ? 0 : 1));
+    }
+    ant = atual;
+  }
+  return ant[n];
+}
+
+function maisParecido(alvo, lista){
+  let melhor = null, menor = 99;
+  lista.forEach(function(o){
+    const d = distancia(alvo, chaveTexto(o.nome));
+    if(d < menor){ menor = d; melhor = o.nome; }
+  });
+  // até três letras de diferença ainda é erro de digitação; além disso é outro nome
+  return menor <= 3 ? melhor : null;
+}
+
+/* Devolve {id} quando é inequívoco, ou {erro} dizendo o que houve. */
+function acharOrganismo(familia, material, organismo){
+  const alvo = chaveTexto(familia)+"|"+chaveTexto(material)+"|"+chaveTexto(organismo);
+  const achados = indiceOrgs().filter(function(o){ return o.k === alvo; });
+  if(achados.length === 1) return {id:achados[0].id};
+  if(achados.length > 1)
+    return {erro:'"'+familia+" · "+material+" · "+organismo+'" bate com mais de um painel. '+
+                 "Nada foi aplicado: corrija a planilha para o nome ficar único."};
+
+  /* Erro que ensina em vez de recusar seco. Compara só pelo nome do organismo
+     para sugerir onde ele existe de fato. */
+  const kOrg = chaveTexto(organismo);
+  const mesmosNomes = indiceOrgs().filter(function(o){ return chaveTexto(o.nome) === kOrg; });
+  if(mesmosNomes.length)
+    return {erro:'"'+organismo+'" não existe em '+familia+" · "+material+
+                 ". Existe em: "+mesmosNomes.map(function(o){ return o.fam+" · "+o.mat; }).join("; ")+"."};
+
+  /* Uma letra trocada é o erro mais provável de quem digita nome científico.
+     Recusar sem dizer qual seria o nome certo obriga a pessoa a caçar a grafia
+     numa lista de 31 — e ela não sabe se errou o organismo ou o painel. */
+  const perto = maisParecido(kOrg, indiceOrgs().filter(function(o){
+    return chaveTexto(o.fam) === chaveTexto(familia) && chaveTexto(o.mat) === chaveTexto(material);
+  }));
+  return {erro:"não conheço "+(organismo ? '"'+organismo+'"' : "esse microrganismo")+
+               " em "+familia+" · "+material+
+               (perto ? '. Era "'+perto+'"?' : ".")};
+}
+
 function montarConfig(linhas){
   const refsN = {}, listasN = {}, cartoesN = {}, erros = [];
   if(!linhas.length) erros.push("A planilha está vazia.");
   linhas.forEach(function(r, i){
     const ln = i + 2;   // +1 do cabeçalho, +1 porque planilha conta de 1
-    const oid = r.organismo_id;
-    const alvo = POR_ID[oid] ? oid : IDS_LEGADO[oid];
-    if(!alvo || !POR_ID[alvo]){ erros.push("linha "+ln+': microrganismo desconhecido "'+oid+'"'); return; }
+    const acho = acharOrganismo(r.familia, r.material, r.organismo);
+    if(acho.erro){ erros.push("linha "+ln+": "+acho.erro); return; }
+    const alvo = acho.id;
     const t = TIPOS[r.tipo];
     if(!t){ erros.push("linha "+ln+': tipo inválido "'+r.tipo+'" (use cim, triagem ou titulo)'); return; }
     const nome = r.antimicrobiano;
@@ -2528,18 +2623,24 @@ function renderFonte(){
       '</div>'+
       '')+
     ajuda('O que a planilha precisa ter',
-      '<p class="ajuda-sub">A primeira linha tem que ser exatamente este cabeçalho, nesta '+
-      'grafia. Uma linha por antimicrobiano.</p>'+
+      '<p class="ajuda-sub">A primeira linha tem que ser exatamente este cabeçalho, nesta grafia. '+
+      'Uma linha por antimicrobiano. As três primeiras colunas dizem de quem é o corte — juntas, '+
+      'têm que apontar para um painel só.</p>'+
       '<div class="tablewrap"><table class="grid"><tbody>'+
-        '<tr><td><code>organismo_id</code></td><td>Chave que liga a linha ao microrganismo. '+
-          '<strong>Nunca alterar.</strong> Vale proteger a coluna no Sheets.</td></tr>'+
+        '<tr><td><code>familia</code></td><td>Grupo do painel — <code>Enterobactérias</code>, '+
+          '<code>Staphylococcus</code>… Escreva igual ao que aparece na barra lateral.</td></tr>'+
+        '<tr><td><code>material</code></td><td><code>Urina</code>, <code>Outros materiais</code>, '+
+          '<code>Todos os materiais</code>.</td></tr>'+
+        '<tr><td><code>organismo</code></td><td>Nome do microrganismo por extenso — '+
+          '<code>Escherichia coli</code>. Acento e maiúscula não importam; abreviação sim: '+
+          '<code>E. coli</code> não vale.</td></tr>'+
         '<tr><td><code>ordem</code></td><td>Posição da linha na tabela do laudo.</td></tr>'+
         '<tr><td><code>tipo</code></td><td><code>cim</code>, <code>triagem</code> ou <code>titulo</code>.</td></tr>'+
         '<tr><td><code>antimicrobiano</code></td><td>Nome que aparece no laudo.</td></tr>'+
         '<tr><td><code>sensivel_dose_padrao</code></td><td>Corte S. Ex.: <code>≤8</code></td></tr>'+
         '<tr><td><code>aumentando_exposicao</code></td><td>Faixa intermediária. Ex.: <code>2 a 4</code> ou <code>4</code></td></tr>'+
         '<tr><td><code>resistente</code></td><td>Corte R. Ex.: <code>&gt;8</code></td></tr>'+
-        '<tr><td><code>painel</code> · <code>organismo</code></td><td>Só para leitura humana.</td></tr>'+
+
         '<tr><td><code>versao</code><br><em style="color:var(--ink-3);font-size:11.5px">opcional</em></td>'+
           '<td>Edição do BrCAST que estes cortes seguem — por exemplo <code>BrCAST 2024</code>. '+
           'Aparece embaixo do nome do programa, na barra lateral. '+
@@ -3054,17 +3155,15 @@ function painelObsFonteHTML(){
    uma célula com quebra de linha estourar a coluna. */
 function linhasCortes(){
   const TIPO = {cim:"cim", triagem:"triagem", tit:"titulo"};
-  const L = [["painel","organismo_id","organismo","ordem","tipo","antimicrobiano",
-              "sensivel_dose_padrao","aumentando_exposicao","resistente", COL_VERSAO, COL_CARTAO]];
+  const L = [COLUNAS.concat([COL_VERSAO, COL_CARTAO])];
   let versaoPendente = versaoCortes;
   PANELS.forEach(function(p){
-    const painel = p.fam+" · "+p.mat;
     let cartaoPendente = cartaoDe(p);
     p.orgs.forEach(function(o){
       rowsDe(o).forEach(function(row, i){
         const r = (row.t === "cim") ? ((refs[o.id] || {})[row.n] || {sdp:"",sae:"",res:""})
                                     : {sdp:"",sae:"",res:""};
-        L.push([painel, o.id, o.nome, String(i+1), TIPO[row.t] || row.t, row.n,
+        L.push([p.fam, p.mat, o.nome, String(i+1), TIPO[row.t] || row.t, row.n,
                 r.sdp, r.sae, r.res, versaoPendente, cartaoPendente]);
         versaoPendente = ""; cartaoPendente = "";
       });

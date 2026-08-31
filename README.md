@@ -153,14 +153,15 @@ cortes marcados como texto. Não há nada para criar, nomear ou formatar.
 
 | Coluna | Para que serve |
 |---|---|
-| `organismo_id` | Liga a linha ao microrganismo. **Nunca alterar** — vale proteger a coluna |
+| `familia` | Grupo do painel — `Enterobactérias`, `Staphylococcus`… |
+| `material` | `Urina`, `Outros materiais`, `Todos os materiais` |
+| `organismo` | Nome por extenso — `Escherichia coli`. Acento e maiúscula não importam; abreviação sim: `E. coli` não vale |
 | `ordem` | Posição da linha na tabela do laudo |
 | `tipo` | `cim`, `triagem` ou `titulo` |
 | `antimicrobiano` | Nome que aparece no laudo |
 | `sensivel_dose_padrao` | Corte S. Ex.: `≤8` |
 | `aumentando_exposicao` | Faixa intermediária. Ex.: `2 a 4` ou `4` |
 | `resistente` | Corte R. Ex.: `>8` |
-| `painel` · `organismo` | Só para leitura humana |
 | `versao` *(opcional)* | Edição do BrCAST — ex.: `BrCAST 2024`. Basta **uma célula** preenchida, em qualquer linha. Aparece na barra lateral |
 | `cartao` *(opcional)* | Cartão do equipamento — ex.: `NMIC ID 471`. Uma célula por painel, em qualquer linha dele. Aparece no supratítulo |
 
