@@ -259,12 +259,17 @@
   </div>
 
   <details id="ajudaInstalar" hidden>
-    <summary>O botão de instalar não apareceu</summary>
-    <p>Ele só aparece quando dá para instalar de verdade. Os motivos mais comuns:</p>
+    <summary>Não apareceu o botão de instalar — ou o ícone sumiu</summary>
+    <p>O botão só aparece quando dá para instalar de verdade. Depois de instalado ele não volta:
+    o programa continua no computador mesmo que o atalho tenha sido apagado. Procure por
+    <strong>Corte BrCAST</strong> no menu Iniciar ou no Launchpad.</p>
+    <p><strong>Se o atalho sumiu e você quer ele de volta.</strong> No Chrome, copie
+    <code>chrome://apps</code> e cole na barra de endereço (esse endereço não abre por link).
+    No Edge, <code>edge://apps</code>. Clique com o botão direito em <strong>Corte BrCAST</strong>
+    e escolha <strong>Criar atalhos</strong>. No Mac o programa fica em
+    <strong>Aplicativos ▸ Chrome Apps</strong> — arraste o ícone de lá para a Dock.</p>
+    <p>Se ainda não instalou, o botão pode faltar por outro motivo:</p>
     <ul>
-      <li><strong>Já está instalado.</strong> Procure por <strong>Corte BrCAST</strong> no menu
-          Iniciar, no Launchpad ou na área de trabalho — e se o ícone sumiu, dá para criar de
-          novo por <code>chrome://apps</code>.</li>
       <li><strong>É uma janela anônima.</strong> O Chrome não instala programas ali. Abra esta
           página numa janela normal.</li>
       <li><strong>É o Firefox.</strong> Ele não instala programas assim — use o Chrome ou o Edge.
@@ -423,7 +428,10 @@ if(!podeInstalarComClique){
      distinguir — getInstalledRelatedApps responde vazio mesmo com o app
      instalado, testado nesta máquina. O texto de reserva responde aos dois. */
   setTimeout(function(){
-    if(btn.hidden) ajuda.hidden = false;
+    /* Fechado, o bloco vira uma linha discreta que ninguém abre — e quem só
+       apagou o atalho fica sem saber que o programa ainda está instalado.
+       Aberto, o caminho de volta está na tela. */
+    if(btn.hidden){ ajuda.hidden = false; ajuda.open = true; }
   }, 2500);
 }
 </script>
