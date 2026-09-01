@@ -877,7 +877,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.01.19";
+const VERSAO_APP = "2026.09.01.20";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -1374,10 +1374,27 @@ function renderRail(){
   fecharGrupo();
   if(!lista.length) h = '<div class="semnada">Nenhum microrganismo com “'+esc(buscaOrg)+'”.</div>';
 
-  $("orglist").innerHTML = h;
+  /* innerHTML zera a rolagem, e trocar de microrganismo reescreve a lista
+     inteira: quem estava lendo o fim da lista voltava ao topo a cada clique.
+     Guardar o topo e devolver depois mantém a lista onde a pessoa deixou. */
+  const caixa = $("orglist");
+  const topo = caixa.scrollTop;
+  caixa.innerHTML = h;
+  caixa.scrollTop = topo;
   if(!q){
-    const at = $("orglist").querySelector('[aria-current="true"]');
-    if(at && at.scrollIntoView) at.scrollIntoView({block:"nearest"});
+    /* Rolar até o selecionado só quando ele não está à vista — na abertura do
+       programa, ou vindo da busca. Rolar sempre desmancharia a rolagem que a
+       pessoa acabou de fazer. E o selecionado aparece duas vezes quando está
+       em Recentes: o alvo é o da lista completa, o último; mirar no primeiro
+       era o que puxava a lista de volta para o alto. */
+    const sel = [].slice.call(caixa.querySelectorAll('[aria-current="true"]'));
+    const cx = caixa.getBoundingClientRect();
+    const visivel = sel.some(function(b){
+      const r = b.getBoundingClientRect();
+      return r.bottom > cx.top && r.top < cx.bottom;
+    });
+    const at = sel[sel.length - 1];
+    if(!visivel && at && at.scrollIntoView) at.scrollIntoView({block:"nearest"});
   }
 }
 
