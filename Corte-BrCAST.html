@@ -84,16 +84,18 @@ button,input,select{font:inherit; color:inherit}
 .semnada{padding:16px 10px; font-size:12.5px; color:var(--ink-3); line-height:1.5}
 /* O titulo era menor e mais apagado que os nomes que ele rotula — 9,5px a
    3,78:1 contra 13,5px a 7,73:1, abaixo do minimo de 4,5:1 — entao o olho
-   passava direto ao varrer a lista. Vira faixa: fundo proprio, texto no tom
-   do corpo e sangria ate a borda da trilha (dai a margem negativa, que anula
-   o recuo lateral da lista). A borda de baixo separa a faixa do que rola por
-   baixo dela quando fica grudada no topo. */
+   passava direto ao varrer a lista. O que o faz aparecer agora e o contraste
+   do texto mais a linha de baixo, sem faixa cinza. A margem negativa anula o
+   recuo lateral da lista para a linha ir de ponta a ponta.
+   O fundo continua sendo pintado, e de proposito: igual ao da trilha, some da
+   vista, mas sem ele o nome que rola por baixo aparece atraves do titulo
+   grudado. */
 .grouphead{
   margin:0 -8px; padding:8px 18px 7px;
   font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
   color:var(--ink-2); font-weight:700;
   position:sticky; top:0; z-index:1;
-  background:var(--surface-2); border-bottom:1px solid var(--rule);
+  background:var(--surface); border-bottom:1px solid var(--rule);
 }
 /* O z-index acima nao e enfeite: com "z-index:auto" a faixa nao cria contexto
    de empilhamento e o "2 materiais", que e float dentro do item, desenhava por
@@ -853,7 +855,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.01.12";
+const VERSAO_APP = "2026.09.01.13";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
