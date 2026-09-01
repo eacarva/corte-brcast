@@ -1,4 +1,4 @@
 {
-  "versao": "2026.09.01.9",
-  "notas": "O olho de tirar do laudo voltou a aparecer no fim da linha, e a lista de observações agora rola até o fim"
+  "versao": "2026.09.01.10",
+  "notas": "Ao rolar a lista de bactérias, o nome não passa mais por cima do título do grupo"
 }
