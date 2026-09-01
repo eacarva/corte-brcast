@@ -82,9 +82,18 @@ button,input,select{font:inherit; color:inherit}
    .grouphead, que ja tem 13px de padding em cima. */
 .orglist{overflow-y:auto; flex:1; padding:0 8px 14px}
 .semnada{padding:16px 10px; font-size:12.5px; color:var(--ink-3); line-height:1.5}
+/* O titulo era menor e mais apagado que os nomes que ele rotula — 9,5px a
+   3,78:1 contra 13,5px a 7,73:1, abaixo do minimo de 4,5:1 — entao o olho
+   passava direto ao varrer a lista. Vira faixa: fundo proprio, texto no tom
+   do corpo e sangria ate a borda da trilha (dai a margem negativa, que anula
+   o recuo lateral da lista). A borda de baixo separa a faixa do que rola por
+   baixo dela quando fica grudada no topo. */
 .grouphead{
-  padding:13px 10px 5px; font-size:9.5px; letter-spacing:.11em; text-transform:uppercase;
-  color:var(--ink-3); font-weight:700; position:sticky; top:0; background:var(--surface);
+  margin:0 -8px; padding:8px 18px 7px;
+  font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink-2); font-weight:700;
+  position:sticky; top:0;
+  background:var(--surface-2); border-bottom:1px solid var(--rule);
 }
 .grouphead .mat{color:var(--accent-ink); font-weight:600}
 .orgbtn{display:block; width:100%; text-align:left; background:none; border:0; cursor:pointer;
@@ -841,7 +850,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.01.10";
+const VERSAO_APP = "2026.09.01.11";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -1311,18 +1320,31 @@ function renderRail(){
            esc(e.abbr)+mats+'</button>';
   }
 
+  /* Cada grupo vai numa caixa propria porque "sticky" so prende dentro do
+     elemento pai. Soltos no mesmo pai, todos os titulos paravam no topo e
+     ficavam empilhados um sobre o outro; o certo e o grupo seguinte empurrar
+     o anterior para fora. */
+  function caixaGrupo(tituloHTML, itens){
+    return '<div class="grupo"><div class="grouphead">'+tituloHTML+'</div>'+
+           itens.join("")+'</div>';
+  }
+
   let h = "";
   if(!q && recentes.length){
     const rec = recentes.map(porChave).filter(Boolean);
     if(rec.length){
-      h += '<div class="grouphead">Recentes</div>' + rec.map(item).join("");
+      h += caixaGrupo("Recentes", rec.map(item));
     }
   }
-  let grupo = null;
+  let grupo = null, doGrupo = [];
+  function fecharGrupo(){
+    if(grupo !== null) h += caixaGrupo(esc(grupo), doGrupo);
+  }
   lista.forEach(function(e){
-    if(e.g !== grupo){ grupo = e.g; h += '<div class="grouphead">'+esc(grupo)+'</div>'; }
-    h += item(e);
+    if(e.g !== grupo){ fecharGrupo(); grupo = e.g; doGrupo = []; }
+    doGrupo.push(item(e));
   });
+  fecharGrupo();
   if(!lista.length) h = '<div class="semnada">Nenhum microrganismo com “'+esc(buscaOrg)+'”.</div>';
 
   $("orglist").innerHTML = h;
