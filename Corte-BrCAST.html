@@ -673,6 +673,10 @@ function interpretarTriagem(v){
    ESTADO
    ========================================================================== */
 const K_REF = "brcast.refs.v2", K_VAL = "brcast.valores.v2";
+/* Edição do BrCAST a que os cortes gravados em K_REF pertencem. Declarada
+   junto das chaves porque "refs" é montado antes do resto e precisa dela. */
+const K_REF_ED = "brcast.refs.edicao.v1";
+const VERSAO_EMBUTIDA = "BrCAST 2025";   // descreve os cortes que vêm no arquivo
 const K_PEND = "brcast.pendentes.v1", K_REC = "brcast.recentes.v1";
 const K_ALIAS = "brcast.apelidos.v1";
 const K_OMIT  = "brcast.omitidos.v1";
@@ -744,6 +748,16 @@ function gravar(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e
 
 let refs = (function(){
   const base = refsPadrao(), salvo = ler(K_REF, null);
+  /* O que está em K_REF é um retrato de TODOS os cortes no momento em que
+     alguém mexeu num deles — editar um valor grava os 434. Quando a edição do
+     BrCAST muda, esse retrato passa a ser da edição anterior: aproveitá-lo
+     congelaria a máquina nos cortes velhos sem ninguém perceber, e um ajuste
+     feito em 2024 valeria mais que o BrCAST 2025. Em edição nova, o padrão
+     manda; quem quiser voltar a customizar refaz, ou usa a planilha. */
+  if(ler(K_REF_ED, null) !== VERSAO_EMBUTIDA){
+    try{ localStorage.removeItem(K_REF); }catch(e){}
+    return base;
+  }
   if(!salvo) return base;
   ORGS.forEach(function(o){
     if(!salvo[o.id]){ salvo[o.id] = base[o.id]; return; }
@@ -856,7 +870,6 @@ function cartaoDe(p){
   const daPlanilha = String(cartoes[p.id] == null ? "" : cartoes[p.id]).trim();
   return daPlanilha || String(p.cartao == null ? "" : p.cartao).trim();
 }
-const VERSAO_EMBUTIDA = "BrCAST 2025";   // descreve os cortes que vêm no arquivo
 let versaoCortes = VERSAO_EMBUTIDA;
 
 /* Versão do programa. Não confundir com a do BrCAST acima: aquela descreve os
@@ -864,7 +877,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.01.17";
+const VERSAO_APP = "2026.09.01.18";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -2253,7 +2266,7 @@ function acrescentarLinha(org, nome){
   gravarLinhas();
   if(!refs[org.id]) refs[org.id] = {};
   if(!refs[org.id][n]) refs[org.id][n] = {sdp:"",sae:"",res:""};
-  gravar(K_REF, refs);
+  gravar(K_REF, refs); gravar(K_REF_ED, VERSAO_EMBUTIDA);
   return true;
 }
 
@@ -2385,7 +2398,7 @@ function renderRef(){
       if(!refs[orgAtual.id]) refs[orgAtual.id] = {};
       if(!refs[orgAtual.id][inp.dataset.n]) refs[orgAtual.id][inp.dataset.n] = {sdp:"",sae:"",res:""};
       refs[orgAtual.id][inp.dataset.n][inp.dataset.k] = inp.value;
-      gravar(K_REF, refs);
+      gravar(K_REF, refs); gravar(K_REF_ED, VERSAO_EMBUTIDA);
     });
   });
 
@@ -2434,7 +2447,7 @@ function renderRef(){
     delete linhasCustom[orgAtual.id];
     gravarLinhas();
     refs[orgAtual.id] = refsPadrao()[orgAtual.id];
-    gravar(K_REF, refs);
+    gravar(K_REF, refs); gravar(K_REF_ED, VERSAO_EMBUTIDA);
     renderRef();
     toast(orgAtual.abbr+" restaurado ao padrão da planilha.");
   });
@@ -3333,7 +3346,7 @@ function importar(){
           if(POR_ID[id] && Array.isArray(listas[id]) && listas[id].length) listasOk[id] = listas[id];
         });
 
-        refs = montado;         gravar(K_REF, refs);
+        refs = montado;         gravar(K_REF, refs); gravar(K_REF_ED, VERSAO_EMBUTIDA);
         linhasCustom = listasOk; gravarLinhas();
         apelidos = Object.assign({}, apelidos, aps); gravar(K_ALIAS, apelidos);
         render();
