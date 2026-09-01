@@ -1,4 +1,4 @@
 {
-  "versao": "2026.09.01.16",
-  "notas": "O cabeçalho passa a dizer a cor do cartão: UNMIC/ID-471 rosa, PMIC/ID-601 azul"
+  "versao": "2026.09.01.17",
+  "notas": "Sem o nome do cartão preenchido, o cabeçalho não deixa mais um ponto solto no fim"
 }

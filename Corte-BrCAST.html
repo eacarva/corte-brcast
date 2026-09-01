@@ -848,7 +848,13 @@ const COL_CARTAO = "cartao";
 let cartoes = {};                       // painel -> cartão vindo da planilha
 
 function cartaoDe(p){
-  return (p && (cartoes[p.id] || p.cartao)) || "";
+  /* apara antes de decidir: um cartão só com espaços tem que valer como
+     ausente e cair no embutido, senão o supratítulo mostra um separador
+     seguido de nada. A planilha já chega aparada, mas o valor também vem
+     do cache de configuração gravado no navegador. */
+  if(!p) return "";
+  const daPlanilha = String(cartoes[p.id] == null ? "" : cartoes[p.id]).trim();
+  return daPlanilha || String(p.cartao == null ? "" : p.cartao).trim();
 }
 const VERSAO_EMBUTIDA = "BrCAST 2025";   // descreve os cortes que vêm no arquivo
 let versaoCortes = VERSAO_EMBUTIDA;
@@ -858,7 +864,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.01.16";
+const VERSAO_APP = "2026.09.01.17";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -2829,7 +2835,12 @@ function render(){
     $("eyebrow").innerHTML = esc(cab[0])+'<span class="dot">·</span>'+esc(cab[1]);
     $("titulo").textContent = cab[2];
   }else{
+    /* filtra vazios antes de juntar: sem cartão, o join deixava um "·" solto
+       no fim do supratítulo. Não acontece com a planilha, que cai no valor
+       embutido quando a coluna falta ou vem em branco, mas acontece se um
+       painel novo nascer sem cartão. */
     $("eyebrow").innerHTML = [esc(p.fam)].concat(comSeg ? [] : [esc(p.mat)]).concat([esc(cartaoDe(p))])
+      .filter(function(t){ return t; })
       .join('<span class="dot">·</span>');
     $("titulo").innerHTML = nomeHTML(orgAtual.nome);
   }
