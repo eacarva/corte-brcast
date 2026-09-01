@@ -205,13 +205,13 @@
   <section class="hero">
     <h2>Do CIM ao laudo, sem consultar tabela.</h2>
     <p>Você digita os valores de CIM do antibiograma. O programa aplica os pontos de corte do
-    BrCAST e devolve a interpretação pronta para copiar — <strong>27 microrganismos</strong>,
+    BrCAST e devolve a interpretação pronta para copiar — <strong>29 microrganismos</strong>,
     com tabelas separadas para urina e outros materiais.</p>
 
     <div class="amostra">
       <div class="amostra-topo">
         <b><i>Escherichia coli</i></b>
-        <span>urina · BrCAST 2024</span>
+        <span>urina · BrCAST 2025</span>
       </div>
       <table>
         <thead>
@@ -290,7 +290,7 @@
       <p>Os valores de corte vêm de uma planilha que o laboratório mantém — a mesma bactéria, o
       mesmo antibiótico e o mesmo resultado, em qualquer máquina.</p>
       <p>Abrindo por esta página, o programa já vem com os cortes de fábrica
-      (<code>BrCAST 2024</code>). Dá para experimentar à vontade.</p>
+      (<code>BrCAST 2025</code>). Dá para experimentar à vontade.</p>
     </div>
     <div>
       <h4>A conferência continua sendo sua</h4>
@@ -400,13 +400,32 @@ function marcarInstalado(){
   ajuda.hidden = true;
 }
 
-/* O botão some por dois motivos opostos: já instalado, ou este navegador não
-   instala. Não há API confiável para distinguir — getInstalledRelatedApps
-   responde vazio mesmo com o app instalado, testado nesta máquina. Então o
-   texto de reserva responde aos dois. */
-setTimeout(function(){
-  if(btn.hidden) ajuda.hidden = false;
-}, 2500);
+/* Navegador que nem conhece o evento nunca vai instalar com um clique: e o
+   caso do Firefox no computador, que removeu isso de vez. Deixa-lo esperando
+   por um botao que nao vem, com o cartao dizendo "Recomendado", faz parecer
+   que a opcao boa esta quebrada. Aqui o cartao diz na cara o que fazer. */
+var podeInstalarComClique = ("onbeforeinstallprompt" in window);
+
+if(!podeInstalarComClique){
+  document.getElementById("tituloInstalar").textContent = "Deixar no computador";
+  document.getElementById("txtInstalar").innerHTML =
+    "Este navegador n\u00e3o cria o \u00edcone sozinho. No <strong>Safari</strong> o caminho \u00e9 " +
+    "<strong>Compartilhar \u25b8 Adicionar \u00e0 Dock</strong>. No <strong>Firefox</strong> n\u00e3o " +
+    "h\u00e1 caminho \u2014 use o <strong>Chrome</strong> ou o <strong>Edge</strong>, ou baixe o " +
+    "arquivo abaixo, que faz exatamente a mesma coisa.";
+  var seloRec = document.getElementById("seloRec");
+  seloRec.hidden = true;                 // nada a recomendar onde nada e possivel
+  document.getElementById("blocoInstalar").classList.remove("destaque");
+  ajuda.hidden = true;
+}else{
+  /* Com suporte a clique, o botão ainda pode não vir por dois motivos opostos:
+     já instalado, ou instalação bloqueada. Não há API confiável para
+     distinguir — getInstalledRelatedApps responde vazio mesmo com o app
+     instalado, testado nesta máquina. O texto de reserva responde aos dois. */
+  setTimeout(function(){
+    if(btn.hidden) ajuda.hidden = false;
+  }, 2500);
+}
 </script>
 </body>
 </html>
