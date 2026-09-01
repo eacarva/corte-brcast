@@ -877,7 +877,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.09.01.18";
+const VERSAO_APP = "2026.09.01.19";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 
@@ -1381,6 +1381,18 @@ function renderRail(){
   }
 }
 
+/* Opções da caixa de triagem. A planilha diz que a linha é de triagem, mas
+   não como ela se preenche — não há coluna para isso, e não deve haver: o
+   laboratório descreve cortes, não controles de tela. Sem essas opções o
+   desenho da linha estourava e a tela inteira parava de trocar de
+   microrganismo, calada: só Enterococcus e Staphylococcus têm triagem, então
+   o defeito parecia "os Staphylococcus não mudam". Vêm do embutido, pelo
+   nome; linha de triagem nova, que só existe na planilha, cai no par comum. */
+function opsTriagem(org, nome){
+  const r = org.rows.filter(function(x){ return x.t === "triagem" && x.n === nome; })[0];
+  return (r && r.op) || ["Positivo","Negativo"];
+}
+
 // Linhas do microrganismo já interpretadas
 function linhas(){
   return rowsDe(orgAtual).map(function(row){
@@ -1388,7 +1400,8 @@ function linhas(){
     const v = val(orgAtual.id, row.n);
     const pnd = !!v && pend(orgAtual.id, row.n);
     if(row.t === "triagem")
-      return {tipo:"triagem", n:row.n, v:v, op:row.op, cat:interpretarTriagem(v), pendente:pnd,
+      return {tipo:"triagem", n:row.n, v:v, op:row.op || opsTriagem(orgAtual, row.n),
+              cat:interpretarTriagem(v), pendente:pnd,
               omitido:estaOmitido(orgAtual.id, row.n)};
     const ref = (refs[orgAtual.id] || {})[row.n] || {sdp:"",sae:"",res:""};
     return {tipo:"cim", n:row.n, v:v, ref:ref, cat:interpretar(v, ref), src:row.src, pendente:pnd,
