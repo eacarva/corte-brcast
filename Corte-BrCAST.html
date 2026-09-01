@@ -146,7 +146,7 @@ button,input,select{font:inherit; color:inherit}
 .origem a{color:var(--ink-3); text-decoration:none}
 .origem a:hover{color:var(--accent-ink); text-decoration:underline}
 .sobre-corpo{padding:14px 18px}
-.sobre-corpo p{margin:0 0 10px; font-size:13.5px; color:var(--ink-2); max-width:76ch}
+.sobre-corpo p{margin:0 0 10px; font-size:13.5px; color:var(--ink-2)}
 .sobre-corpo p:last-child{margin-bottom:0}
 .sobre-corpo strong{color:var(--ink)}
 .sobre-url{font-size:15px !important}
@@ -376,6 +376,10 @@ tr.omitida .abxnome{text-decoration:line-through}
 
 .refhead{padding:13px 18px; border-bottom:1px solid var(--rule); background:var(--surface-2)}
 .refhead p{margin:4px 0 0; font-size:12.5px; color:var(--ink-2); max-width:76ch}
+/* No Sobre o texto usa a largura toda do cartão: ali não há tabela ao lado
+   competindo por espaço, e o limite de leitura deixava uma faixa vazia à
+   direita que parecia defeito. */
+#content[data-vista="sobre"] .refhead p{max-width:none}
 input.ref{width:100%; border:1px solid transparent; background:transparent; padding:7px 10px;
           font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace; font-size:13px; text-align:center; border-radius:4px}
 input.ref:hover{border-color:var(--rule)}
@@ -833,7 +837,7 @@ let versaoCortes = VERSAO_EMBUTIDA;
    máquina, e sem isso ninguém saberia que a sua envelheceu. Ao publicar,
    subir este número e o de version.json juntos — se um ficar para trás, o
    aviso mente. */
-const VERSAO_APP = "2026.08.31.20";
+const VERSAO_APP = "2026.09.01.9";
 const URL_VERSAO = "https://eacarva.github.io/corte-brcast/version.json";
 const URL_SITE   = "https://eacarva.github.io/corte-brcast/";
 

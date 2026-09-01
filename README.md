@@ -233,6 +233,11 @@ terceiro comanda a troca nas máquinas instaladas: o navegador só percebe que
 há versão nova porque o `sw.js` mudou de conteúdo. Sem mexer nele, quem
 instalou continua na versão antiga.
 
+O campo `notas`, no `version.json`, não é changelog: é a frase que aparece ao
+parar o mouse sobre o aviso, e quem lê é quem usa o programa. Escrever o que
+mudou na tela, com as palavras da bancada — "o olho de tirar do laudo voltou a
+aparecer" —, não o que mudou no código.
+
 Correções só na página de entrada (`index.html`) aparecem sem precisar de
 número novo: ela é buscada da rede a cada visita, com o cache apenas como
 reserva para quando não há rede. O programa é o contrário — vem do disco,

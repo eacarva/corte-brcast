@@ -1,4 +1,4 @@
 {
-  "versao": "2026.08.31.20",
-  "notas": "Tabela do laudo volta a caber na tela; lista de observacoes rola"
+  "versao": "2026.09.01.9",
+  "notas": "O olho de tirar do laudo voltou a aparecer no fim da linha, e a lista de observações agora rola até o fim"
 }
