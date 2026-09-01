@@ -1,4 +1,4 @@
 {
-  "versao": "2026.09.01.15",
-  "notas": "O nome do cartão no cabeçalho agora é o do POP: UNMIC/ID-471 e PMIC/ID-601"
+  "versao": "2026.09.01.16",
+  "notas": "O cabeçalho passa a dizer a cor do cartão: UNMIC/ID-471 rosa, PMIC/ID-601 azul"
 }
