@@ -151,11 +151,24 @@ cortes marcados como texto. Não há nada para criar, nomear ou formatar.
 
 ### Colunas
 
+As três primeiras **definem o painel**: a planilha diz quais microrganismos
+existem, em que material, e com que antimicrobianos. Tirar todas as linhas de
+uma bactéria tira a bactéria da lista; trocar o nome dela na coluna `organismo`
+renomeia; um nome que não estava lá aparece sozinho, sem mexer no programa. O
+que vem embutido no arquivo são os cortes de fábrica — valem enquanto não
+houver planilha configurada.
+
+Duas coisas continuam vindo do arquivo, porque não são corte: a abreviação da
+barra lateral (`E. coli`) e o grupo em que a bactéria aparece nela
+(*Não-fermentadores*). Bactéria que só existe na planilha ganha abreviação
+automática (`Providencia stuartii` → `P. stuartii`) e o grupo da própria
+família.
+
 | Coluna | Para que serve |
 |---|---|
 | `familia` | Grupo do painel — `Enterobactérias`, `Staphylococcus`… |
 | `material` | `Urina`, `Outros materiais`, `Todos os materiais` |
-| `organismo` | Nome por extenso — `Escherichia coli`. Acento e maiúscula não importam; abreviação sim: `E. coli` não vale |
+| `organismo` | Nome por extenso — `Escherichia coli`. Acento e maiúscula não importam; abreviação sim: `E. coli` vira uma bactéria diferente de `Escherichia coli`. **É esta coluna que cria, renomeia e apaga microrganismo** |
 | `ordem` | Posição da linha na tabela do laudo |
 | `tipo` | `cim`, `triagem` ou `titulo` |
 | `antimicrobiano` | Nome que aparece no laudo |
@@ -184,7 +197,7 @@ O programa **recusa a sincronização inteira** e diz a linha e o motivo. Nunca 
 | "Não consegui abrir a planilha" | Compartilhamento não está em *Qualquer pessoa com o link*. Teste numa janela anônima |
 | "a coluna … está como número" | Formate as colunas de corte como **Texto simples** e sincronize de novo. Os valores não se perderam — só não estavam sendo enviados |
 | "tudo numa coluna só" | Um CSV foi colado sem separador. `Dados ▸ Dividir texto em colunas`, vírgula. Não acontece com o `.xlsx` |
-| "microrganismo desconhecido" | Alguém editou `organismo_id`. A mensagem diz a linha |
+| Bactéria repetida na lista | A mesma bactéria escrita de dois jeitos na coluna `organismo`. Cada grafia vira um microrganismo. A situação da tela *Fonte dos cortes* lista, em **Só na planilha**, os nomes que não vêm de fábrica |
 | "Faltam colunas" | O link aponta para a aba errada, ou a primeira linha não é o cabeçalho |
 
 ---
