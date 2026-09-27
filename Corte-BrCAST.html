@@ -1421,6 +1421,34 @@ function nomeHTML(n){
     return RETO[w.toLowerCase()] ? esc(w) : "<i>"+esc(w)+"</i>";
   }).join(" ");
 }
+/* Texto de observação com os nomes científicos em itálico. A planilha chega
+   pelo gviz, que entrega só o texto: o itálico feito no Google Sheets não
+   viaja. Então a regex abaixo só acha ONDE está o nome científico na frase —
+   gêneros dos painéis mais os que só aparecem nas observações, com ou sem
+   espécie e subespécie ("ssp."), e abreviações como "E. coli". Achado o
+   trecho, quem decide o que fica reto ou itálico é o nomeHTML mesmo, pra não
+   duplicar a regra do "spp."/"ssp." em dois lugares.
+   "Enterococos" fica de fora da lista de gêneros de propósito: é grafia comum
+   em português (e aparece como organismo real da planilha), então entraria
+   como falso-positivo em frase corrida ("outros enterococos podem..."). Custo:
+   a observação que citar esse organismo por extenso não ganha itálico. */
+const GENEROS_OBS = ["Hafnia","Raoultella","Neisseria","Moraxella"];
+function obsHTML(t){
+  const g = {};
+  GENEROS_OBS.concat(ORGS.map(function(o){
+    return String(o.nome).replace(/^complexo\s+/i, "").split(/\s+/)[0];
+  })).forEach(function(x){ if(/^[A-Z][a-z]+$/.test(x) && x !== "Enterococos") g[x] = 1; });
+  const re = new RegExp("\\b(?:(?:"+Object.keys(g).join("|")+")(?: (?!spp?\\b|ssp\\b)[a-z]{3,}(?: ssp\\.? [a-z]{3,})?)?"+
+    "|[A-Z]\\. [a-z]{3,})(?![\\wÀ-ÿ])", "g");
+  const s = String(t == null ? "" : t);
+  let out = "", fim = 0;
+  s.replace(re, function(m, pos){
+    out += esc(s.slice(fim, pos)) + nomeHTML(m);
+    fim = pos + m.length;
+    return m;
+  });
+  return out + esc(s.slice(fim));
+}
 function val(oid, n){ return (valores[oid] || {})[n] || ""; }
 function setVal(oid, n, v){
   if(!valores[oid]) valores[oid] = {};
@@ -1967,7 +1995,7 @@ function painelObsHTML(){
     const txt = o ? o.t : "(observação "+cod+" não existe mais na planilha)";
     return '<div class="obsitem'+(o?"":" perdida")+'">'+
       '<div class="obscod">'+esc(cod)+'</div>'+
-      '<div class="obstxt">'+esc(txt)+'</div>'+
+      '<div class="obstxt">'+obsHTML(txt)+'</div>'+
       '<button class="obstirar" data-obstirar="'+esc(cod)+'" title="Tirar esta observação do laudo" '+
       'aria-label="Tirar a observação '+esc(cod)+'">'+X_TIRAR+'</button>'+
     '</div>';
@@ -2021,7 +2049,7 @@ function painelObsHTML(){
           const resumo = o.t.replace(/\s+/g, " ");
           return '<button class="obsop" data-obspor="'+esc(o.c)+'">'+
                  '<span class="obscod">'+esc(o.c)+'</span>'+
-                 '<span class="obsop-txt">'+esc(resumo.slice(0,150))+(resumo.length>150?"…":"")+'</span>'+
+                 '<span class="obsop-txt">'+obsHTML(resumo.slice(0,150))+(resumo.length>150?"…":"")+'</span>'+
                  '</button>';
         }).join("")+'</div>'
       : "");
@@ -3090,7 +3118,7 @@ function tabelaHTML(){
     obs.forEach(function(cod){
       const o = acharObs(cod);
       if(!o) return;
-      h += '<p style="'+F+'margin:10px 0 0;">'+esc(o.t).replace(/\n/g, "<br>")+'</p>';
+      h += '<p style="'+F+'margin:10px 0 0;">'+obsHTML(o.t).replace(/\n/g, "<br>")+'</p>';
     });
   }
   return h;
